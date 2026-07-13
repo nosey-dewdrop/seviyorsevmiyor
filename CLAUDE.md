@@ -26,10 +26,21 @@ old /whatdoyoumean/ URL is dead 404). v18 shipped in one session, all Damla-dire
 - Legacy Gemini /api/read path kept but off; old unsure→"buluta sor" UI removed.
 Seed 268, held-out 72.2% (hard set), parity 1e-16. VC report: reports/2026-07-13-whatdoyoumean-vc.md.
 
-NEXT: spiker polish (LLM sometimes slips "sanki" tic + capitalizes lowercase voice — tighten
-prompt or post-process), EN second engine (greenlit "lig arttır"), 10 real screenshots OCR run.
-DAMLA-ONLY: rotate the Groq key (it touched terminal history + chat 13 Tem — make new key at
-console.groq.com, then `npx wrangler secret put GROQ_API_KEY` in HER OWN terminal, blind paste).
+v20 (same night, "paketleyelim" = Faz 1): spiker post-process in the worker (TR lowercase on
+playful screens, "sanki" tic stripped after first use — verified live: 0 uppercase, 0 extra
+sanki); content-free counters (`/api/ping` analiz/spiker/paylasim/itiraz + `/api/stats` +
+web/panel.html, no identity, no content, KV `stat:` keys); "bence yanlış okudun" itiraz button
+→ optional consented donation (`/api/itiraz`, the ONLY content-storing route, KV `corpus:` keys,
+gizlilik updated same session) = the flywheel that grows OUR model; kayıt defteri (localStorage,
+other person's name + score only → "geçen sefere göre ısınmış/soğumuş" return loop).
+
+VISION (Damla, 13 Tem late): NOT a company, NOT B2B, NOT VC-fundable — don't pitch that. It is a
+viral fun tool à la theyseeyourphotos whose "thing" is the OWN ENGINE (cascade, on-device verdict,
+donation flywheel). PM/VC/league analysis archived: reports/2026-07-13-mesajibirokusana-pm-vc-lig.md.
+
+NEXT: EN second engine (greenlit "lig arttır"), OCR quality run (Damla will bring ~10 real
+screenshots — she said she'll come back for this), first retrain once corpus donations arrive.
+Groq key rotation: Damla says handled (13 Tem).
 Deploy: `git subtree split --prefix web -b t && git push -f origin t:gh-pages && git branch -D t`; bump ?v=N + footer.
 Retrain: `python3 train/train.py`; verify `python3 train/parity_check.py && node train/parity_check.mjs`; walk harness /tmp/mbo_walk/walk.mjs (recreate from git history of this note if gone).
 
