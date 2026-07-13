@@ -1,4 +1,4 @@
-name = "whatdoyoumean-api"
+name = "mesajibirokusana-api"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
@@ -8,7 +8,11 @@ binding = "RATE_LIMIT"
 id = "REPLACE_WITH_KV_ID"
 
 [vars]
-# Set to "on" to open the tokenless browser fallback path (each call costs Gemini money).
+# Spiker (Groq/Llama voice layer). "on" = live; flip to "off" as the kill switch.
+# Fuses in code: 6/min + 60/day per IP, 2000/day global.
+SPIKER_OPEN = "on"
+# Legacy Gemini full-fallback path; stays "off" until we ever need it.
 PUBLIC_READ = "off"
 
-# Secrets (never in this file): GEMINI_API_KEY, APP_TOKEN — set via `wrangler secret put`.
+# Secrets (never in this file): GROQ_API_KEY (+ GEMINI_API_KEY, APP_TOKEN if /api/read opens)
+# — set via `wrangler secret put`.

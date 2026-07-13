@@ -1,4 +1,4 @@
-// Runtime config. The Worker answers only low-confidence conversations, with consent.
-// Until it is deployed with PUBLIC_READ="on", the cloud path returns 403 and the app degrades
-// gracefully ("cloud read is not open yet").
-export const API_BASE = 'https://whatdoyoumean-api.damummyphus.workers.dev';
+// Runtime config. The Worker hosts the Groq spiker (voice layer) + legacy Gemini fallback.
+// Until it is deployed, cloud paths 403/fail and the app degrades gracefully to the on-device
+// template lines — the product never breaks without the cloud.
+export const API_BASE = 'https://mesajibirokusana-api.damummyphus.workers.dev';
