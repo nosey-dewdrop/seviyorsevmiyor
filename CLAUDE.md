@@ -68,9 +68,9 @@ Story: most analysis stays on device; only unsure cases go to the cloud, with co
 the other person did not consent → visible warning + "I have the right to upload this" checkbox. No
 persistent storage in v1. `gizlilik.html` + consent line ship together. Worker logs no content.
 
-## Money (born with a paywall)
-Free: N reads/day. Paywall: unlimited + "deep read" + multi-chat "relationship report". The paywall also
-funds the Gemini fallback quota (which shrinks as the model learns).
+## Money
+None by direction (2026-07-13): free unlimited idea-tool, audience first. Quota + paywall removed in v11;
+nothing is gated and no payment provider is planned unless Damla says otherwise.
 
 ## Deploy (once live)
 Site = gh-pages subtree push (stitchu pattern). Worker = Cloudflare (Gemini fallback proxy), GEMINI_API_KEY
