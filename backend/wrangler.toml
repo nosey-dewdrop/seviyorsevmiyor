@@ -3,9 +3,10 @@ main = "worker.js"
 compatibility_date = "2024-11-01"
 
 # KV for per-IP rate counters only (no content is ever stored).
+# Namespace title is MESAJ_RATE_LIMIT (account already had a generic RATE_LIMIT from another worker).
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-id = "REPLACE_WITH_KV_ID"
+id = "facdf8b5b45d493b808c18fe9fa3e7a1"
 
 [vars]
 # Spiker (Groq/Llama voice layer). "on" = live; flip to "off" as the kill switch.
