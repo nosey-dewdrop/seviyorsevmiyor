@@ -114,6 +114,9 @@ export async function playReveal(root, r, messages, me) {
   const cl = el('div', 'bubble closing-b', esc(r.kapanis));
   await say(cl, { wait: 900 });
 
+  // honest note: this is an automated guess, not a verdict
+  stream.appendChild(el('div', 'reveal-note', 'Bu okuma otomatik bir tahmindir, kesin bir yargı ya da tavsiye değildir.'));
+
   // 7 — unsure → cloud offer (only on-device, uncertain)
   if (r.unsure && !r.fromCloud) {
     const u = el('div', 'bubble unsure');

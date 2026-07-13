@@ -2,8 +2,8 @@
 // a real computed value (tone class, flirt score, who-reaches-more, counted flags) — no made-up
 // story (the yks-koc "no fabrication" rule). When the model is unsure, we say so plainly.
 
-import { flirtSignal, interestBalance, flags as computeFlags } from './balance.js?v=5';
-import { lowerTr } from './features.js?v=5';
+import { flirtSignal, interestBalance, flags as computeFlags } from './balance.js?v=8';
+import { lowerTr } from './features.js?v=8';
 
 const TONE_TR = {
   flirty: 'flört havası',

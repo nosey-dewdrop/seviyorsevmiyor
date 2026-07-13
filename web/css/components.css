@@ -219,3 +219,13 @@ textarea.paste:focus { outline: none; }
 @keyframes typingDot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
 @keyframes kwRise { from { opacity: 0; transform: translateY(0.5em); } to { opacity: 1; transform: none; } }
 @keyframes stamp { 0% { transform: scale(0) rotate(-8deg); } 100% { transform: scale(1) rotate(0); } }
+
+/* ---- honesty note + footer disclaimer ---- */
+.reveal-note { align-self: center; text-align: center; max-width: 40ch; margin: 6px 0 2px;
+  font-size: 0.78rem; color: var(--ink-3); line-height: 1.4; }
+.site-foot .disclaimer { flex-basis: 100%; color: var(--ink-3); }
+
+/* ---- keyboard focus visibility (a11y) ---- */
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 4px; }
+.tab:focus-visible, .btn:focus-visible, .icon-btn:focus-visible,
+.whois .seg button:focus-visible, textarea.paste:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }

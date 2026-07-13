@@ -118,3 +118,52 @@
 {"text": "A: umursamıyorsun beni değil mi\nB: yeter ya sürekli aynı şey\nA: çünkü hissettirmiyorsun\nB: elimden geleni yapıyorum senden", "tone": "tense"}
 {"text": "A: partide beni yalnız bıraktın\nB: arkadaşlarımla konuşuyordum\nA: bütün gece\nB: abartma her şeyi", "tone": "tense"}
 {"text": "A: telefonuma neden baktın\nB: merak ettim\nA: bu çok yanlış\nB: saklayacak bir şeyin yoksa sorun ne", "tone": "tense"}
+{"text": "A: seni çok özledim bugün\nB: ben de\nA: ne zaman görüşüyoruz\nB: bu hafta müsaitim senin için", "tone": "flirty"}
+{"text": "A: yeni fotoğrafın çok güzel olmuş\nB: teşekkür ederim\nA: gözlerine bakakaldım\nB: durdur beni kızarıyorum", "tone": "flirty"}
+{"text": "A: iyi geceler güzelim\nB: sen de tatlım\nA: rüyanda beni gör\nB: zaten hep oradasın", "tone": "flirty"}
+{"text": "A: bugün çok yakışıklıydın\nB: sadece senin için giyindim\nA: fark ettim\nB: fark etmeni istedim", "tone": "flirty"}
+{"text": "A: kahve içmeye ne dersin\nB: seninle her şeye varım\nA: cidden mi\nB: senin yanında olmak güzel", "tone": "flirty"}
+{"text": "A: uyuyamıyorum\nB: ben de\nA: hep seni düşünüyorum\nB: aynı anda aynı şeyi", "tone": "flirty"}
+{"text": "A: elini tutmak istedim bugün\nB: neden tutmadın\nA: cesaret edemedim\nB: bir dahaki sefere ben tutarım", "tone": "flirty"}
+{"text": "A: gülüşün aklımdan çıkmıyor\nB: aa\nA: cidden çok tatlısın\nB: kızarttın beni yine", "tone": "flirty"}
+{"text": "A: bugün rüyamda seni gördüm\nB: hayırdır\nA: çok güzeldi keşke uyanmasaydım\nB: anlat bakalım neler oldu", "tone": "flirty"}
+{"text": "A: seni düşününce gülümsüyorum\nB: ben de aynısı\nA: bu ne şimdi\nB: sanırım hoşlanıyorum senden", "tone": "flirty"}
+{"text": "A: story'ne bakıp durdum\nB: stalker\nA: senin stalkerın olurum\nB: ben de senin", "tone": "flirty"}
+{"text": "A: yanımda olsan sarılırdım şimdi\nB: keşke\nA: yakında olacak\nB: sabırsızlanıyorum", "tone": "flirty"}
+{"text": "A: bugün parfümün aklımda kaldı\nB: hangisi\nA: sana yakışan\nB: bir dahaki görüşmede yine sürerim", "tone": "flirty"}
+{"text": "A: ödevi bitirdin mi\nB: yarısı kaldı\nA: birlikte bakalım mı\nB: olur çağır beni", "tone": "friendly"}
+{"text": "A: maça geliyor musun\nB: kaçta\nA: sekizde\nB: tamam görüşürüz orada", "tone": "friendly"}
+{"text": "A: doğum günün kutlu olsun\nB: çok teşekkür\nA: akşam pasta var mı\nB: gel beraber yiyelim", "tone": "friendly"}
+{"text": "A: kitabı bitirdin mi\nB: evet süperdi\nA: bana da ver\nB: yarın getiririm okula", "tone": "friendly"}
+{"text": "A: hasta mısın bugün gelmedin\nB: biraz üşütmüşüm\nA: geçmiş olsun dinlen\nB: sağ ol iyiyim merak etme", "tone": "friendly"}
+{"text": "A: sınav nasıldı\nB: fena değil\nA: matematik zor muydu\nB: son soru saçmaydı ya", "tone": "friendly"}
+{"text": "A: yeni dizi başladı izledin mi\nB: daha başlamadım\nA: beraber başlayalım\nB: hafta sonu olur", "tone": "friendly"}
+{"text": "A: kargom geldi mi bakar mısın\nB: geldi masanda\nA: sağ ol be\nB: ne demek", "tone": "friendly"}
+{"text": "A: yarın erken çıkalım mı\nB: olur işim var zaten\nA: kahve içeriz yolda\nB: iyi olur", "tone": "friendly"}
+{"text": "A: proje grubuna seni ekledim\nB: süper\nA: pazartesi toplanalım\nB: uygun bana", "tone": "friendly"}
+{"text": "A: telefonun şarjı var mı\nB: var al kullan\nA: sağ ol kurtardın\nB: sorun değil", "tone": "friendly"}
+{"text": "A: bugün çok kalabalıktı ya\nB: evet nefes alamadım\nA: yarın erken gidelim\nB: iyi fikir", "tone": "friendly"}
+{"text": "A: bugün müsait misin\nB: değilim\nA: yarın\nB: bakarız", "tone": "cold"}
+{"text": "A: seni özledim\nB: hı\nA: görüşsek mi\nB: bu ara yoğunum", "tone": "cold"}
+{"text": "A: nasılsın uzun zaman oldu\nB: iyi\nA: görüşelim mi bir ara\nB: bakarız artık", "tone": "cold"}
+{"text": "A: mesajıma bakmadın mı\nB: gördüm\nA: cevap yok\nB: ne diyeyim ki", "tone": "cold"}
+{"text": "A: konuşabilir miyiz\nB: şimdi olmaz\nA: ne zaman\nB: bilmiyorum", "tone": "cold"}
+{"text": "A: iyi geceler\nB: iyi geceler\nA: yarın konuşuruz\nB: neyse artık", "tone": "cold"}
+{"text": "A: kızgın mısın bana\nB: değilim\nA: öyle geldi\nB: fark etmez", "tone": "cold"}
+{"text": "A: bir şey mi oldu\nB: yok\nA: ama garipsin\nB: sen bilirsin", "tone": "cold"}
+{"text": "A: hafta sonu plan yapalım mı\nB: göreceğiz\nA: net söyle\nB: şimdi karar veremem", "tone": "cold"}
+{"text": "A: seni arayabilir miyim\nB: müsait değilim\nA: kısa olur\nB: yazsan yeter", "tone": "cold"}
+{"text": "A: görüşmeyeli çok oldu\nB: evet\nA: özlemedin mi\nB: iş güç işte", "tone": "cold"}
+{"text": "A: mesajlarıma geç dönüyorsun\nB: yoğunum\nA: hep mi\nB: öyle işte", "tone": "cold"}
+{"text": "A: neredeydin bütün gece\nB: dışarıdaydım dedim ya\nA: kimlerle\nB: sorgu mu bu", "tone": "tense"}
+{"text": "A: telefonunu neden kilitliyorsun\nB: mahremiyet diye bir şey var\nA: saklayacak neyin var\nB: yeter artık", "tone": "tense"}
+{"text": "A: yine mi geç kaldın\nB: trafik vardı\nA: her seferinde bahane\nB: bıktım bu tartışmadan", "tone": "tense"}
+{"text": "A: o kız kim\nB: iş arkadaşım\nA: neden gülüyorsunuz öyle\nB: paranoyaklaşma lütfen", "tone": "tense"}
+{"text": "A: beni hiç önemsemiyorsun\nB: yine mi başladık\nA: her şeyi ben yapıyorum\nB: abartıyorsun her zamanki gibi", "tone": "tense"}
+{"text": "A: mesajlarımı görüp geçiyorsun\nB: meşguldüm\nA: hep meşgulsün\nB: uğraşma benimle şimdi", "tone": "tense"}
+{"text": "A: söz vermiştin ama gelmedin\nB: unutmuşum işte\nA: hep unutuyorsun\nB: kes artık lütfen", "tone": "tense"}
+{"text": "A: bana bağırma\nB: sen başlattın\nA: her şey benim suçum tabii\nB: senin yüzünden zaten", "tone": "tense"}
+{"text": "A: neden böyle konuşuyorsun\nB: nasıl konuşuyormuşum\nA: küçümser gibi\nB: alıngan olma bu kadar", "tone": "tense"}
+{"text": "A: yine görmezden geliyorsun\nB: konuşmak istemiyorum\nA: hep böyle kaçıyorsun\nB: rahat bırak beni", "tone": "tense"}
+{"text": "A: bu kadar soğuk olma\nB: nasılsam öyleyim\nA: değişmişsin\nB: sen de öyle", "tone": "tense"}
+{"text": "A: nerede o para\nB: harcadım\nA: bana sormadan mı\nB: hesap mı vereceğim sana", "tone": "tense"}

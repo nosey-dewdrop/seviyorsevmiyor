@@ -1,11 +1,11 @@
 // Flow: input → parse → who-is-me → cascade (on-device model; fallback comes in Faz 2) → reveal.
-import { loadModel, scoreConversation } from './model.js?v=5';
-import { parseChat, toDoc } from './parse.js?v=5';
-import { buildReveal } from './reveal.js?v=5';
-import { playReveal } from './ui.js?v=5';
-import { cloudRead } from './api.js?v=5';
-import { ocrToText } from './ocr.js?v=5';
-import { readWhatsApp } from './wa.js?v=5';
+import { loadModel, scoreConversation } from './model.js?v=8';
+import { parseChat, toDoc } from './parse.js?v=8';
+import { buildReveal } from './reveal.js?v=8';
+import { playReveal } from './ui.js?v=8';
+import { cloudRead } from './api.js?v=8';
+import { ocrToText } from './ocr.js?v=8';
+import { readWhatsApp } from './wa.js?v=8';
 
 const FREE_PER_DAY = 5;
 const QKEY = 'wdym.quota.v1';
