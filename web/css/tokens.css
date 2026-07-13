@@ -1,38 +1,5 @@
 :root {
-  /* light — white, no cream */
-  --bg: #ffffff;
-  --surface: #f4f4f5;        /* received bubble / cards */
-  --ink: #0a0a0b;
-  --ink-2: #52525b;          /* meta, timestamps */
-  --ink-3: #8b8b92;          /* faint */
-  --line: #e4e4e7;
-  --line-2: #d4d4d8;
-
-  /* the app "speaks" in ink: outgoing bubble */
-  --sent: #0a0a0b;
-  --sent-ink: #ffffff;
-
-  /* status only — never on body text */
-  --heat: #d8402e;           /* flirt / warmth / red flag */
-  --calm: #12a066;           /* green flag / healthy */
-  --cool: #3a5a78;           /* cold / distance */
-  --link: #2563eb;
-
-  --r-bubble: 22px;
-  --r-tail: 7px;
-  --r-card: 16px;
-  --r-ui: 12px;
-
-  --sea: #eef0f4;            /* the water the big bubble floats on */
-  --thread: 560px;
-  --page: 940px;
-  --shadow: 0 1px 2px rgba(10,10,11,0.05), 0 6px 22px rgba(10,10,11,0.04);
-  --page-shadow: 0 20px 60px rgba(10,10,11,0.10), 0 4px 14px rgba(10,10,11,0.06);
-  --disp: "Fraunces", Georgia, serif;
-  --sans: "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-}
-
-[data-theme="dark"] {
+  /* dark only — Damla 13 Tem gece: light mode kalktı */
   --bg: #0b0b0c;
   --surface: #1c1c1f;
   --ink: #fafafa;
@@ -40,13 +7,29 @@
   --ink-3: #71717a;
   --line: #27272a;
   --line-2: #3f3f46;
+
+  /* the app "speaks" in ink: outgoing bubble */
   --sent: #fafafa;
   --sent-ink: #0b0b0c;
-  --heat: #ff6b52;
-  --calm: #3ddc8a;
-  --cool: #8fb4d6;
+
+  /* status only — never on body text */
+  --heat: #ff6b52;           /* flirt / warmth / red flag */
+  --calm: #3ddc8a;           /* green flag / healthy */
+  --cool: #8fb4d6;           /* cold / distance */
   --link: #6aa0ff;
-  --sea: #050506;
+
+  --r-bubble: 22px;
+  --r-tail: 7px;
+  --r-card: 16px;
+  --r-ui: 12px;
+
+  --sea: #050506;            /* the water the big bubble floats on */
+  --thread: 560px;
+  --page: 940px;
   --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 30px rgba(0,0,0,0.35);
   --page-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.4);
+
+  /* Damla 13 Tem gece: Arial her yerde, süslü font yok (web 1.0 chunky) */
+  --disp: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
 }

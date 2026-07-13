@@ -160,7 +160,6 @@ textarea.paste:focus { outline: none; }
 .ton-flirty .ton, .ton-tense .ton { color: #ff9d8f; }
 .ton-friendly .ton { color: #7ff0b8; }
 .ton-cold .ton { color: #a8cdea; }
-[data-theme="light"] .verdict-b { --sent: #0a0a0b; }
 
 /* headers + meters inside bubbles */
 .b-h { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.09em; opacity: 0.6; margin-bottom: 8px; }
@@ -251,6 +250,20 @@ textarea.paste:focus { outline: none; }
 .reveal-note { align-self: center; text-align: center; max-width: 40ch; margin: 6px 0 2px;
   font-size: 0.78rem; color: var(--ink-3); line-height: 1.4; }
 .site-foot .disclaimer { flex-basis: 100%; color: var(--ink-3); }
+
+/* ---- Damla 13 Tem gece: yazılar bold (web 1.0 chunky, Arial) ---- */
+.q, .app, .bubble, .hero .sub, .btn, .dz-title, .b-p,
+.reading .said, .reading .mean, .flag-body .txt, .demo-ask, .whois-q { font-weight: 700; }
+.verdict-b .ton, .closing-b, .meter-num, .flag-body .ttl, .app b, .split b { font-weight: 700; }
+
+/* ---- flört karar: net hüküm, ya var ya yok (Damla: "varsa var yoksa yok deyin") ---- */
+.karar { font-family: var(--disp); font-size: clamp(1.5rem, 5.5vw, 2.1rem); font-weight: 700;
+  letter-spacing: -0.01em; line-height: 1.1; margin: 2px 0 6px; }
+
+/* ---- gözden kaçanlar (llama spiker) ---- */
+.gozden .ttl { font-weight: 700; font-size: 0.96rem; }
+.gozden .txt { font-size: 0.95rem; margin-top: 3px; opacity: 0.85; }
+.gozden .kanit { font-size: 0.84rem; margin-top: 7px; opacity: 0.6; font-style: italic; }
 
 /* ---- keyboard focus visibility (a11y) ---- */
 :focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 4px; }
