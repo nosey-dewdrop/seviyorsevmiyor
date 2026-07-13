@@ -1,0 +1,28 @@
+:root {
+  /* paper + ink, no cream, no purple */
+  --paper: #ffffff;
+  --paper-2: #f4f3f1;
+  --ink: #17171a;
+  --ink-soft: #55555c;
+  --ink-faint: #8b8b92;
+  --line: #e4e2de;
+  --line-2: #d3d0cb;
+
+  /* semantic accents = status, used sparingly */
+  --heat: #d8402e;      /* flirt / warmth / red flags */
+  --heat-soft: #fbeae7;
+  --calm: #2f7d5b;      /* green flags / healthy */
+  --calm-soft: #e7f1ec;
+  --cool: #3a5a78;      /* cold / distance */
+
+  /* chat bubbles */
+  --bubble-them: #efedea;
+  --bubble-me: #17171a;
+  --bubble-me-ink: #ffffff;
+
+  --radius: 2px;
+  --radius-bubble: 3px;
+  --shadow: 0 1px 0 rgba(0,0,0,0.04);
+  --maxw: 640px;
+  --sans: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>whatdoyoumean — bir sohbetin altında ne yazıyor</title>
+<meta name="description" content="Bir sohbeti yapıştır, altındaki alt-metni oku: flört mü arkadaşça mı, kim daha çok istiyor, yeşil bayrak mı kırmızı bayrak mı. Analiz cihazında yapılır, mesajların telefonundan çıkmaz." />
+<link rel="stylesheet" href="./css/tokens.css?v=1" />
+<link rel="stylesheet" href="./css/base.css?v=1" />
+<link rel="stylesheet" href="./css/components.css?v=1" />
+</head>
+<body>
+<div class="wrap">
+  <header class="site-head">
+    <span class="brand">whatdoyoumean<span class="dot">.</span></span>
+    <span class="muted">alt-metin okuyucu</span>
+  </header>
+
+  <section class="hero">
+    <h1 id="heroTitle">Bir sohbeti yapıştır.<br />Altında ne yazdığını okuyalım.</h1>
+    <p class="sub" id="heroSub">Flört mü ediyor, arkadaşça mı? Kim daha çok istiyor? Yeşil bayrak mı, kırmızı bayrak mı? Motor sohbetin tonunu okur.</p>
+    <span class="privacy-badge"><span class="lock"></span> Analiz cihazında yapılır, mesajların çıkmaz</span>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="paste">Yapıştır</button>
+    <button class="tab" data-tab="shot">Ekran görüntüsü<span class="soon">yakında</span></button>
+    <button class="tab" data-tab="wa">WhatsApp<span class="soon">yakında</span></button>
+  </nav>
+
+  <div class="pane" id="pane-paste">
+    <textarea class="paste" id="pasteBox" placeholder="Sohbeti buraya yapıştır.&#10;&#10;Ör:&#10;Ayşe: bugün seni düşündüm&#10;Mehmet: aa öyle mi&#10;Ayşe: gülüşün aklımdaydı"></textarea>
+    <p class="paste-hint muted">İsimli (Ayşe: ...) ya da düz satırlar olabilir. WhatsApp kopyala-yapıştır da çalışır.</p>
+  </div>
+
+  <div class="pane hidden" id="pane-shot">
+    <div class="dropzone">Ekran görüntüsü okuma (cihazında OCR) bir sonraki sürümde açılıyor.</div>
+  </div>
+  <div class="pane hidden" id="pane-wa">
+    <div class="dropzone">WhatsApp .txt / .zip dışa aktarımı bir sonraki sürümde açılıyor.</div>
+  </div>
+
+  <div class="whois hidden" id="whois">
+    Bu sohbette sen kimsin?
+    <span class="seg" id="meSeg"></span>
+  </div>
+
+  <div class="row">
+    <button class="btn" id="goBtn" disabled>Alt-metni oku</button>
+    <button class="btn ghost small hidden" id="resetBtn">Yeni sohbet</button>
+  </div>
+  <div class="quota" id="quota"></div>
+
+  <section class="reveal" id="reveal"></section>
+
+  <footer class="site-foot">
+    <a href="./gizlilik.html">Gizlilik</a>
+    <span>Analiz cihazında. Emin olunmayan vakalar için bulut, sadece senin onayınla.</span>
+  </footer>
+</div>
+
+<div class="overlay hidden" id="onboard">
+  <div class="sheet">
+    <h2>Nasıl çalışır?</h2>
+    <p class="muted">Wrapper değil. Kendi motorumuz senin tarafında çalışır.</p>
+    <ol>
+      <li><b>Yapıştır.</b> Bir sohbeti ver, isim ya da düz satır fark etmez.</li>
+      <li><b>Cihazında okunur.</b> Kendi istatistik modelimiz tonu, ilgi dengesini ve bayrakları çıkarır. Mesajların telefonundan çıkmaz.</li>
+      <li><b>Emin değilse.</b> Sadece zor vakada, senin onayınla buluta sorar. Onu da zamanla öğrenip bırakır.</li>
+    </ol>
+    <button class="btn" id="onboardClose">Başla</button>
+  </div>
+</div>
+
+<script type="module" src="./js/app.js?v=1"></script>
+</body>
+</html>
