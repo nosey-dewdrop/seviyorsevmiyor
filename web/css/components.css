@@ -26,6 +26,17 @@
 .hero.card-bubble { padding-top: 30px; padding-bottom: 30px; }
 .card-bubble .tabs { margin-top: 0; }
 
+/* hero bubble + tool bubble sit side by side on desktop, stack on mobile */
+.lead { display: flex; align-items: flex-start; gap: clamp(22px, 3vw, 36px); }
+.lead > .hero { flex: 1 1 44%; min-width: 0; margin-bottom: clamp(30px, 6vw, 52px); }
+.lead > .tool { flex: 1 1 56%; min-width: 0; }
+@media (max-width: 820px) {
+  .lead { flex-direction: column; }
+  .lead > .hero, .lead > .tool { flex: none; }
+}
+/* the analysis stays a centered chat-width thread under the two bubbles */
+.reveal { max-width: var(--thread); margin-left: auto; margin-right: auto; }
+
 /* ============ bubbles (shared) ============ */
 .q, .app, .bubble {
   position: relative;
