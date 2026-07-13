@@ -5,15 +5,15 @@ conversation and the engine reads what's really going on: flirty or friendly, wh
 interest level, green/red flags, and a per-message "what did they mean". Theyseeyourphotos energy,
 but for messaging, printed in a chat-bubble reveal. Born with a paywall. Turkish-first.
 
-STATUS 2026-07-13: LIVE at https://damlahelloworld.github.io/whatdoyoumean/ (gh-pages). Faz 0–7 shipped (7 partial).
+STATUS 2026-07-13: LIVE at https://damlahelloworld.github.io/whatdoyoumean/ (v10). Faz 0–6 shipped; Faz 7 (revenue) deferred by Damla — this is a free idea-tool (paste→read→done), audience first.
 Deploy: `git subtree split --prefix web -b t && git push -f origin t:gh-pages && git branch -D t`; bump ?v=N + footer stamp each time.
+Big session (13 Tem): full redesign + ship-check. NO login/accounts (removed supa.js + supabase creds) — nothing stored server-side, like theyseeyourphotos; local daily quota only. Disclaimer + kosullar.html (Terms) live. Favicon + OG share card. Seed grown 120→169 (79% held-out, parity ok). Paste parser now strips time-first + bracketed WhatsApp stamps. Module imports are version-stamped (fixes Safari stale-module crash).
 
-DAMLA'S TODO (blocks full launch):
-1. Supabase: run backend/supabase-schema.sql in the SHARED project's SQL editor (wdym_ tables + RLS + signup trigger). Also enable Email auth (magic link) for the project. URL she gave was .supabase.com; correct is .supabase.co (already set in config.js).
-2. Worker: `cd backend && wrangler login` → create KV, paste id in wrangler.toml → `wrangler secret put GEMINI_API_KEY` (her Google AI Studio key) + `APP_TOKEN` → set PUBLIC_READ="on" → `wrangler deploy`. Until then the "buluta sor" button degrades to "cloud read not open".
-3. Payment provider decision (Paddle vs Lemon Squeezy) → then server-enforced quota (wdym_daily_reads + use_read rpc) + set is_premium on webhook.
-4. Grow train/data.jsonl beyond the 120-example seed and re-run train.py (accuracy climbs with data). Review the seed labels.
-5. Look at the design in dev and steer — it's a v1, not blindly iterated (kör iterasyon yasağı).
+DAMLA'S TODO (all optional, none block launch):
+1. Worker — ONLY if you want the "buluta sor" cloud fallback live: `cd backend && wrangler login` → KV → `wrangler secret put GEMINI_API_KEY` (your Google AI Studio key) + `APP_TOKEN` → PUBLIC_READ="on" → `wrangler deploy`. Until then the button says "cloud read not open" (graceful).
+2. Payment provider (Paddle vs Lemon Squeezy) — ONLY when you actually want to sell premium; paywall shows "yakında".
+3. Grow train/data.jsonl further + re-run train.py (reads sharpen with data).
+4. Generate more bubble sprites in Midjourney if you want; drop into web/assets/bubbles/ and I bump the version.
 
 LATER (Damla, deferred to save tokens 2026-07-13): add a SECOND engine for English — do NOT replace the Turkish one. Needs EN lexicons (features/balance), EN labeled seed data + model.en.json, EN reveal templates, and a TR/EN toggle with language routing. Only once the TR engine's data has grown; theyseeyourphotos is EN + global = bigger reach.
 
@@ -49,11 +49,15 @@ is exactly what earns a fallback. Held-out accuracy is measured and reported (bu
 - Feature extractor is mirrored in `train/features.py` (training) and `web/js/features.js` (inference);
   a parity check dumps features from Python and re-computes them in Node to catch drift.
 
-## Design
-theyseeyourphotos spirit: single column, minimal, generous (not dead) whitespace, big emotional reveal,
-chat-bubble typography so it reads as "about messaging". House style: sharp corners (0–3px), NO purple,
-no colored single words, no bold piles, no pill/gradient/emoji-bullet. Onboarding always. Design is mine
-to iterate until excellent, then Damla approves.
+## Design (identity locked 13 Tem — Damla-directed)
+The whole page is one chat thread of separate "bubble" cards floating on an interactive canvas **bubble
+sea** (solid collision, flees the cursor, keeps clear of the cards). **DARK is default** (reads premium)
+and the sea uses Damla's Midjourney-generated **textured ivory bubble sprites** (`web/assets/bubbles/`,
+chroma-keyed to transparent); LIGHT mode uses colorful pastel vector bubbles. Type = Fraunces (display) +
+Inter (body). Reveal streams in as the app "texting you back" (typing dots → bubbles). Onboarding = mini chat.
+Still banned: cream backgrounds, colored single words, pill/gradient/emoji-bullet. Border-radius + font
+weight are FREE now (old sharp-corner + no-bold laws were dropped 13 Tem). Asset flow: Damla generates in
+MJ (recipe: matte black bg, ivory bubble, grainy stippled texture), I chroma-key to transparent PNGs and place.
 
 ## KVKK / law (ships in the SAME version as any data collection)
 Story: most analysis stays on device; only unsure cases go to the cloud, with consent. Third-party data:
