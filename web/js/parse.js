@@ -2,11 +2,20 @@
 // Handles pasted text, "Name: message" logs, and WhatsApp .txt exports. The two most frequent
 // speakers map to A/B; everything downstream only sees A/B.
 
-const WA_LINE = [
-  // 12.07.2026, 21:344 - Name: message   /   12/07/2026, 9:34 PM - Name: msg
-  /^\[?(\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4})[,\s]+\d{1,2}:\d{2}(?::\d{2})?\s?(?:AM|PM|ÖÖ|ÖS)?\]?\s*[-–]?\s*([^:]{1,40}):\s(.*)$/i,
-];
 const NAME_LINE = /^([^:\n]{1,40}):\s(.*)$/;
+
+// Leading WhatsApp timestamps come in many orders; strip whichever is present, then the rest is
+// "Name: message". Handles iOS "[01:12, 10.06.2026]" and "[10.06.2026, 01:12]" (either order),
+// and Android "10.06.2026, 21:34 -" / "10/06/2026, 9:34 PM -".
+const STAMPS = [
+  /^\[[^\]]*\]\s*/,                                                                              // any [ ... ] block (iOS, both orders)
+  /^\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}[,\s]+\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|ÖÖ|ÖS)?\s*[-–]\s*/i, // Android date time -
+  /^\d{1,2}:\d{2}(?::\d{2})?[,\s]+\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}\s*[-–]?\s*/i,                    // time, date (unbracketed)
+];
+function stripStamp(t) {
+  for (const re of STAMPS) { const s = t.replace(re, ''); if (s !== t) return s.trim(); }
+  return t;
+}
 
 function classifyLines(raw) {
   const lines = raw.replace(/\r/g, '').split('\n');
@@ -14,17 +23,12 @@ function classifyLines(raw) {
   for (const line of lines) {
     const t = line.trim();
     if (!t) continue;
-    let matched = false;
-    for (const re of WA_LINE) {
-      const m = t.match(re);
-      if (m) { msgs.push({ name: m[2].trim(), text: m[3] }); matched = true; break; }
-    }
-    if (matched) continue;
-    const nm = t.match(NAME_LINE);
+    const s = stripStamp(t);
+    const nm = s.match(NAME_LINE);
     if (nm && !/^https?$/i.test(nm[1])) { msgs.push({ name: nm[1].trim(), text: nm[2] }); continue; }
-    // continuation of the previous message (wrapped line)
-    if (msgs.length) msgs[msgs.length - 1].text += ' ' + t;
-    else msgs.push({ name: null, text: t });
+    // continuation of the previous message (wrapped line); keep the stamp-stripped text
+    if (msgs.length) msgs[msgs.length - 1].text += ' ' + s;
+    else msgs.push({ name: null, text: s });
   }
   return msgs;
 }

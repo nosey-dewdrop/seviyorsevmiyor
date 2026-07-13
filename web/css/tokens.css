@@ -23,8 +23,11 @@
   --r-card: 16px;
   --r-ui: 12px;
 
+  --sea: #eef0f4;            /* the water the big bubble floats on */
   --thread: 560px;
+  --page: 720px;
   --shadow: 0 1px 2px rgba(10,10,11,0.05), 0 6px 22px rgba(10,10,11,0.04);
+  --page-shadow: 0 20px 60px rgba(10,10,11,0.10), 0 4px 14px rgba(10,10,11,0.06);
   --disp: "Fraunces", Georgia, serif;
   --sans: "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 }
@@ -43,5 +46,7 @@
   --calm: #3ddc8a;
   --cool: #8fb4d6;
   --link: #6aa0ff;
+  --sea: #050506;
   --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 30px rgba(0,0,0,0.35);
+  --page-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.4);
 }

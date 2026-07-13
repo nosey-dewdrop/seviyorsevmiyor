@@ -2,7 +2,7 @@
 // exported by train/train.py) and scores a conversation entirely in the browser — no network,
 // data never leaves the device. Mirrors the Python TF-IDF + softmax math exactly.
 
-import { ngrams, numericVector, NUMERIC_NAMES } from './features.js';
+import { ngrams, numericVector, NUMERIC_NAMES } from './features.js?v=3';
 
 let MODEL = null;
 

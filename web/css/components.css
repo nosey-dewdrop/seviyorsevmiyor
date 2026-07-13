@@ -1,3 +1,28 @@
+/* ============ the whole site is one big chat bubble ============ */
+.page-bubble {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 40px;
+  padding: 26px clamp(20px, 5vw, 46px) 34px;
+  box-shadow: var(--page-shadow);
+}
+/* the big bubble's tail, bottom-left */
+.page-bubble::after {
+  content: '';
+  position: absolute; left: 46px; bottom: -22px;
+  width: 46px; height: 40px;
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-bottom-right-radius: 34px 30px;
+  transform: skewX(-24deg);
+}
+@media (max-width: 600px) {
+  .page-bubble { border-radius: 28px; padding: 20px 18px 26px; }
+  .page-bubble::after { left: 30px; width: 36px; height: 32px; bottom: -18px; }
+}
+
 /* ============ bubbles (shared) ============ */
 .q, .app, .bubble {
   position: relative;

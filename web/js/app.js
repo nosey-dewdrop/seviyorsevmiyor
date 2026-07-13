@@ -1,12 +1,12 @@
 // Flow: input → parse → who-is-me → cascade (on-device model; fallback comes in Faz 2) → reveal.
-import { loadModel, scoreConversation } from './model.js';
-import { parseChat, toDoc } from './parse.js';
-import { buildReveal } from './reveal.js';
-import { playReveal } from './ui.js';
-import { cloudRead } from './api.js';
-import { ocrToText } from './ocr.js';
-import { readWhatsApp } from './wa.js';
-import { getUser, sendMagicLink, signOut, isPremium, onAuthChange } from './supa.js';
+import { loadModel, scoreConversation } from './model.js?v=3';
+import { parseChat, toDoc } from './parse.js?v=3';
+import { buildReveal } from './reveal.js?v=3';
+import { playReveal } from './ui.js?v=3';
+import { cloudRead } from './api.js?v=3';
+import { ocrToText } from './ocr.js?v=3';
+import { readWhatsApp } from './wa.js?v=3';
+import { getUser, sendMagicLink, signOut, isPremium, onAuthChange } from './supa.js?v=3';
 
 const FREE_PER_DAY = 5;
 const QKEY = 'wdym.quota.v1';
@@ -62,31 +62,38 @@ function ingestText(text) {
 }
 
 const shotZone = $('shotZone');
+const shotStatus = shotZone.querySelector('.dz-title');
 $('shotInput').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   shotZone.classList.add('hot');
-  shotZone.lastChild.textContent = ' Ekran görüntüsü okunuyor…';
+  shotStatus.textContent = 'Ekran görüntüsü okunuyor…';
   try {
-    const text = await ocrToText(file, (p) => { shotZone.lastChild.textContent = ` Okunuyor… %${Math.round(p * 100)}`; });
+    const text = await ocrToText(file, (p) => { shotStatus.textContent = `Okunuyor… %${Math.round(p * 100)}`; });
     if (!text) throw new Error('Metin çıkmadı');
     ingestText(text);
+    shotStatus.textContent = 'Okundu, aşağıda düzenleyebilirsin.';
   } catch (err) {
-    shotZone.lastChild.textContent = ' Okunamadı, başka bir görsel dene ya da metni yapıştır.';
+    shotStatus.textContent = 'Okunamadı, başka bir görsel dene ya da metni yapıştır.';
   } finally {
     shotZone.classList.remove('hot');
     e.target.value = '';
   }
 });
 
+const waZone = $('waZone');
+const waStatus = waZone.querySelector('.dz-title');
 $('waInput').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
+  waStatus.textContent = 'Dosya okunuyor…';
   try {
     const text = await readWhatsApp(file);
+    if (!text || !text.trim()) throw new Error('Dosya boş görünüyor');
     ingestText(text);
+    waStatus.textContent = 'Okundu, aşağıda düzenleyebilirsin.';
   } catch (err) {
-    $('waZone').lastChild.textContent = ' ' + (err.message || 'Dosya okunamadı');
+    waStatus.textContent = err.message || 'Dosya okunamadı';
   } finally {
     e.target.value = '';
   }
