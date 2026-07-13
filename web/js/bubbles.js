@@ -8,8 +8,13 @@ if (cvs) {
   const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const cards = () => document.querySelectorAll('.card-bubble');
 
-  // confetti pastels (approved palette — pink, coral, yellow, green, blue, lavender)
+  // confetti pastels (approved palette) — used in light mode
   const COLORS = ['#F7B8C4', '#F6A99A', '#F4D06F', '#9BD8A0', '#A6C8F0', '#C9B8E8', '#F2A6C2', '#8FE0C6'];
+  // Damla's hand-generated textured ivory bubbles (dark mode sprites)
+  const sprites = Array.from({ length: 14 }, (_, i) => {
+    const im = new Image(); im.src = `./assets/bubbles/b${String(i).padStart(2, '0')}.png?v=9`; return im;
+  });
+  const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
 
   let W = 0, H = 0, DPR = 1;
   let bubbles = [];                          // each: {x,y = CENTER, w, h, r, vx, vy, color, alpha}
@@ -32,11 +37,12 @@ if (cvs) {
     bubbles = [];
     let guard = 0;
     while (bubbles.length < n && guard++ < n * 60) {
-      const w = rand(36, 84), h = w * rand(0.64, 0.78), r = Math.max(w, h) / 2;
+      const w = rand(52, 118), h = w * rand(0.7, 0.82), r = Math.max(w, h) / 2;
       const x = rand(r, W - r), y = rand(r, H - r);
       if (bubbles.some((b) => Math.hypot(b.x - x, b.y - y) < b.r + r + 6)) continue; // no overlap at birth
       bubbles.push({ x, y, w, h, r, vx: rand(-0.2, 0.2), vy: rand(-0.18, 0.18),
-        color: COLORS[bubbles.length % COLORS.length], alpha: rand(0.6, 0.9) });
+        color: COLORS[bubbles.length % COLORS.length], alpha: rand(0.6, 0.9),
+        sprite: sprites[Math.floor(Math.random() * sprites.length)] });
     }
   }
 
@@ -57,9 +63,17 @@ if (cvs) {
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
+    const dark = isDark();
     for (const b of bubbles) {
-      ctx.globalAlpha = b.alpha; ctx.fillStyle = b.color;
-      bubblePath(b.x, b.y, b.w, b.h); ctx.fill();
+      ctx.globalAlpha = b.alpha;
+      const s = b.sprite;
+      if (dark && s && s.complete && s.naturalWidth) {
+        const dw = b.w * 2, dh = dw * (s.naturalHeight / s.naturalWidth);
+        ctx.drawImage(s, b.x - dw / 2, b.y - dh / 2, dw, dh);
+      } else {
+        ctx.fillStyle = b.color;
+        bubblePath(b.x, b.y, b.w, b.h); ctx.fill();
+      }
     }
     ctx.globalAlpha = 1;
   }
