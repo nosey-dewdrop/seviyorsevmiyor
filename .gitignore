@@ -4,3 +4,4 @@ train/__pycache__/
 train/.venv/
 backend/.dev.vars
 *.log
+backend/.wrangler/
