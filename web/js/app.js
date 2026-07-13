@@ -1,13 +1,13 @@
 // Flow: input → parse → who-is-me → on-device engine (verdict + counts = the law) →
 // optional Groq/Llama spiker (fresh wording + gözden kaçanlar, consent-gated) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
-import { loadModel, scoreConversation } from './model.js?v=18';
-import { parseChat, toDoc } from './parse.js?v=18';
-import { buildReveal } from './reveal.js?v=18';
-import { playReveal } from './ui.js?v=18';
-import { spikerRead } from './api.js?v=18';
-import { ocrToText } from './ocr.js?v=18';
-import { readWhatsApp } from './wa.js?v=18';
+import { loadModel, scoreConversation } from './model.js?v=20';
+import { parseChat, toDoc } from './parse.js?v=20';
+import { buildReveal } from './reveal.js?v=20';
+import { playReveal } from './ui.js?v=20';
+import { spikerRead, ping } from './api.js?v=20';
+import { ocrToText } from './ocr.js?v=20';
+import { readWhatsApp } from './wa.js?v=20';
 
 const ONBOARD_KEY = 'wdym.onboarded.v1';
 
@@ -167,11 +167,13 @@ goBtn.addEventListener('click', async () => {
     const doc = toDoc(parsed.messages);
     const toneResult = scoreConversation(doc);
     const r = buildReveal({ toneResult, messages: parsed.messages, me: parsed.me });
+    ping('analiz');
     if (consentBox.checked && cloudConsentBox.checked) {
       goBtn.textContent = 'Spiker yazıyor…';
       const sp = await spikerRead(spikerFacts(r), spikerDoc(parsed.messages, parsed.me));
-      if (sp) mergeSpiker(r, sp);
+      if (sp) { mergeSpiker(r, sp); ping('spiker'); }
     }
+    attachHistory(r, parsed);
     lastReveal = r;
     playReveal(reveal, r, parsed.messages, parsed.me);
     resetBtn.classList.remove('hidden');
@@ -207,3 +209,21 @@ $('onboardClose').addEventListener('click', () => {
 });
 
 // theme toggle removed 13 Tem gece (Damla: "light mode kaldıralım") — the site is dark only.
+
+// ---- kayıt defteri: on-device return loop. Keyed by the OTHER person's real name (skipped
+// for anonymous "İlk kişi/İkinci kişi" parses); stores verdict + score only, never the chat.
+const HISTORY_KEY = 'wdym.history.v1';
+function attachHistory(r, p) {
+  const other = p.me === 'A' ? 'B' : 'A';
+  const name = (p.speakers[other] || '').trim();
+  if (!name || /^(İlk kişi|İkinci kişi)$/i.test(name)) return;
+  const key = name.toLocaleLowerCase('tr');
+  let hist = {};
+  try { hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}'); } catch {}
+  const prev = hist[key];
+  if (prev && typeof prev.score === 'number') {
+    r.kayit = { name, prevScore: prev.score, prevKarar: prev.karar, prevTs: prev.ts, score: r.flort_sinyali.score };
+  }
+  hist[key] = { ts: Date.now(), karar: r.flort_sinyali.karar, score: r.flort_sinyali.score };
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(hist)); } catch {}
+}

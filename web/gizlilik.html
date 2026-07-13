@@ -37,7 +37,9 @@
       <li><b>Cihaz üzerinde analiz (varsayılan):</b> Yapıştırdığın veya yüklediğin sohbet metni tarayıcında işlenir. Kendi istatistiksel modelimiz orada çalışır; bu metin sunucularımıza gönderilmez, saklanmaz.</li>
       <li><b>Ekran görüntüsü:</b> Fotoğraftan metin çıkarımı (OCR) da cihazında yapılır; görsel yüklenmez.</li>
       <li><b>Bulut yorum katmanı, "canlı spiker" (yalnızca onayla):</b> Onay kutusunu işaretlersen, o sohbetin metni ve cihazda hesaplanan analiz raporu, yorum cümlelerinin yazılması için bir yapay zeka sağlayıcısına (Groq üzerinde Llama modeli; sunucular yurt dışında) bizim aracımız üzerinden iletilir. Aracı, IP adresini geçici hız sınırı sayacı dışında saklamaz ve sohbet içeriğini loglamaz. Hüküm ve sayılar buluta gitse de gitmese de cihazında hesaplanır.</li>
-      <li><b>Saklama:</b> Bu sürümde sohbetlerin kalıcı olarak saklanmaz. Tema gibi tercihler yalnızca kendi tarayıcının localStorage'ında tutulur.</li>
+      <li><b>Saklama:</b> Sohbetlerin kalıcı olarak saklanmaz; tek istisna aşağıdaki gönüllü itiraz bağışıdır. Tercihler ve kayıt defteri (kişi adı + sinyal yüzdesi, sohbet metni değil) yalnızca kendi tarayıcının localStorage'ında tutulur.</li>
+      <li><b>İtiraz bağışı (yalnızca onayla):</b> "bence yanlış okudun" dedikten sonra istersen o tek sohbeti motorun eğitimi için bağışlayabilirsin. Yalnızca bu durumda sohbet metni ve verilen hüküm saklanır ve modelin eğitiminde kullanılır. Bağışlamadan da itiraz edebilirsin. Bağışını sildirmek için e-posta atman yeterli.</li>
+      <li><b>Sayaçlar:</b> Ürünü iyileştirmek için içeriksiz, kimliksiz günlük toplamlar tutulur (kaç analiz yapıldı, kaç paylaşım tıklandı gibi). Sohbet içeriği, isim ya da kalıcı IP kaydı içermez.</li>
     </ul>
 
     <h2>Başkasına ait sohbetler</h2>

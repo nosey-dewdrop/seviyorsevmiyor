@@ -27,6 +27,40 @@ export default {
       const len = parseInt(request.headers.get('content-length') || '0');
       if (len > 60_000) return json({ error: 'Conversation too large' }, 413);
 
+      // fire-and-forget counters: no content, no identity, daily totals only (Faz 1 metrics)
+      if (url.pathname === '/api/ping') {
+        if (await limited(env, `p:${ip}`, 30, 120)) return json({ ok: true });
+        const b = await request.json().catch(() => ({}));
+        if (PING_EVENTS.includes(b.olay)) await bump(env, b.olay);
+        return json({ ok: true });
+      }
+
+      // public read-only counts (the panel)
+      if (url.pathname === '/api/stats' && request.method === 'POST') {
+        return json(await readStats(env));
+      }
+
+      // consented hard-case donation: user pressed "yanlış okudun" AND approved storing this
+      // one chat for training. The ONLY route that ever stores content.
+      if (url.pathname === '/api/itiraz') {
+        if (await limited(env, `i:${ip}`, 5, 120) || await limited(env, `iday:${ip}`, 20, 90000)) {
+          return json({ error: 'Rate limit exceeded' }, 429);
+        }
+        const b = await request.json().catch(() => ({}));
+        const doc = typeof b.doc === 'string' ? b.doc.slice(0, 8000) : '';
+        if (!doc || b.onay !== true) return json({ error: 'Invalid request' }, 400);
+        const kayit = {
+          doc,
+          hukum: typeof b.hukum === 'string' ? b.hukum.slice(0, 40) : '',
+          karar: typeof b.karar === 'string' ? b.karar.slice(0, 10) : '',
+          ts: Date.now(),
+        };
+        await env.RATE_LIMIT?.put(`corpus:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
+          JSON.stringify(kayit));
+        await bump(env, 'itiraz_bagis');
+        return json({ ok: true });
+      }
+
       if (url.pathname === '/api/spiker') {
         if (env.SPIKER_OPEN !== 'on') return json({ error: 'Spiker is not open yet' }, 403);
         // Fuses: per-IP per-minute, per-IP per-day, and a global daily cap on the free key.
@@ -58,6 +92,29 @@ export default {
     }
   },
 };
+
+const PING_EVENTS = ['analiz', 'spiker', 'paylasim', 'itiraz'];
+
+async function bump(env, olay) {
+  const day = new Date().toISOString().slice(0, 10);
+  const key = `stat:${olay}:${day}`;
+  const cur = parseInt((await env.RATE_LIMIT?.get(key)) || '0');
+  await env.RATE_LIMIT?.put(key, String(cur + 1), { expirationTtl: 60 * 60 * 24 * 400 });
+}
+
+async function readStats(env) {
+  const out = {};
+  const days = [];
+  for (let i = 0; i < 14; i++) days.push(new Date(Date.now() - i * 86400000).toISOString().slice(0, 10));
+  for (const olay of [...PING_EVENTS, 'itiraz_bagis']) {
+    out[olay] = {};
+    for (const day of days) {
+      const v = await env.RATE_LIMIT?.get(`stat:${olay}:${day}`);
+      if (v) out[olay][day] = parseInt(v);
+    }
+  }
+  return out;
+}
 
 async function limited(env, keyBase, max, ttl) {
   const bucket = ttl > 1000 ? Math.floor(Date.now() / 86400000) : Math.floor(Date.now() / 60000);
@@ -144,7 +201,31 @@ async function handleSpiker(request, env) {
 
   const spiker = validateSpiker(out, Array.isArray(facts.okumalar) ? facts.okumalar.length : 0);
   if (!spiker) return json({ error: 'Could not read this one' }, 502);
+  const serious = facts?.hukum?.tur === 'tense' || (facts?.sayim?.red_flag_turu || 0) >= 1;
+  postProcess(spiker, serious);
   return json({ source: 'groq', spiker });
+}
+
+// The LLM does not fully obey the voice law, so we enforce it in code: playful screens are
+// lowercase (TR-aware), and the "sanki" filler tic is stripped after its first use. Evidence
+// quotes are never touched.
+function trLower(s) { return s.replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase(); }
+function postProcess(spiker, serious) {
+  let sankiSeen = false;
+  const fix = (s) => {
+    if (!s) return s;
+    let t = serious ? s : trLower(s);
+    t = t.replace(/\bsanki\b[ ,]*/gi, (m) => (sankiSeen ? '' : (sankiSeen = true, m)));
+    return t.replace(/\s{2,}/g, ' ').trim();
+  };
+  spiker.ton_line = fix(spiker.ton_line);
+  spiker.sinyal_reason = fix(spiker.sinyal_reason);
+  spiker.denge_line = fix(spiker.denge_line);
+  spiker.kapanis = fix(spiker.kapanis);
+  if (spiker.okumalar) spiker.okumalar = spiker.okumalar.map(fix);
+  spiker.gozden_kacanlar = spiker.gozden_kacanlar.map((g) => ({
+    baslik: fix(g.baslik), line: fix(g.line), kanit: g.kanit,
+  }));
 }
 
 // The client merges these over its template lines; anything malformed is dropped so the

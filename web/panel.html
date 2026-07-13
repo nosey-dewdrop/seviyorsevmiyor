@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>panel · mesajibirokusana</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="stylesheet" href="./css/tokens.css?v=20" />
+<link rel="stylesheet" href="./css/base.css?v=20" />
+<style>
+  .doc { max-width: 620px; margin: 0 auto; padding: 8px 0 40px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 0.92rem; }
+  th, td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--line); color: var(--ink-2); }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--ink-3); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.07em; }
+  .tot { color: var(--ink); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-head">
+    <span class="brand">mesajibirokusana<span class="dot">.</span></span>
+    <a href="./index.html" style="font-size:0.9rem">← geri</a>
+  </header>
+  <main class="doc">
+    <h1>sayaç paneli</h1>
+    <p class="muted">İçeriksiz günlük toplamlar. Kimlik yok, sohbet yok, sadece sayılar.</p>
+    <div id="out"><p class="muted">yükleniyor…</p></div>
+  </main>
+</div>
+<script type="module">
+  import { API_BASE } from './js/config.js?v=20';
+  const NAMES = { analiz: 'analiz', spiker: 'spiker kullanımı', paylasim: 'paylaşım tıkı', itiraz: 'itiraz', itiraz_bagis: 'itiraz bağışı' };
+  try {
+    const res = await fetch(`${API_BASE}/api/stats`, { method: 'POST' });
+    const data = await res.json();
+    const days = [...new Set(Object.values(data).flatMap((d) => Object.keys(d)))].sort().reverse();
+    let html = '<table><tr><th>gün</th>' + Object.keys(NAMES).map((k) => `<th>${NAMES[k]}</th>`).join('') + '</tr>';
+    for (const day of days) {
+      html += `<tr><td>${day}</td>` + Object.keys(NAMES).map((k) => `<td>${data[k]?.[day] || ''}</td>`).join('') + '</tr>';
+    }
+    const tot = (k) => Object.values(data[k] || {}).reduce((a, b) => a + b, 0);
+    html += '<tr class="tot"><td>toplam (14 gün)</td>' + Object.keys(NAMES).map((k) => `<td class="tot">${tot(k)}</td>`).join('') + '</tr></table>';
+    document.getElementById('out').innerHTML = days.length ? html : '<p class="muted">henüz sayılacak bir şey yok.</p>';
+  } catch {
+    document.getElementById('out').innerHTML = '<p class="muted">panel şu an ulaşılamıyor.</p>';
+  }
+</script>
+</body>
+</html>

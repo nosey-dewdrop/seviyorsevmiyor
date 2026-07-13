@@ -2,6 +2,8 @@
 // Original conversation shows as a quoted transcript; each finding drops in as a bubble after a
 // typing indicator. Pure DOM, no framework. Respects prefers-reduced-motion.
 
+import { ping, itirazGonder } from './api.js?v=20';
+
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let SKIP = false;   // tap the reveal → the rest lands instantly
 const raw = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -149,6 +151,17 @@ export async function playReveal(root, r, messages, me) {
     await say(gz, { wait: 320, soft: true });
   }
 
+  // 5.8 — kayıt defteri: same person, what changed since last time (on-device history)
+  if (r.kayit) {
+    const ky = el('div', 'bubble');
+    ky.appendChild(el('div', 'b-h', 'kayıt defteri'));
+    const delta = r.kayit.score - r.kayit.prevScore;
+    const gun = Math.max(1, Math.round((Date.now() - r.kayit.prevTs) / 86400000));
+    const yon = delta > 5 ? `ısınmış (+${delta})` : delta < -5 ? `soğumuş (${delta})` : 'aynı yerde sayıyor';
+    ky.appendChild(el('p', 'b-p', esc(`${r.kayit.name} ile ${gun} gün önceki analizde sinyal %${r.kayit.prevScore} idi, şimdi %${r.kayit.score}. ${yon}.`)));
+    await say(ky, { wait: 320, soft: true });
+  }
+
   // 6 — closing punch
   const cl = el('div', 'bubble closing-b', esc(r.kapanis));
   await say(cl, { wait: 450 });
@@ -177,8 +190,9 @@ export async function playReveal(root, r, messages, me) {
   const sbtn = el('button', 'btn small ghost', 'Sonucu görsel al');
   sbtn.addEventListener('click', async () => {
     sbtn.disabled = true; sbtn.textContent = 'Hazırlanıyor…';
+    ping('paylasim');
     try {
-      const { shareReveal } = await import('./share.js?v=18');
+      const { shareReveal } = await import('./share.js?v=20');
       const how = await shareReveal(r);
       sbtn.textContent = how === 'downloaded' ? 'İndirildi' : how === 'shared' ? 'Paylaşıldı' : 'Sonucu görsel al';
     } catch { sbtn.textContent = 'Olmadı, tekrar dene'; }
@@ -187,6 +201,26 @@ export async function playReveal(root, r, messages, me) {
   sr.appendChild(sbtn);
   sr.appendChild(el('span', 'cloud-note muted', 'kart cihazında üretilir, sohbet görselde yok'));
   stream.appendChild(sr);
+
+  // itiraz: wrong readings are training data, not embarrassments (the flywheel)
+  const ir = el('div', 'share-row itiraz-row');
+  const ibtn = el('button', 'btn small ghost', 'bence yanlış okudun');
+  ibtn.addEventListener('click', () => {
+    ping('itiraz');
+    ir.innerHTML = '';
+    const q = el('span', 'cloud-note', 'not ettim kanka. motorun öğrenmesi için bu sohbeti bağışlar mısın? isim geçiyorsa silsen iyi olur.');
+    const yes = el('button', 'btn small ghost', 'bağışla');
+    yes.addEventListener('click', async () => {
+      yes.disabled = true; yes.textContent = 'gönderiliyor…';
+      const doc = messages.map((m) => `${m.speaker === me ? 'SEN' : 'O'}: ${m.text}`).join('\n');
+      const ok = await itirazGonder(doc, r.genel_ton.key, r.flort_sinyali.karar);
+      ir.innerHTML = '';
+      ir.appendChild(el('span', 'cloud-note', ok ? 'geldi kanka, motor bundan öğrenecek. sağ ol.' : 'şu an gitmedi ama itirazın not edildi.'));
+    });
+    ir.appendChild(q); ir.appendChild(yes);
+  });
+  ir.appendChild(ibtn);
+  stream.appendChild(ir);
 
   // honest note: this is an automated guess, not a verdict
   stream.appendChild(el('div', 'reveal-note', 'Bu okuma otomatik bir tahmindir, kesin bir yargı ya da tavsiye değildir.'));
