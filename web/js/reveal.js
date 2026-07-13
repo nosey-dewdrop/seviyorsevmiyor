@@ -96,7 +96,7 @@ export function buildReveal({ toneResult, messages, me }) {
         : signal >= 35 ? 'Ara ara ilgi kıvılcımı var ama net değil.'
           : 'İlgi sinyali düşük, konuşma daha çok işlevsel.',
     },
-    ilgi_dengesi: { leans: bal.leans, line: balanceLine(bal) },
+    ilgi_dengesi: { leans: bal.leans, line: balanceLine(bal), aShare: bal.aShare },
     mesaj_okumalari: messageReadings(messages),
     bayraklar: flagList.map((f) => ({ type: f.type, title: FLAG_TR[f.kind][0], line: FLAG_TR[f.kind][1] })),
     kapanis: closingLine(toneResult.top, bal, flagList),

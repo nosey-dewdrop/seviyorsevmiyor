@@ -1,28 +1,47 @@
 :root {
-  /* paper + ink, no cream, no purple */
-  --paper: #ffffff;
-  --paper-2: #f4f3f1;
-  --ink: #17171a;
-  --ink-soft: #55555c;
-  --ink-faint: #8b8b92;
-  --line: #e4e2de;
-  --line-2: #d3d0cb;
+  /* light — white, no cream */
+  --bg: #ffffff;
+  --surface: #f4f4f5;        /* received bubble / cards */
+  --ink: #0a0a0b;
+  --ink-2: #52525b;          /* meta, timestamps */
+  --ink-3: #8b8b92;          /* faint */
+  --line: #e4e4e7;
+  --line-2: #d4d4d8;
 
-  /* semantic accents = status, used sparingly */
-  --heat: #d8402e;      /* flirt / warmth / red flags */
-  --heat-soft: #fbeae7;
-  --calm: #2f7d5b;      /* green flags / healthy */
-  --calm-soft: #e7f1ec;
-  --cool: #3a5a78;      /* cold / distance */
+  /* the app "speaks" in ink: outgoing bubble */
+  --sent: #0a0a0b;
+  --sent-ink: #ffffff;
 
-  /* chat bubbles */
-  --bubble-them: #efedea;
-  --bubble-me: #17171a;
-  --bubble-me-ink: #ffffff;
+  /* status only — never on body text */
+  --heat: #d8402e;           /* flirt / warmth / red flag */
+  --calm: #12a066;           /* green flag / healthy */
+  --cool: #3a5a78;           /* cold / distance */
+  --link: #2563eb;
 
-  --radius: 2px;
-  --radius-bubble: 3px;
-  --shadow: 0 1px 0 rgba(0,0,0,0.04);
-  --maxw: 640px;
-  --sans: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --r-bubble: 22px;
+  --r-tail: 7px;
+  --r-card: 16px;
+  --r-ui: 12px;
+
+  --thread: 560px;
+  --shadow: 0 1px 2px rgba(10,10,11,0.05), 0 6px 22px rgba(10,10,11,0.04);
+  --disp: "Fraunces", Georgia, serif;
+  --sans: "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg: #0b0b0c;
+  --surface: #1c1c1f;
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+  --line: #27272a;
+  --line-2: #3f3f46;
+  --sent: #fafafa;
+  --sent-ink: #0b0b0c;
+  --heat: #ff6b52;
+  --calm: #3ddc8a;
+  --cool: #8fb4d6;
+  --link: #6aa0ff;
+  --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 30px rgba(0,0,0,0.35);
 }

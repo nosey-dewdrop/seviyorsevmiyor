@@ -2,7 +2,7 @@
 import { loadModel, scoreConversation } from './model.js';
 import { parseChat, toDoc } from './parse.js';
 import { buildReveal } from './reveal.js';
-import { renderReveal } from './ui.js';
+import { playReveal } from './ui.js';
 import { cloudRead } from './api.js';
 import { ocrToText } from './ocr.js';
 import { readWhatsApp } from './wa.js';
@@ -144,13 +144,14 @@ goBtn.addEventListener('click', async () => {
   }
 });
 
-// Render a reveal and (re)wire the cloud fallback button if present.
+// Play a reveal as an incoming thread. The cloud button appears late (after the stream),
+// so it is wired via delegation on the reveal container once (see below).
 function showReveal(r) {
-  reveal.innerHTML = '';
-  reveal.appendChild(renderReveal(r, parsed.messages, parsed.me));
-  const cloudBtn = document.getElementById('cloudBtn');
-  if (cloudBtn) cloudBtn.addEventListener('click', onCloud);
+  playReveal(reveal, r, parsed.messages, parsed.me);
 }
+reveal.addEventListener('click', (e) => {
+  if (e.target && e.target.id === 'cloudBtn') onCloud();
+});
 
 async function onCloud() {
   if (!consentBox.checked) {
@@ -238,3 +239,21 @@ onAuthChange(() => refreshAuthUi());
 refreshAuthUi();
 
 renderQuota();
+
+// ---- theme (light default, persisted) ----
+const THEME_KEY = 'wdym.theme.v1';
+const themeBtn = $('themeBtn');
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  if (themeBtn) themeBtn.setAttribute('aria-label', t === 'dark' ? 'Aydınlık moda geç' : 'Karanlık moda geç');
+}
+(function initTheme() {
+  let t = 'light';
+  try { t = localStorage.getItem(THEME_KEY) || 'light'; } catch {}
+  applyTheme(t);
+})();
+if (themeBtn) themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem(THEME_KEY, next); } catch {}
+});

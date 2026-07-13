@@ -1,55 +1,74 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="light">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>whatdoyoumean — bir sohbetin altında ne yazıyor</title>
 <meta name="description" content="Bir sohbeti yapıştır, altındaki alt-metni oku: flört mü arkadaşça mı, kim daha çok istiyor, yeşil bayrak mı kırmızı bayrak mı. Analiz cihazında yapılır, mesajların telefonundan çıkmaz." />
-<link rel="stylesheet" href="./css/tokens.css?v=1" />
-<link rel="stylesheet" href="./css/base.css?v=1" />
-<link rel="stylesheet" href="./css/components.css?v=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/tokens.css?v=2" />
+<link rel="stylesheet" href="./css/base.css?v=2" />
+<link rel="stylesheet" href="./css/components.css?v=2" />
 </head>
 <body>
 <div class="wrap">
   <header class="site-head">
     <span class="brand">whatdoyoumean<span class="dot">.</span></span>
-    <button class="lang-toggle" id="authBtn">Giriş</button>
+    <div class="head-actions">
+      <button class="text-btn" id="authBtn">Giriş</button>
+      <button class="icon-btn" id="themeBtn" aria-label="Karanlık moda geç">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+    </div>
   </header>
 
   <section class="hero">
-    <h1 id="heroTitle">Bir sohbeti yapıştır.<br />Altında ne yazdığını okuyalım.</h1>
-    <p class="sub" id="heroSub">Flört mü ediyor, arkadaşça mı? Kim daha çok istiyor? Yeşil bayrak mı, kırmızı bayrak mı? Motor sohbetin tonunu okur.</p>
+    <h1 id="heroTitle">Konuşmanın altında<br />ne yatıyor?</h1>
+    <p class="sub" id="heroSub">Bir sohbeti yapıştır; flört mü arkadaşça mı, kim daha çok istiyor, yeşil bayrak mı kırmızı bayrak mı, okuyalım.</p>
+
+    <div class="demo-thread" aria-hidden="true">
+      <div class="q them">bugün seni düşündüm</div>
+      <div class="q you">aa öyle mi</div>
+      <div class="app enter-done">bu sohbet <b>flörtöz</b> — ama sen mesafeni koruyorsun</div>
+    </div>
+
     <span class="privacy-badge"><span class="lock"></span> Analiz cihazında yapılır, mesajların çıkmaz</span>
   </section>
 
   <nav class="tabs">
     <button class="tab active" data-tab="paste">Yapıştır</button>
-    <button class="tab" data-tab="shot">Ekran görüntüsü<span class="soon">yakında</span></button>
-    <button class="tab" data-tab="wa">WhatsApp<span class="soon">yakında</span></button>
+    <button class="tab" data-tab="shot">Ekran görüntüsü</button>
+    <button class="tab" data-tab="wa">WhatsApp</button>
   </nav>
 
   <div class="pane" id="pane-paste">
-    <textarea class="paste" id="pasteBox" placeholder="Sohbeti buraya yapıştır.&#10;&#10;Ör:&#10;Ayşe: bugün seni düşündüm&#10;Mehmet: aa öyle mi&#10;Ayşe: gülüşün aklımdaydı"></textarea>
+    <div class="composer">
+      <textarea class="paste" id="pasteBox" placeholder="Sohbeti buraya yapıştır.&#10;&#10;Ör:&#10;Ayşe: bugün seni düşündüm&#10;Mehmet: aa öyle mi&#10;Ayşe: gülüşün aklımdaydı"></textarea>
+    </div>
     <p class="paste-hint muted">İsimli (Ayşe: ...) ya da düz satırlar olabilir. WhatsApp kopyala-yapıştır da çalışır.</p>
   </div>
 
   <div class="pane hidden" id="pane-shot">
     <label class="dropzone" id="shotZone">
       <input type="file" id="shotInput" accept="image/*" hidden />
-      Bir sohbet ekran görüntüsü seç. Metin cihazında okunur (OCR), görsel yüklenmez.
+      <span class="dz-title">Bir sohbet ekran görüntüsü seç</span>
+      <span class="dz-sub">Metin cihazında okunur (OCR), görsel yüklenmez.</span>
     </label>
     <p class="paste-hint muted">Sol/sağ baloncuk konumundan kimin yazdığını tahmin eder; sonucu düzeltebilirsin.</p>
   </div>
   <div class="pane hidden" id="pane-wa">
     <label class="dropzone" id="waZone">
       <input type="file" id="waInput" accept=".txt,.zip" hidden />
-      WhatsApp dışa aktarımını (.txt ya da .zip) seç. Tarayıcında açılır, yüklenmez.
+      <span class="dz-title">WhatsApp dışa aktarımını seç (.txt / .zip)</span>
+      <span class="dz-sub">Tarayıcında açılır, yüklenmez.</span>
     </label>
     <p class="paste-hint muted">WhatsApp'ta sohbet → ⋮ → Dışa aktar → medyasız. Dosya cihazında çözülür.</p>
   </div>
 
   <div class="whois hidden" id="whois">
-    Bu sohbette sen kimsin?
+    <span class="whois-q">Bu sohbette sen kimsin?</span>
     <span class="seg" id="meSeg"></span>
   </div>
 
@@ -69,19 +88,18 @@
   <footer class="site-foot">
     <a href="./gizlilik.html">Gizlilik</a>
     <span>Analiz cihazında. Emin olunmayan vakalar için bulut, sadece senin onayınla.</span>
-    <span>v0 · 13 Tem</span>
+    <span>v1 · mesaj balonu · 13 Tem</span>
   </footer>
 </div>
 
 <div class="overlay hidden" id="onboard">
   <div class="sheet">
-    <h2>Nasıl çalışır?</h2>
-    <p class="muted">Wrapper değil. Kendi motorumuz senin tarafında çalışır.</p>
-    <ol>
-      <li><b>Yapıştır.</b> Bir sohbeti ver, isim ya da düz satır fark etmez.</li>
-      <li><b>Cihazında okunur.</b> Kendi istatistik modelimiz tonu, ilgi dengesini ve bayrakları çıkarır. Mesajların telefonundan çıkmaz.</li>
-      <li><b>Emin değilse.</b> Sadece zor vakada, senin onayınla buluta sorar. Onu da zamanla öğrenip bırakır.</li>
-    </ol>
+    <div class="ob-thread">
+      <div class="app">Selam. Ben bir sohbetin altında ne olduğunu okuyorum.</div>
+      <div class="app">Bir konuşma yapıştır — isim ya da düz satır fark etmez.</div>
+      <div class="app">Kendi istatistik modelim <b>senin cihazında</b> çalışır. Mesajların telefonundan çıkmaz.</div>
+      <div class="app">Emin olamazsam, sadece senin onayınla buluta sorarım. Onu da zamanla öğrenip bırakırım.</div>
+    </div>
     <button class="btn" id="onboardClose">Başla</button>
   </div>
 </div>
@@ -90,7 +108,7 @@
   <div class="sheet">
     <h2>Giriş yap</h2>
     <p class="muted">Şifre yok. E-postana bir bağlantı gönderiyoruz, tıklayınca girmiş oluyorsun.</p>
-    <input type="email" id="authEmail" class="paste" style="min-height:auto;height:46px" placeholder="e-posta adresin" />
+    <input type="email" id="authEmail" class="field" placeholder="e-posta adresin" />
     <div class="row">
       <button class="btn" id="authSend">Bağlantı gönder</button>
       <button class="btn ghost small" id="authCancel">Vazgeç</button>
@@ -111,6 +129,6 @@
   </div>
 </div>
 
-<script type="module" src="./js/app.js?v=1"></script>
+<script type="module" src="./js/app.js?v=2"></script>
 </body>
 </html>
