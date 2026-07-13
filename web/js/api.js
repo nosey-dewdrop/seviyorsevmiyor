@@ -1,6 +1,6 @@
 // Cloud fallback client. Called ONLY on low-confidence conversations, after the user consents.
 // Sends the normalized doc (no names required) to the Worker, which proxies Gemini and logs nothing.
-import { API_BASE } from './config.js?v=11';
+import { API_BASE } from './config.js?v=12';
 
 export async function cloudRead(doc, me) {
   const res = await fetch(`${API_BASE}/api/read`, {

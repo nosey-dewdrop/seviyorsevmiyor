@@ -1,12 +1,12 @@
 // Flow: input → parse → who-is-me → cascade (on-device model; cloud fallback on low confidence) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
-import { loadModel, scoreConversation } from './model.js?v=11';
-import { parseChat, toDoc } from './parse.js?v=11';
-import { buildReveal } from './reveal.js?v=11';
-import { playReveal } from './ui.js?v=11';
-import { cloudRead } from './api.js?v=11';
-import { ocrToText } from './ocr.js?v=11';
-import { readWhatsApp } from './wa.js?v=11';
+import { loadModel, scoreConversation } from './model.js?v=12';
+import { parseChat, toDoc } from './parse.js?v=12';
+import { buildReveal } from './reveal.js?v=12';
+import { playReveal } from './ui.js?v=12';
+import { cloudRead } from './api.js?v=12';
+import { ocrToText } from './ocr.js?v=12';
+import { readWhatsApp } from './wa.js?v=12';
 
 const ONBOARD_KEY = 'wdym.onboarded.v1';
 
@@ -79,6 +79,19 @@ $('waInput').addEventListener('change', async (e) => {
     e.target.value = '';
   }
 });
+
+// ---- demo chat: a stranger should feel the product in five seconds ----
+const DEMO_CHAT = `Ben: naber, bugün ne yaptın?
+O: iş güç işte
+Ben: ben bugün o kafeye gittim hani beraber gitmiştik ya, aklıma sen geldin
+O: hı
+Ben: bu hafta sonu müsait misin? şu sergiye gidelim mi demiştik
+O: bakarız
+Ben: geçen de öyle demiştin ama :( özledim seni ya
+O: yoğunum bu ara
+Ben: tamam, haber ver o zaman?
+O: ok`;
+$('demoBtn').addEventListener('click', () => { ingestText(DEMO_CHAT); });
 
 // ---- parse as the user types ----
 pasteBox.addEventListener('input', refreshParse);

@@ -158,6 +158,22 @@ export async function playReveal(root, r, messages, me) {
     stream.appendChild(det);
   }
 
+  // share: the verdict as an on-device PNG — the conversation itself never leaves the phone
+  const sr = el('div', 'share-row');
+  const sbtn = el('button', 'btn small ghost', 'Sonucu görsel al');
+  sbtn.addEventListener('click', async () => {
+    sbtn.disabled = true; sbtn.textContent = 'Hazırlanıyor…';
+    try {
+      const { shareReveal } = await import('./share.js?v=12');
+      const how = await shareReveal(r);
+      sbtn.textContent = how === 'downloaded' ? 'İndirildi' : how === 'shared' ? 'Paylaşıldı' : 'Sonucu görsel al';
+    } catch { sbtn.textContent = 'Olmadı, tekrar dene'; }
+    finally { sbtn.disabled = false; }
+  });
+  sr.appendChild(sbtn);
+  sr.appendChild(el('span', 'cloud-note muted', 'kart cihazında üretilir, sohbet görselde yok'));
+  stream.appendChild(sr);
+
   // honest note: this is an automated guess, not a verdict
   stream.appendChild(el('div', 'reveal-note', 'Bu okuma otomatik bir tahmindir, kesin bir yargı ya da tavsiye değildir.'));
 
