@@ -8,14 +8,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="./css/tokens.css?v=3" />
-<link rel="stylesheet" href="./css/base.css?v=3" />
-<link rel="stylesheet" href="./css/components.css?v=3" />
+<link rel="stylesheet" href="./css/tokens.css?v=4" />
+<link rel="stylesheet" href="./css/base.css?v=4" />
+<link rel="stylesheet" href="./css/components.css?v=4" />
 </head>
 <body>
 <canvas id="bubbleSea" class="bubble-sea" aria-hidden="true"></canvas>
 <div class="wrap">
-  <div class="page-bubble">
   <header class="site-head">
     <span class="brand">whatdoyoumean<span class="dot">.</span></span>
     <div class="head-actions">
@@ -26,7 +25,7 @@
     </div>
   </header>
 
-  <section class="hero">
+  <section class="hero card-bubble">
     <h1 id="heroTitle">Konuşmanın altında<br />ne yatıyor?</h1>
     <p class="sub" id="heroSub">Bir sohbeti yapıştır; flört mü arkadaşça mı, kim daha çok istiyor, yeşil bayrak mı kırmızı bayrak mı, okuyalım.</p>
 
@@ -39,6 +38,7 @@
     <span class="privacy-badge"><span class="lock"></span> Analiz cihazında yapılır, mesajların çıkmaz</span>
   </section>
 
+  <div class="card-bubble tool">
   <nav class="tabs">
     <button class="tab active" data-tab="paste">Yapıştır</button>
     <button class="tab" data-tab="shot">Ekran görüntüsü</button>
@@ -84,15 +84,15 @@
     <button class="btn ghost small hidden" id="resetBtn">Yeni sohbet</button>
   </div>
   <div class="quota" id="quota"></div>
+  </div>
 
   <section class="reveal" id="reveal"></section>
 
   <footer class="site-foot">
     <a href="./gizlilik.html">Gizlilik</a>
     <span>Analiz cihazında. Emin olunmayan vakalar için bulut, sadece senin onayınla.</span>
-    <span>v3 · katı balonlar · 13 Tem</span>
+    <span>v4 · ayrı balonlar · 13 Tem</span>
   </footer>
-  </div>
 </div>
 
 <div class="overlay hidden" id="onboard">
@@ -132,7 +132,7 @@
   </div>
 </div>
 
-<script src="./js/bubbles.js?v=4" defer></script>
+<script src="./js/bubbles.js?v=5" defer></script>
 <script type="module" src="./js/app.js?v=3"></script>
 </body>
 </html>

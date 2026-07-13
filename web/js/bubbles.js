@@ -6,7 +6,7 @@ const cvs = document.getElementById('bubbleSea');
 if (cvs) {
   const ctx = cvs.getContext('2d');
   const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const pageEl = document.querySelector('.page-bubble');
+  const cards = () => document.querySelectorAll('.card-bubble');
 
   // confetti pastels (approved palette — pink, coral, yellow, green, blue, lavender)
   const COLORS = ['#F7B8C4', '#F6A99A', '#F4D06F', '#9BD8A0', '#A6C8F0', '#C9B8E8', '#F2A6C2', '#8FE0C6'];
@@ -80,10 +80,8 @@ if (cvs) {
     }
   }
 
-  // Keep the sea out of the central message box.
-  function avoidCenter(b) {
-    if (!pageEl) return;
-    const rc = pageEl.getBoundingClientRect();
+  // Keep the sea out of every message-box bubble on the page.
+  function avoidRect(b, rc) {
     const pad = 10;
     const l = rc.left - pad, t = rc.top - pad, rr = rc.right + pad, bo = rc.bottom + pad;
     if (b.x + b.r < l || b.x - b.r > rr || b.y + b.r < t || b.y - b.r > bo) return;
@@ -119,7 +117,8 @@ if (cvs) {
       if (b.y + b.r > H) { b.y = H - b.r; b.vy = -Math.abs(b.vy); }
     }
     collide();
-    for (const b of bubbles) avoidCenter(b);
+    const rects = [...cards()].map((c) => c.getBoundingClientRect());
+    for (const b of bubbles) for (const rc of rects) avoidRect(b, rc);
     draw();
     raf = requestAnimationFrame(step);
   }

@@ -1,27 +1,30 @@
-/* ============ the whole site is one big chat bubble ============ */
-.page-bubble {
+/* ============ each block is its own chat bubble on the sea ============ */
+.card-bubble {
   position: relative;
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 40px;
-  padding: 26px clamp(20px, 5vw, 46px) 34px;
+  border-radius: 30px;
+  padding: 26px clamp(20px, 5vw, 38px);
   box-shadow: var(--page-shadow);
+  margin: 0 0 clamp(30px, 6vw, 52px);
 }
-/* the big bubble's tail, bottom-left */
-.page-bubble::after {
+/* each bubble's tail, bottom-left, like a message in a thread */
+.card-bubble::after {
   content: '';
-  position: absolute; left: 46px; bottom: -22px;
-  width: 46px; height: 40px;
+  position: absolute; left: 40px; bottom: -18px;
+  width: 40px; height: 34px;
   background: var(--bg);
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  border-bottom-right-radius: 34px 30px;
+  border-bottom-right-radius: 30px 26px;
   transform: skewX(-24deg);
 }
 @media (max-width: 600px) {
-  .page-bubble { border-radius: 28px; padding: 20px 18px 26px; }
-  .page-bubble::after { left: 30px; width: 36px; height: 32px; bottom: -18px; }
+  .card-bubble { border-radius: 22px; padding: 20px 18px; margin-bottom: 34px; }
+  .card-bubble::after { left: 26px; width: 32px; height: 28px; bottom: -15px; }
 }
+.hero.card-bubble { padding-top: 30px; padding-bottom: 30px; }
+.card-bubble .tabs { margin-top: 0; }
 
 /* ============ bubbles (shared) ============ */
 .q, .app, .bubble {
@@ -44,8 +47,7 @@
 .q.you { align-self: flex-end; background: var(--sent); color: var(--sent-ink); border-bottom-right-radius: var(--r-tail); }
 
 /* ============ hero ============ */
-.hero { padding: 46px 0 6px; }
-.hero h1 { font-size: clamp(2.4rem, 8vw, 3.6rem); font-weight: 600; letter-spacing: -0.02em; margin-bottom: 16px; }
+.hero h1 { font-size: clamp(2.1rem, 6.5vw, 3.1rem); font-weight: 600; letter-spacing: -0.02em; margin-bottom: 16px; }
 .hero .sub { font-size: 1.08rem; color: var(--ink-2); max-width: 30em; }
 
 .demo-thread { display: flex; flex-direction: column; gap: 6px; margin: 30px 0 8px; max-width: 380px; }
