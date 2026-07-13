@@ -15,6 +15,8 @@ DAMLA'S TODO (blocks full launch):
 4. Grow train/data.jsonl beyond the 120-example seed and re-run train.py (accuracy climbs with data). Review the seed labels.
 5. Look at the design in dev and steer — it's a v1, not blindly iterated (kör iterasyon yasağı).
 
+LATER (Damla, deferred to save tokens 2026-07-13): add a SECOND engine for English — do NOT replace the Turkish one. Needs EN lexicons (features/balance), EN labeled seed data + model.en.json, EN reveal templates, and a TR/EN toggle with language routing. Only once the TR engine's data has grown; theyseeyourphotos is EN + global = bigger reach.
+
 
 - Faz 1: own tone engine (numpy tfidf+logistic, 120-example TR seed, 79% held-out), on-device JS inference,
   Python↔JS parity harness (diff 1e-16), paste + WhatsApp-text parsing, deterministic balance + flag rules,
