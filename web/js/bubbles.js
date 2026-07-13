@@ -26,8 +26,8 @@ if (cvs) {
     W = cvs.clientWidth; H = cvs.clientHeight;
     cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    // denser sea (Damla, 13 Tem: COUNT up, size untouched) — still solid, spawn guard prevents gridlock
-    const target = Math.min(34, Math.max(12, Math.round((W * H) / 48000)));
+    // Damla's spec (13 Tem): 10-15 bubbles on the page, sizes untouched
+    const target = Math.min(15, Math.max(10, Math.round((W * H) / 90000)));
     if (bubbles.length !== target) spawn(target);
   }
 

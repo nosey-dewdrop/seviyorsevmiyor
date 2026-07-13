@@ -1,12 +1,12 @@
 // Flow: input → parse → who-is-me → cascade (on-device model; cloud fallback on low confidence) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
-import { loadModel, scoreConversation } from './model.js?v=14';
-import { parseChat, toDoc } from './parse.js?v=14';
-import { buildReveal } from './reveal.js?v=14';
-import { playReveal } from './ui.js?v=14';
-import { cloudRead } from './api.js?v=14';
-import { ocrToText } from './ocr.js?v=14';
-import { readWhatsApp } from './wa.js?v=14';
+import { loadModel, scoreConversation } from './model.js?v=15';
+import { parseChat, toDoc } from './parse.js?v=15';
+import { buildReveal } from './reveal.js?v=15';
+import { playReveal } from './ui.js?v=15';
+import { cloudRead } from './api.js?v=15';
+import { ocrToText } from './ocr.js?v=15';
+import { readWhatsApp } from './wa.js?v=15';
 
 const ONBOARD_KEY = 'wdym.onboarded.v1';
 
