@@ -5,7 +5,16 @@ conversation and the engine reads what's really going on: flirty or friendly, wh
 interest level, green/red flags, and a per-message "what did they mean". Theyseeyourphotos energy,
 but for messaging, printed in a chat-bubble reveal. Born with a paywall. Turkish-first.
 
-STATUS 2026-07-13: FAZ 1 in progress (own engine v0, paste input end to end, no Gemini yet).
+STATUS 2026-07-13: FAZ 1 + 2 + 6 done locally, NOT deployed yet.
+- Faz 1: own tone engine (numpy tfidf+logistic, 120-example TR seed, 79% held-out), on-device JS inference,
+  Python↔JS parity harness (diff 1e-16), paste + WhatsApp-text parsing, deterministic balance + flag rules,
+  templated TR reveal, chat-bubble UI, onboarding, daily free quota. Verified end to end in Node.
+- Faz 2: Gemini fallback worker (backend/, PUBLIC_READ off by default) + on-device confidence threshold;
+  low-confidence conversations show a "buluta sor" button (consent-gated). Worker NOT deployed (Damla: Google key + wrangler login).
+- Faz 6: gizlilik.html (KVKK/GDPR), third-party-consent checkbox, no persistent storage, worker logs no content.
+- OPEN: retrain repo path (data.jsonl is a small honest seed — grow it), screenshot OCR (Faz 3), WhatsApp .zip (Faz 4),
+  paywall provider + real gate (Faz 7), deploy (gh-pages + worker), EN copy. See PROJECT.md.
+- Retrain: `python3 train/train.py` (writes web/data/model.json). Verify: `python3 train/parity_check.py && node train/parity_check.mjs`.
 
 ## The one non-negotiable idea: cascade, not wrapper
 This is NOT a GPT/Gemini wrapper. The engine is a **cascade**:

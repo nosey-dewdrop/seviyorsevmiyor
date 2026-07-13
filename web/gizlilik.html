@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gizlilik — whatdoyoumean</title>
+<meta name="robots" content="index,follow" />
+<link rel="stylesheet" href="./css/tokens.css?v=1" />
+<link rel="stylesheet" href="./css/base.css?v=1" />
+<style>
+  .doc { max-width: 620px; margin: 0 auto; padding: 8px 0 40px; }
+  .doc h2 { margin: 28px 0 8px; font-size: 1.15rem; }
+  .doc p, .doc li { color: var(--ink-soft); margin: 8px 0; }
+  .doc ul { padding-left: 20px; }
+  .doc .lead { color: var(--ink); font-size: 1.05rem; }
+  .back { display: inline-block; margin-top: 8px; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-head">
+    <span class="brand">whatdoyoumean<span class="dot">.</span></span>
+    <a class="back" href="./index.html">← geri</a>
+  </header>
+
+  <main class="doc">
+    <h1>Gizlilik ve Aydınlatma Metni</h1>
+    <p class="muted">Son güncelleme: 13 Temmuz 2026</p>
+
+    <p class="lead">Kısası: yapıştırdığın sohbet varsayılan olarak <b>cihazından çıkmaz</b>. Analizi tarayıcının kendisi yapar. Yalnızca motor emin olamadığında ve <b>sen onay verirsen</b>, o tek sohbet analiz için buluta gönderilir. Sohbetlerini saklamıyoruz.</p>
+
+    <h2>Veri sorumlusu</h2>
+    <p>Bu hizmet damlahelloworld tarafından sunulur. İletişim: <a href="mailto:redacted@example.com">redacted@example.com</a>. Bu metin 6698 sayılı KVKK ve GDPR çerçevesinde hazırlanmıştır.</p>
+
+    <h2>Neyi, nasıl işliyoruz</h2>
+    <ul>
+      <li><b>Cihaz üzerinde analiz (varsayılan):</b> Yapıştırdığın veya yüklediğin sohbet metni tarayıcında işlenir. Kendi istatistiksel modelimiz orada çalışır; bu metin sunucularımıza gönderilmez, saklanmaz.</li>
+      <li><b>Ekran görüntüsü:</b> Fotoğraftan metin çıkarımı (OCR) da cihazında yapılır; görsel yüklenmez.</li>
+      <li><b>Bulut analizi (yalnızca onayla):</b> Model emin olamadığında sana sorarız. Onaylarsan, o sohbetin metni analiz için bir yapay zeka sağlayıcısına (Google Gemini) bizim aracımız üzerinden iletilir. Aracı, IP adresini geçici hız sınırı dışında saklamaz ve sohbet içeriğini loglamaz.</li>
+      <li><b>Saklama:</b> Bu sürümde sohbetlerin kalıcı olarak saklanmaz. Günlük ücretsiz okuma sayacı gibi tercihler yalnızca kendi tarayıcının localStorage'ında tutulur.</li>
+    </ul>
+
+    <h2>Başkasına ait sohbetler</h2>
+    <p>Yüklediğin sohbette karşı taraf sen değilsin. Bu kişinin verisini işlemek için bu sohbeti paylaşma hakkına sahip olduğunu beyan etmiş olursun. Lütfen tanımadığın kişilerin özel yazışmalarını yükleme. İçerik cihazında kaldığı sürece bu bilgi cihazından çıkmaz; buluta gönderdiğinde de kimlik bilgisi (isim, telefon) taşımaman senin sorumluluğundadır.</p>
+
+    <h2>Çerezler ve takip</h2>
+    <p>Reklam veya üçüncü taraf takip çerezi kullanmıyoruz. Yalnızca uygulamanın çalışması için tarayıcı depolaması (localStorage) kullanılır.</p>
+
+    <h2>Haklarınız</h2>
+    <p>KVKK madde 11 ve GDPR kapsamında; işlenen verilere erişme, düzeltme, silme ve itiraz haklarına sahipsin. Cihazda tutulan veriyi tarayıcı verini temizleyerek istediğin an silebilirsin. Bulut analizinde içerik saklanmadığı için ayrıca silinecek bir kayıt oluşmaz. Talepler için yukarıdaki e-postaya yazabilirsin.</p>
+
+    <h2>Çocuklar</h2>
+    <p>Hizmet 18 yaş altı için tasarlanmamıştır.</p>
+
+    <h2>Değişiklikler</h2>
+    <p>Bu metni güncellersek buradaki tarihi değiştiririz. Önemli değişikliklerde uygulama içinde bilgilendiririz.</p>
+
+    <a class="back" href="./index.html">← whatdoyoumean'e dön</a>
+  </main>
+</div>
+</body>
+</html>

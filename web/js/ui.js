@@ -20,16 +20,27 @@ export function renderThread(messages, me) {
 }
 
 export function renderReveal(r, messages, me) {
+  r.mesaj_okumalari = Array.isArray(r.mesaj_okumalari) ? r.mesaj_okumalari : [];
+  r.bayraklar = Array.isArray(r.bayraklar) ? r.bayraklar : [];
   const root = el('div', 'reveal-inner');
   root.appendChild(renderThread(messages, me));
 
-  if (r.unsure) {
-    root.appendChild(el('div', 'unsure',
-      '<b>Bu vakada emin değilim.</b> Sinyaller karışık. İstersen bunu daha derin okuması için buluta gönderebilirsin (mesajların anonim gider, sadece onayınla).'));
+  if (r.unsure && !r.fromCloud) {
+    const u = el('div', 'unsure',
+      '<b>Bu vakada emin değilim.</b> Sinyaller karışık. İstersen bunu daha derin okuması için buluta gönderebilirsin. Sadece bu sohbet gider, isim taşımadan; onay kutusu işaretliyse.');
+    const cr = el('div', 'cloud-row');
+    const btn = el('button', 'btn small', 'Buluta sor');
+    btn.id = 'cloudBtn';
+    cr.appendChild(btn);
+    cr.appendChild(el('span', 'cloud-note', 'gizlilik: içerik saklanmaz'));
+    u.appendChild(cr);
+    root.appendChild(u);
   }
 
   const v = el('div', 'verdict');
-  v.appendChild(el('div', `ton ${r.genel_ton.key}`, esc(r.genel_ton.label)));
+  const ton = el('div', `ton ${r.genel_ton.key}`, esc(r.genel_ton.label));
+  if (r.fromCloud) ton.appendChild(el('span', 'cloud-badge', 'buluttan'));
+  v.appendChild(ton);
   v.appendChild(el('div', 'ton-line', esc(r.genel_ton.line)));
   root.appendChild(v);
 

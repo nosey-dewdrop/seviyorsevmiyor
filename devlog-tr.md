@@ -34,3 +34,17 @@ hook: bir analiz aracı yaptım ama tablo gibi değil, tam senin telefonundaki s
 tasarımda tek bir his istedim: kişi sohbetini yapıştırınca kendi konuşmasını baloncuklar halinde geri görsün, altına da okumayı koyayım. üstte büyük tek kelime tonu söylüyor, sonra flört sinyali yüzdeyle bir çubukta, sonra kim daha çok istiyor, sonra seçtiğim birkaç mesajın "aslında ne demek istendiği", en altta da tek vuruşluk bir kapanış cümlesi. hepsi şablon, uydurma hikaye yok, her cümle gerçekten hesapladığım bir sayıya bağlı.
 
 renk kullanımını duruma bağladım. flört ve kırmızı bayrak sıcak kırmızı, sağlıklı sinyaller yeşil, soğukluk maviye çalan gri. keskin köşeler, mor yok, gradient yok, süs yok. ilk girişte küçük bir açıklama çıkıyor: nasıl çalışır, veri neden telefonunda kalır. bir de günlük ücretsiz okuma sayacı koydum, çünkü bu ürün baştan paywall ile doğuyor. şimdilik ekran görüntüsü ve whatsapp sekmeleri "yakında" yazıyor, sıradaki iş onları açmak ve emin olmadığı vakada buluta sorma kısmını kurmak.
+
+---
+
+## 03 — "veri toplayan her ürün, aynı gün gizlilik ile doğar"
+
+hook: çoğu uygulama "sonra ekleriz" diyor. ben mesajı işleyen ilk satırla birlikte gizliliği de yazdım.
+
+burada hassas bir şey var: kişi başkasının da olduğu bir sohbeti yüklüyor. o yüzden iki şey koydum. biri, girişin hemen altında bir onay kutusu: "bu sohbet bana ait ya da paylaşma hakkım var". işaretlemeden buluta gönderemiyorsun. ikincisi, gerçek bir kvkk ve gdpr aydınlatma metni. özü şu: analiz varsayılan olarak cihazında, mesajın sunucuya gitmiyor, saklanmıyor. sadece emin olmadığımız vakada, senin onayınla o tek sohbet buluta gidiyor, orada da loglanmıyor. reklam çerezi, takip yok.
+
+## 04 — "emin değilsem bunu saklamıyorum, sana söylüyorum ve soruyorum"
+
+hook: çoğu yapay zeka emin olmadığında bile kendinden emin konuşur. benimki emin değilse bunu açıkça yazıyor.
+
+kademeli motorun kalbini bağladım. model bir sohbete baktığında bir de güven marjı üretiyor. marj düşükse, yani en yakın iki ton birbirine çok yakınsa, cevabın üstüne "bu vakada emin değilim, sinyaller karışık" notunu koyuyorum ve "buluta sor" düğmesi çıkıyor. bastığında sohbet, onay kutusu işaretliyse, isim taşımadan bir cloudflare worker'ına gidiyor, o da gemini'ye soruyor ve cevabı aynı sohbet baloncuğu ekranında "buluttan" etiketiyle gösteriyor. worker gemini anahtarını saklayan tek yer, içeriği loglamıyor, dakikada ve günde ip başına sınırı var. şu an kapalı geliyor çünkü her çağrı para, damla kendi google anahtarını girip açacak. güzel taraf şu: bu buluta giden zor vakalar ileride modeli yeniden eğitmek için birikip fallback'i küçültecek.

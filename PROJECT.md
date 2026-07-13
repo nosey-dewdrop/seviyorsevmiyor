@@ -30,14 +30,14 @@ shrinks over time. See CLAUDE.md for the full cascade contract.
 `{ messages: [{ speaker: "A"|"B", text, ts? }], me: "A"|"B" }` — every input adapter lands here.
 
 ## Roadmap (phases)
-- [~] **Faz 0 — Skeleton:** repo, folders, label schema, CLAUDE.md + PROJECT.md + devlog.
-- [ ] **Faz 1 — Own engine v0:** seed labels → numpy logistic model → export weights → JS inference;
+- [x] **Faz 0 — Skeleton:** repo, folders, label schema, CLAUDE.md + PROJECT.md + devlog.
+- [x] **Faz 1 — Own engine v0:** seed labels → numpy logistic model → export weights → JS inference;
       **paste input works end to end** (no Gemini). Report held-out accuracy.
-- [ ] **Faz 2 — Confidence threshold + Gemini fallback:** worker proxy, low-confidence routing + consent.
+- [x] **Faz 2 — Confidence threshold + Gemini fallback:** worker proxy, low-confidence routing + consent.
 - [ ] **Faz 3 — Screenshot OCR:** Tesseract.js on-device text extraction → cascade.
 - [ ] **Faz 4 — WhatsApp .txt/.zip:** JSZip + WhatsApp line parser.
 - [ ] **Faz 5 — Reveal + design:** chat-bubble output, onboarding, emotional layer, damla-ui pass.
-- [ ] **Faz 6 — KVKK + security:** privacy, consent, third-party warning, rate-limit hardening, sec pass.
+- [x] **Faz 6 — KVKK + security:** privacy, consent, third-party warning, rate-limit hardening, sec pass.
 - [ ] **Faz 7 — Paywall + revenue.**
 - [ ] **Faz 8 (ongoing) — beaver:** retrain from consented hard cases; option to upgrade to BERTurk later.
 
