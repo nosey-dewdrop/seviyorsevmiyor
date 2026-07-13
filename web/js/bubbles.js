@@ -12,7 +12,7 @@ if (cvs) {
   const COLORS = ['#F7B8C4', '#F6A99A', '#F4D06F', '#9BD8A0', '#A6C8F0', '#C9B8E8', '#F2A6C2', '#8FE0C6'];
   // Damla's hand-generated textured ivory bubbles (dark mode sprites)
   const sprites = Array.from({ length: 14 }, (_, i) => {
-    const im = new Image(); im.src = `./assets/bubbles/b${String(i).padStart(2, '0')}.png?v=9`; return im;
+    const im = new Image(); im.src = `./assets/bubbles/b${String(i).padStart(2, '0')}.png?v=18`; return im;
   });
   let W = 0, H = 0, DPR = 1;
   let bubbles = [];                          // each: {x,y = CENTER, w, h, r, vx, vy, color, alpha}
@@ -26,8 +26,8 @@ if (cvs) {
     W = cvs.clientWidth; H = cvs.clientHeight;
     cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    // Damla's spec (13 Tem): 10-15 bubbles on the page, sizes untouched
-    const target = Math.min(15, Math.max(10, Math.round((W * H) / 90000)));
+    // Damla's spec (13 Tem gece): denser sea — "daha çok soru balonu ekranda gezmeli"
+    const target = Math.min(26, Math.max(16, Math.round((W * H) / 55000)));
     if (bubbles.length !== target) spawn(target);
   }
 

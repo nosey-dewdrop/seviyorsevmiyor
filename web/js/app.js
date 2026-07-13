@@ -1,12 +1,13 @@
-// Flow: input → parse → who-is-me → cascade (on-device model; cloud fallback on low confidence) → reveal.
+// Flow: input → parse → who-is-me → on-device engine (verdict + counts = the law) →
+// optional Groq/Llama spiker (fresh wording + gözden kaçanlar, consent-gated) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
-import { loadModel, scoreConversation } from './model.js?v=17';
-import { parseChat, toDoc } from './parse.js?v=17';
-import { buildReveal } from './reveal.js?v=17';
-import { playReveal } from './ui.js?v=17';
-import { cloudRead } from './api.js?v=17';
-import { ocrToText } from './ocr.js?v=17';
-import { readWhatsApp } from './wa.js?v=17';
+import { loadModel, scoreConversation } from './model.js?v=18';
+import { parseChat, toDoc } from './parse.js?v=18';
+import { buildReveal } from './reveal.js?v=18';
+import { playReveal } from './ui.js?v=18';
+import { spikerRead } from './api.js?v=18';
+import { ocrToText } from './ocr.js?v=18';
+import { readWhatsApp } from './wa.js?v=18';
 
 const ONBOARD_KEY = 'wdym.onboarded.v1';
 
@@ -19,6 +20,8 @@ const meSeg = $('meSeg');
 const reveal = $('reveal');
 const consent = $('consent');
 const consentBox = $('consentBox');
+const cloudConsent = $('cloudConsent');
+const cloudConsentBox = $('cloudConsentBox');
 
 let parsed = null;   // { messages, speakers, me, ambiguous }
 let lastReveal = null;
@@ -101,6 +104,7 @@ function refreshParse() {
   parsed = parseChat(raw);
   goBtn.disabled = parsed.messages.length < 2;
   consent.classList.toggle('hidden', parsed.messages.length < 2);
+  cloudConsent.classList.toggle('hidden', parsed.messages.length < 2);
   renderWhois();
 }
 function renderWhois() {
@@ -117,6 +121,43 @@ function renderWhois() {
 }
 
 // ---- analyze ----
+// Facts sent to the spiker: EXPLICIT named numbers, never "5-3" strings — Llama once read
+// "mesaj 5-3" as "3 of 5 messages"; ambiguity is how numbers get bent. Fields are the law.
+function spikerFacts(r) {
+  const n = r.nasil || {};
+  return {
+    hukum: { tur: r.genel_ton.key, etiket: r.genel_ton.label, cumle: r.genel_ton.line, gerekce: r.genel_ton.why || null },
+    flort: { karar: r.flort_sinyali.karar, yuzde: r.flort_sinyali.score, sende_yuzde: r.flort_sinyali.me, onda_yuzde: r.flort_sinyali.other },
+    sayim: {
+      toplam_mesaj: n.msgs, senin_mesajin: n.mine, onun_mesaji: n.theirs,
+      senin_sorun: n.questionsMine, onun_sorusu: n.questionsTheirs,
+      red_flag_turu: n.redKinds, green_flag: n.greens,
+    },
+    denge: { cumle: r.ilgi_dengesi.line },
+    okumalar: r.mesaj_okumalari.map((m) => ({ mesaj: m.text, okuma: m.read })),
+    bayraklar: r.bayraklar.map((f) => ({ tur: f.type, baslik: f.title })),
+    kapanis: r.kapanis,
+  };
+}
+
+function spikerDoc(messages, me) {
+  return messages.map((m) => `${m.speaker === me ? 'SEN' : 'O'}: ${m.text}`).join('\n');
+}
+
+// The spiker may only restyle wording and add evidence-quoted observations; every merged
+// field keeps its template floor if the cloud returns nothing.
+function mergeSpiker(r, sp) {
+  if (sp.ton_line) r.genel_ton.line = sp.ton_line;
+  if (sp.sinyal_reason) r.flort_sinyali.reason = sp.sinyal_reason;
+  if (sp.denge_line) r.ilgi_dengesi.line = sp.denge_line;
+  if (Array.isArray(sp.okumalar)) {
+    r.mesaj_okumalari.forEach((m, i) => { if (sp.okumalar[i]) m.read = sp.okumalar[i]; });
+  }
+  if (sp.kapanis) r.kapanis = sp.kapanis;
+  r.gozden_kacanlar = sp.gozden_kacanlar || [];
+  r.spiker = true;
+}
+
 goBtn.addEventListener('click', async () => {
   if (!parsed) return;
   goBtn.disabled = true;
@@ -126,8 +167,13 @@ goBtn.addEventListener('click', async () => {
     const doc = toDoc(parsed.messages);
     const toneResult = scoreConversation(doc);
     const r = buildReveal({ toneResult, messages: parsed.messages, me: parsed.me });
+    if (consentBox.checked && cloudConsentBox.checked) {
+      goBtn.textContent = 'Spiker yazıyor…';
+      const sp = await spikerRead(spikerFacts(r), spikerDoc(parsed.messages, parsed.me));
+      if (sp) mergeSpiker(r, sp);
+    }
     lastReveal = r;
-    showReveal(r);
+    playReveal(reveal, r, parsed.messages, parsed.me);
     resetBtn.classList.remove('hidden');
     reveal.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (e) {
@@ -138,36 +184,6 @@ goBtn.addEventListener('click', async () => {
   }
 });
 
-// Play a reveal as an incoming thread. The cloud button appears late (after the stream),
-// so it is wired via delegation on the reveal container once (see below).
-function showReveal(r) {
-  playReveal(reveal, r, parsed.messages, parsed.me);
-}
-reveal.addEventListener('click', (e) => {
-  if (e.target && e.target.id === 'cloudBtn') onCloud();
-});
-
-async function onCloud() {
-  if (!consentBox.checked) {
-    consent.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    consentBox.focus();
-    return;
-  }
-  const btn = document.getElementById('cloudBtn');
-  btn.disabled = true; btn.textContent = 'Buluta soruluyor…';
-  try {
-    const cloudReveal = await cloudRead(toDoc(parsed.messages), parsed.me);
-    cloudReveal.fromCloud = true;
-    cloudReveal.unsure = false;
-    lastReveal = cloudReveal;
-    showReveal(cloudReveal);
-  } catch (e) {
-    btn.disabled = false; btn.textContent = 'Buluta sor';
-    const note = btn.parentElement.querySelector('.cloud-note');
-    if (note) note.textContent = e.message;
-  }
-}
-
 resetBtn.addEventListener('click', () => {
   pasteBox.value = '';
   parsed = null;
@@ -176,6 +192,8 @@ resetBtn.addEventListener('click', () => {
   whois.classList.add('hidden');
   consent.classList.add('hidden');
   consentBox.checked = false;
+  cloudConsent.classList.add('hidden');
+  cloudConsentBox.checked = false;
   resetBtn.classList.add('hidden');
   goBtn.disabled = true;
   pasteBox.focus();
@@ -188,20 +206,4 @@ $('onboardClose').addEventListener('click', () => {
   try { localStorage.setItem(ONBOARD_KEY, '1'); } catch {}
 });
 
-// ---- theme (dark default — reads more premium, persisted) ----
-const THEME_KEY = 'wdym.theme.v1';
-const themeBtn = $('themeBtn');
-function applyTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  if (themeBtn) themeBtn.setAttribute('aria-label', t === 'dark' ? 'Aydınlık moda geç' : 'Karanlık moda geç');
-}
-(function initTheme() {
-  let t = 'dark';
-  try { t = localStorage.getItem(THEME_KEY) || 'dark'; } catch {}
-  applyTheme(t);
-})();
-if (themeBtn) themeBtn.addEventListener('click', () => {
-  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  applyTheme(next);
-  try { localStorage.setItem(THEME_KEY, next); } catch {}
-});
+// theme toggle removed 13 Tem gece (Damla: "light mode kaldıralım") — the site is dark only.

@@ -49,7 +49,7 @@ export async function playReveal(root, r, messages, me) {
   root.appendChild(transcript(messages, me, r.speakers));
   const stream = el('div', 'stream');
   root.appendChild(stream);
-  stream.appendChild(el('div', 'sys', r.fromCloud ? 'whatdoyoumean · derin okuma' : 'whatdoyoumean okudu'));
+  stream.appendChild(el('div', 'sys', r.spiker ? 'mesajibirokusana okudu · canlı spiker' : 'mesajibirokusana okudu'));
 
   // tap anywhere on the reveal → the rest of the bubbles land instantly
   SKIP = false;
@@ -81,9 +81,11 @@ export async function playReveal(root, r, messages, me) {
   if (r.fromCloud) v.appendChild(el('span', 'cloud-badge', 'buluttan'));
   await say(v, { wait: 550 });
 
-  // 2 — flört signal: one-sided → per-side meters (the split IS the story); else one meter
+  // 2 — flört: the COMMITTED call first (Damla: "varsa var yoksa yok deyin"), evidence under it
   const fs = el('div', 'bubble');
-  fs.appendChild(el('div', 'b-h', 'flört sinyali'));
+  fs.appendChild(el('div', 'b-h', 'flört var mı, yok mu?'));
+  const KARAR_TEXT = { var: 'flört var.', yok: 'flört yok.', tek: 'flört var, ama tek taraflı.' };
+  fs.appendChild(el('div', 'karar', esc(KARAR_TEXT[r.flort_sinyali.karar] || KARAR_TEXT.yok)));
   const fills = [];
   if (r.flort_sinyali.oneSided) {
     for (const [who, val] of [['sen', r.flort_sinyali.me], ['o', r.flort_sinyali.other]]) {
@@ -137,6 +139,16 @@ export async function playReveal(root, r, messages, me) {
     await say(fl, { wait: 300, soft: true });
   }
 
+  // 5.5 — gözden kaçanlar (spiker observations, every one anchored to a real quote)
+  for (const g of (r.gozden_kacanlar || [])) {
+    const gz = el('div', 'bubble gozden');
+    gz.appendChild(el('div', 'b-h', 'gözden kaçan'));
+    gz.appendChild(el('div', 'ttl', esc(g.baslik)));
+    gz.appendChild(el('div', 'txt', esc(g.line)));
+    gz.appendChild(el('div', 'kanit', `kanıt: “${esc(g.kanit)}”`));
+    await say(gz, { wait: 320, soft: true });
+  }
+
   // 6 — closing punch
   const cl = el('div', 'bubble closing-b', esc(r.kapanis));
   await say(cl, { wait: 450 });
@@ -149,8 +161,10 @@ export async function playReveal(root, r, messages, me) {
       n.overridden
         ? `Model "${n.modelTone}" dedi (%${n.modelConf} güven) ama sayılan sinyaller ağır bastı; hükmü onlar verdi.`
         : `Ton modeli %${n.modelConf} güvenle "${n.modelTone}" dedi.`,
-      `${n.redKinds} kırmızı bayrak türü, ${n.greens} yeşil bayrak sayıldı. Her cümle sayılan bir sinyale bağlı; hiçbir şey uydurulmaz.`,
-      'Hepsi cihazında hesaplandı; mesajların hiçbir yere gitmedi.',
+      `${n.redKinds} red flag türü, ${n.greens} green flag sayıldı. Her cümle sayılan bir sinyale bağlı; hiçbir şey uydurulmaz.`,
+      r.spiker
+        ? 'Hüküm ve sayılar cihazında hesaplandı; yorum cümlelerini onayınla canlı spiker yazdı, içerik saklanmadı.'
+        : 'Hepsi cihazında hesaplandı; mesajların hiçbir yere gitmedi.',
     ];
     const det = el('details', 'howread');
     det.appendChild(el('summary', null, 'nasıl okudum?'));
@@ -164,7 +178,7 @@ export async function playReveal(root, r, messages, me) {
   sbtn.addEventListener('click', async () => {
     sbtn.disabled = true; sbtn.textContent = 'Hazırlanıyor…';
     try {
-      const { shareReveal } = await import('./share.js?v=17');
+      const { shareReveal } = await import('./share.js?v=18');
       const how = await shareReveal(r);
       sbtn.textContent = how === 'downloaded' ? 'İndirildi' : how === 'shared' ? 'Paylaşıldı' : 'Sonucu görsel al';
     } catch { sbtn.textContent = 'Olmadı, tekrar dene'; }
@@ -177,19 +191,6 @@ export async function playReveal(root, r, messages, me) {
   // honest note: this is an automated guess, not a verdict
   stream.appendChild(el('div', 'reveal-note', 'Bu okuma otomatik bir tahmindir, kesin bir yargı ya da tavsiye değildir.'));
 
-  // 7 — unsure → cloud offer (only on-device, uncertain)
-  if (r.unsure && !r.fromCloud) {
-    const u = el('div', 'bubble unsure');
-    u.appendChild(el('div', 'said', 'kanka bu vakada tam emin değilim. sinyaller karışık ya da sohbet kısa.'));
-    u.appendChild(el('div', 'mean', 'İstersen daha derin okuması için buluta gönderebilirsin. Sadece bu sohbet gider, isim taşımadan, onay kutusu işaretliyse.'));
-    const cr = el('div', 'cloud-row');
-    const btn = el('button', 'btn small', 'Buluta sor');
-    btn.id = 'cloudBtn';
-    cr.appendChild(btn);
-    cr.appendChild(el('span', 'cloud-note muted', 'gizlilik: içerik saklanmaz'));
-    u.appendChild(cr);
-    await say(u, { wait: 350, soft: true });
-  }
   skipHint.remove();
   root.removeEventListener('click', onSkip);
 }

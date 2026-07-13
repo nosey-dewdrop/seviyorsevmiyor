@@ -4,8 +4,8 @@
 // The model PROPOSES the tone; counted signals can VETO it (red flags, one-sidedness) — the
 // deterministic layer is the honest part, so on a clear conflict it wins and we say why.
 
-import { flirtSignal, flirtSides, interestBalance, flags as computeFlags } from './balance.js?v=17';
-import { lowerTr } from './features.js?v=17';
+import { flirtSignal, flirtSides, interestBalance, flags as computeFlags } from './balance.js?v=18';
+import { lowerTr } from './features.js?v=18';
 
 const TONE_TR = {
   flirty: 'flört havası',
@@ -36,7 +36,7 @@ function verdict(toneResult, { redKinds, oneSided }) {
   let why = null;
   if (redKinds >= 2 && (key === 'flirty' || key === 'friendly')) {
     key = 'tense';
-    why = `Kelimelerde sıcaklık olabilir ama sayılanlar başka söylüyor: ${redKinds} ayrı kırmızı bayrak türü geçiyor.`;
+    why = `Kelimelerde sıcaklık olabilir ama sayılanlar başka söylüyor: ${redKinds} ayrı red flag türü geçiyor.`;
   } else if (oneSided && (key === 'flirty' || key === 'friendly')) {
     key = 'onesided';
     why = 'Yakınlık dili neredeyse tek taraftan geliyor; karşılık kısa ve erteleyici.';
@@ -165,15 +165,20 @@ export function buildReveal({ toneResult, messages, me }) {
   const unsure = toneResult.margin < CONF_THRESHOLD || shortChat;
 
   const signal = flirtSignal(toneResult.probs, toneResult.classes, messages);
+  // Damla kanunu (13 Tem gece): "varsa var yoksa yok deyin" — the call commits, the honesty
+  // lives in the evidence (score, counts, nasıl okudum). No mumbling middle band.
+  const karar = v.key === 'onesided' ? 'tek'
+    : v.key === 'flirty' || signal >= 50 ? 'var' : 'yok';
   let reason;
   if (v.key === 'onesided') {
     reason = `yakınlık dili tek yönlü kanka: sende %${meWarm}, onda %${otherWarm}. sinyal var ama karşılıklı değil.`;
   } else if (v.key === 'tense' && toneResult.top !== 'tense') {
-    reason = 'Sıcak kelimeler geçiyor ama kırmızı bayrakların gölgesinde. Bu flört değil, tansiyon.';
+    reason = 'Sıcak kelimeler geçiyor ama red flaglerin gölgesinde. Bu flört değil, tansiyon.';
   } else {
     reason = signal >= 65 ? 'sıcaklık, iltifat, yakınlaşma dili... kanka bu kadarı tesadüf olmaz :D'
-      : signal >= 35 ? 'ara ara kıvılcım var kanka ama net değil, dosya henüz kapanmadı.'
-        : 'kanka ilgi sinyali dipte. bu daha çok ödev grubu enerjisi.';
+      : signal >= 50 ? 'kıvılcım küçük ama gerçek kanka: dil, arkadaşlıktan bir tık sıcak.'
+        : signal >= 35 ? 'tek tük sıcak cümle var ama toplam arkadaşlık tarafında kalıyor kanka.'
+          : 'kanka ilgi sinyali dipte. bu daha çok ödev grubu enerjisi.';
   }
 
   return {
@@ -182,7 +187,7 @@ export function buildReveal({ toneResult, messages, me }) {
       key: v.key, cssKey: v.cssKey, label: v.label, line: v.line, why: v.why,
       caveat: shortChat ? 'kanka bu çok kısa bir kesit; okuma sınırlı, kesin hüküm çıkaramam.' : null,
     },
-    flort_sinyali: { score: signal, reason, me: meWarm, other: otherWarm, oneSided: v.key === 'onesided' },
+    flort_sinyali: { karar, score: signal, reason, me: meWarm, other: otherWarm, oneSided: v.key === 'onesided' },
     ilgi_dengesi: { leans: bal.leans, line: balanceLine(bal), aShare: bal.aShare },
     mesaj_okumalari: messageReadings(messages),
     bayraklar: flagList.map((f) => ({ type: f.type, title: FLAG_TR[f.kind][0], line: FLAG_TR[f.kind][1] })),

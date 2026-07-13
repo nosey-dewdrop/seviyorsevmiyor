@@ -1,19 +1,24 @@
-// Cloud fallback client. Called ONLY on low-confidence conversations, after the user consents.
-// Sends the normalized doc (no names required) to the Worker, which proxies Gemini and logs nothing.
-import { API_BASE } from './config.js?v=17';
+// Spiker client. Sends the ENGINE's verdict + counts (the law) plus the chat text to the
+// Worker; gets fresh wording and evidence-quoted "gözden kaçanlar" back. Any failure returns
+// null — the on-device template lines are always the floor, the product never breaks offline.
+import { API_BASE } from './config.js?v=18';
 
-export async function cloudRead(doc, me) {
-  const res = await fetch(`${API_BASE}/api/read`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ doc, me }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const msg = res.status === 403 ? 'Bulut okuması henüz açık değil.'
-      : res.status === 429 ? 'Çok fazla istek oldu, biraz bekle.'
-        : 'Bulut okuması şu an yapılamadı.';
-    throw new Error(msg);
+export async function spikerRead(facts, doc) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 7000);
+  try {
+    const res = await fetch(`${API_BASE}/api/spiker`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ facts, doc }),
+      signal: ctl.signal,
+    });
+    if (!res.ok) return null;
+    const data = await res.json().catch(() => null);
+    return data && data.spiker ? data.spiker : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(t);
   }
-  return data.reveal;
 }

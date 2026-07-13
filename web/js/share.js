@@ -17,8 +17,9 @@ function wrap(ctx, text, maxWidth) {
   return lines;
 }
 
+const KARAR_TEXT = { var: 'flört var.', yok: 'flört yok.', tek: 'flört var, ama tek taraflı.' };
+
 export async function buildShareCard(r) {
-  try { await document.fonts.load('600 100px Fraunces'); await document.fonts.load('400 40px Inter'); } catch {}
   const W = 1080, H = 1350, PAD = 90;
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
@@ -29,35 +30,34 @@ export async function buildShareCard(r) {
 
   // brand
   x.fillStyle = '#71717a';
-  x.font = '500 40px Inter, sans-serif';
-  x.fillText('whatdoyoumean.', PAD, 150);
+  x.font = 'bold 40px Arial, sans-serif';
+  x.fillText('mesajibirokusana.', PAD, 150);
 
   // verdict
   const tone = r.genel_ton;
   x.fillStyle = TONE_COLOR[tone.key] || '#fafafa';
-  x.font = '600 108px Fraunces, Georgia, serif';
+  x.font = 'bold 108px Arial, sans-serif';
   let y = 320;
   for (const line of wrap(x, tone.label, W - PAD * 2)) { x.fillText(line, PAD, y); y += 116; }
 
   // tone line
   x.fillStyle = '#a1a1aa';
-  x.font = '400 42px Inter, sans-serif';
+  x.font = 'bold 42px Arial, sans-serif';
   y += 10;
   for (const line of wrap(x, tone.line, W - PAD * 2)) { x.fillText(line, PAD, y); y += 60; }
 
-  // flirt signal
+  // flört: the committed call is the money shot of the card
   y += 70;
   x.fillStyle = '#71717a';
-  x.font = '500 34px Inter, sans-serif';
-  x.fillText('FLÖRT SİNYALİ', PAD, y);
+  x.font = 'bold 34px Arial, sans-serif';
+  x.fillText('FLÖRT VAR MI, YOK MU?', PAD, y);
   y += 86;
   x.fillStyle = '#fafafa';
-  x.font = '600 84px Fraunces, Georgia, serif';
-  if (r.flort_sinyali.oneSided) {
-    x.fillText(`sende %${r.flort_sinyali.me} · onda %${r.flort_sinyali.other}`, PAD, y);
-  } else {
-    x.fillText(`%${r.flort_sinyali.score}`, PAD, y);
-  }
+  x.font = 'bold 78px Arial, sans-serif';
+  const kararLine = KARAR_TEXT[r.flort_sinyali.karar] || KARAR_TEXT.yok;
+  x.fillText(r.flort_sinyali.oneSided
+    ? `${kararLine} sende %${r.flort_sinyali.me}, onda %${r.flort_sinyali.other}`
+    : `${kararLine} (%${r.flort_sinyali.score})`, PAD, y);
   // meter
   y += 44;
   const mw = W - PAD * 2;
@@ -70,26 +70,26 @@ export async function buildShareCard(r) {
   // balance one-liner (first sentence only — keep the card clean)
   y += 110;
   x.fillStyle = '#a1a1aa';
-  x.font = '400 42px Inter, sans-serif';
+  x.font = 'bold 42px Arial, sans-serif';
   const balFirst = (r.ilgi_dengesi.line.split('.')[0] || '') + '.';
   for (const line of wrap(x, balFirst, W - PAD * 2)) { x.fillText(line, PAD, y); y += 60; }
 
   // closing punch
   y += 60;
   x.fillStyle = '#fafafa';
-  x.font = 'italic 500 52px Fraunces, Georgia, serif';
+  x.font = 'bold italic 52px Arial, sans-serif';
   for (const line of wrap(x, r.kapanis, W - PAD * 2)) { x.fillText(line, PAD, y); y += 70; }
 
   // footer: the dare (how-bad-is-your-spotify energy), then the address, then the honest small print
   x.fillStyle = '#fafafa';
-  x.font = 'italic 600 52px Fraunces, Georgia, serif';
+  x.font = 'bold italic 52px Arial, sans-serif';
   x.fillText('peki senin sohbetin ne diyor?', PAD, H - 210);
   x.fillStyle = '#a1a1aa';
-  x.font = '500 38px Inter, sans-serif';
-  x.fillText('cesaretin varsa: damlahelloworld.github.io/whatdoyoumean', PAD, H - 140);
+  x.font = 'bold 38px Arial, sans-serif';
+  x.fillText('cesaretin varsa: damlahelloworld.github.io/mesajibirokusana', PAD, H - 140);
   x.fillStyle = '#52525b';
-  x.font = '400 32px Inter, sans-serif';
-  x.fillText('otomatik tahmin · analiz cihazda yapıldı, mesajlar görselde yok', PAD, H - 82);
+  x.font = '32px Arial, sans-serif';
+  x.fillText('otomatik tahmin · hüküm cihazda verildi, mesajlar görselde yok', PAD, H - 82);
 
   return c;
 }
@@ -98,7 +98,7 @@ export async function shareReveal(r) {
   const canvas = await buildShareCard(r);
   const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
   if (!blob) throw new Error('görsel üretilemedi');
-  const file = new File([blob], 'whatdoyoumean.png', { type: 'image/png' });
+  const file = new File([blob], 'mesajibirokusana.png', { type: 'image/png' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file] }); return 'shared'; } catch (e) {
       if (e && e.name === 'AbortError') return 'cancelled';
@@ -106,7 +106,7 @@ export async function shareReveal(r) {
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'whatdoyoumean.png';
+  a.download = 'mesajibirokusana.png';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   return 'downloaded';
