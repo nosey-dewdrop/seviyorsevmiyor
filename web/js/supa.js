@@ -3,7 +3,7 @@
 // gracefully: if the client can't load or the tables aren't there yet, the app keeps working with
 // the local free quota and simply shows nobody as premium.
 
-import { SUPABASE_URL, SUPABASE_ANON } from './config.js?v=3';
+import { SUPABASE_URL, SUPABASE_ANON } from './config.js?v=5';
 
 let client = null;
 let ready = null;

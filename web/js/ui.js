@@ -81,7 +81,7 @@ export async function playReveal(root, r, messages, me) {
   const share = typeof r.ilgi_dengesi.aShare === 'number'
     ? (me === 'A' ? r.ilgi_dengesi.aShare : 1 - r.ilgi_dengesi.aShare) : 0.5;
   const bal = el('div', 'bubble');
-  bal.appendChild(el('div', 'b-h', 'kim daha çok istiyor'));
+  bal.appendChild(el('div', 'b-h', 'kim daha çok istiyor?'));
   const split = el('div', 'split');
   const you = el('span', 'you-side', `<b>sen</b> <em>%${Math.round(share * 100)}</em>`);
   const other = el('span', 'other-side', `<em>%${Math.round((1 - share) * 100)}</em> <b>o</b>`);

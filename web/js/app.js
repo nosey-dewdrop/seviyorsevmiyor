@@ -1,12 +1,12 @@
 // Flow: input → parse → who-is-me → cascade (on-device model; fallback comes in Faz 2) → reveal.
-import { loadModel, scoreConversation } from './model.js?v=3';
-import { parseChat, toDoc } from './parse.js?v=3';
-import { buildReveal } from './reveal.js?v=3';
-import { playReveal } from './ui.js?v=3';
-import { cloudRead } from './api.js?v=3';
-import { ocrToText } from './ocr.js?v=3';
-import { readWhatsApp } from './wa.js?v=3';
-import { getUser, sendMagicLink, signOut, isPremium, onAuthChange } from './supa.js?v=3';
+import { loadModel, scoreConversation } from './model.js?v=5';
+import { parseChat, toDoc } from './parse.js?v=5';
+import { buildReveal } from './reveal.js?v=5';
+import { playReveal } from './ui.js?v=5';
+import { cloudRead } from './api.js?v=5';
+import { ocrToText } from './ocr.js?v=5';
+import { readWhatsApp } from './wa.js?v=5';
+import { getUser, sendMagicLink, signOut, isPremium, onAuthChange } from './supa.js?v=5';
 
 const FREE_PER_DAY = 5;
 const QKEY = 'wdym.quota.v1';
@@ -247,7 +247,7 @@ refreshAuthUi();
 
 renderQuota();
 
-// ---- theme (light default, persisted) ----
+// ---- theme (dark default — reads more premium, persisted) ----
 const THEME_KEY = 'wdym.theme.v1';
 const themeBtn = $('themeBtn');
 function applyTheme(t) {
@@ -255,8 +255,8 @@ function applyTheme(t) {
   if (themeBtn) themeBtn.setAttribute('aria-label', t === 'dark' ? 'Aydınlık moda geç' : 'Karanlık moda geç');
 }
 (function initTheme() {
-  let t = 'light';
-  try { t = localStorage.getItem(THEME_KEY) || 'light'; } catch {}
+  let t = 'dark';
+  try { t = localStorage.getItem(THEME_KEY) || 'dark'; } catch {}
   applyTheme(t);
 })();
 if (themeBtn) themeBtn.addEventListener('click', () => {
