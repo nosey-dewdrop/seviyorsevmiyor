@@ -1,14 +1,13 @@
-// Flow: input → parse → who-is-me → cascade (on-device model; fallback comes in Faz 2) → reveal.
-import { loadModel, scoreConversation } from './model.js?v=8';
-import { parseChat, toDoc } from './parse.js?v=8';
-import { buildReveal } from './reveal.js?v=8';
-import { playReveal } from './ui.js?v=8';
-import { cloudRead } from './api.js?v=8';
-import { ocrToText } from './ocr.js?v=8';
-import { readWhatsApp } from './wa.js?v=8';
+// Flow: input → parse → who-is-me → cascade (on-device model; cloud fallback on low confidence) → reveal.
+// Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
+import { loadModel, scoreConversation } from './model.js?v=11';
+import { parseChat, toDoc } from './parse.js?v=11';
+import { buildReveal } from './reveal.js?v=11';
+import { playReveal } from './ui.js?v=11';
+import { cloudRead } from './api.js?v=11';
+import { ocrToText } from './ocr.js?v=11';
+import { readWhatsApp } from './wa.js?v=11';
 
-const FREE_PER_DAY = 5;
-const QKEY = 'wdym.quota.v1';
 const ONBOARD_KEY = 'wdym.onboarded.v1';
 
 const $ = (id) => document.getElementById(id);
@@ -18,28 +17,11 @@ const resetBtn = $('resetBtn');
 const whois = $('whois');
 const meSeg = $('meSeg');
 const reveal = $('reveal');
-const quotaEl = $('quota');
 const consent = $('consent');
 const consentBox = $('consentBox');
 
 let parsed = null;   // { messages, speakers, me, ambiguous }
 let lastReveal = null;
-let premium = false;
-
-// ---- quota (paywall groundwork) ----
-function quota() {
-  const today = new Date().toISOString().slice(0, 10);
-  let q = { day: today, used: 0 };
-  try { const s = JSON.parse(localStorage.getItem(QKEY)); if (s && s.day === today) q = s; } catch {}
-  return q;
-}
-function saveQuota(q) { try { localStorage.setItem(QKEY, JSON.stringify(q)); } catch {} }
-function renderQuota() {
-  if (premium) { quotaEl.textContent = 'Premium: sınırsız okuma'; return; }
-  const q = quota();
-  const left = Math.max(0, FREE_PER_DAY - q.used);
-  quotaEl.textContent = `Bugün kalan ücretsiz okuma: ${left}/${FREE_PER_DAY}`;
-}
 
 // ---- tabs ----
 document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
@@ -124,11 +106,6 @@ function renderWhois() {
 // ---- analyze ----
 goBtn.addEventListener('click', async () => {
   if (!parsed) return;
-  const q = quota();
-  if (!premium && q.used >= FREE_PER_DAY) {
-    $('paywall').classList.remove('hidden');
-    return;
-  }
   goBtn.disabled = true;
   goBtn.textContent = 'Okunuyor…';
   try {
@@ -138,8 +115,6 @@ goBtn.addEventListener('click', async () => {
     const r = buildReveal({ toneResult, messages: parsed.messages, me: parsed.me });
     lastReveal = r;
     showReveal(r);
-    if (!premium) saveQuota({ day: q.day, used: q.used + 1 });
-    renderQuota();
     resetBtn.classList.remove('hidden');
     reveal.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (e) {
@@ -199,12 +174,6 @@ $('onboardClose').addEventListener('click', () => {
   $('onboard').classList.add('hidden');
   try { localStorage.setItem(ONBOARD_KEY, '1'); } catch {}
 });
-
-// ---- paywall (no login, nothing stored server-side — theyseeyourphotos has no account either) ----
-$('pwClose').addEventListener('click', () => $('paywall').classList.add('hidden'));
-$('pwPremium').addEventListener('click', () => { alert('Premium çok yakında.'); });
-
-renderQuota();
 
 // ---- theme (dark default — reads more premium, persisted) ----
 const THEME_KEY = 'wdym.theme.v1';

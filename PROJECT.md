@@ -39,28 +39,29 @@ shrinks over time. See CLAUDE.md for the full cascade contract.
 - [x] **Faz 5 — Reveal + design:** chat-bubble reveal streams in (typing → bubbles); identity redesign =
       bubble sea of separate cards, dark default, Damla's textured MJ bubble sprites; disclaimer + kosullar.html.
 - [x] **Faz 6 — KVKK + security:** privacy, consent, third-party warning, no server storage, no login.
-- [deferred] **Faz 7 — Paywall + revenue:** free idea-tool by Damla's call — audience first. Login REMOVED
-      (no accounts, nothing stored server-side). Local daily quota; paywall shows "yakında". Payment provider
-      (Paddle vs Lemon Squeezy) only when she wants to sell.
+- [removed] **Faz 7 — Paywall + revenue:** Damla direction 2026-07-13 — money is NOT a goal; quota +
+      paywall stripped entirely. Free, unlimited, no accounts, nothing stored server-side.
 - [ ] **Faz 8 (ongoing) — beaver:** retrain from consented hard cases; option to upgrade to BERTurk later.
 
 ## Label schema (seed set, train/data.jsonl)
 One line per example: `{ "text": "<A/B tagged conversation>", "tone": "flirty|friendly|cold|tense" }`.
 `text` uses `A:` / `B:` line prefixes. Interest balance and flags are computed by rules, not labeled.
 
-## Last session (2026-07-13)
-Full identity redesign + ship-check + login removal, all live (v10). Bubble-sea with Damla's textured MJ
-sprites (dark) / vector bubbles (light), separate bubble cards, dark default, Fraunces+Inter, question marks,
-disclaimer + kosullar.html, favicon + OG. Seed 120→169. English second-engine deferred (see CLAUDE.md LATER).
-Open/next: grow seed more; optional Gemini worker deploy (her key); light-mode sprites; more MJ shapes.
+## Last session (2026-07-13 night — PM pass, v11)
+Walked the product end to end as a customer and closed the gaps: rule-guarded verdict (counted signals
+veto the model — red flags kill a flirty verdict, one-sided reaching gets its own "tek taraflı" verdict
+with per-side flirt numbers), evidence in every claim (count citations + "nasıl okudum?" expandable),
+whole-chat message readings with richer patterns (interrogation, keşke, pursue; excuse-with-acceptance
+guard; deflected plans no longer a green flag), reveal pacing cut ~60% + tap-to-skip, short-chat caveat.
+Seed 169→211 targeting the confusions the walk found; held-out 79%→83.7%, parity ok. Quota + paywall
+REMOVED (free unlimited tool, Damla's 13 Tem direction).
 
 ## Open items
-1. Seed still small (169); grow + human-review — reads improve with data (the whole promise rides on this).
+1. Seed still small (211); grow + human-review — reads improve with data (the whole promise rides on this).
 2. Gemini worker not deployed — Damla supplies key from her Google account → wrangler secret (optional).
-3. Payment provider (Paddle vs Lemon Squeezy) — only when Damla wants to sell; revenue deferred for now.
-4. Light-mode bubble sea still uses vector bubbles (dark uses textured sprites) — could adapt sprites for light.
-5. EN second engine deferred (do not replace TR) — see CLAUDE.md LATER note.
+3. Light-mode bubble sea still uses vector bubbles (dark uses textured sprites) — could adapt sprites for light.
+4. EN second engine deferred (do not replace TR) — see CLAUDE.md LATER note.
 
 ## Revenue model
-Free daily quota → premium (unlimited + deep read + relationship report). Premium also funds fallback
-quota; fallback cost falls as the model learns.
+None by direction (2026-07-13): free idea-tool, audience first. Money is not a current goal for
+damlahelloworld products; nothing here is gated.

@@ -68,3 +68,17 @@ hook: her uygulama kendi kullanıcı sistemini kurunca dağılıyorsun. ben what
 paywall'ın iskeletini kurdum ama sıfırdan bir backend açmadım. damlahelloworld'ün tek ortak supabase projesi var, tüm uygulamalar onu kullanacak, ben de whatdoyoumean'i ona bağladım. tablolarımı wdym_ önekiyle açıyorum ki aynı projede diğer uygulamalarla karışmasın. giriş şifresiz: e-postana bir bağlantı gidiyor, tıklıyorsun, giriyorsun. premium durumu kullanıcının profilinden okunuyor, satırı sadece o kişi görebiliyor, kimse tarayıcıdan kendini premium yapamıyor çünkü o alan sunucu tarafında açılacak.
 
 her şeyi de kırılmaya karşı yazdım: supabase yüklenmezse ya da tablo henüz açılmamışsa uygulama çökmüyor, herkes ücretsiz sayaçla devam ediyor. günlük hak dolunca premium ekranı çıkıyor, şimdilik "yakında" çünkü ödeme sağlayıcısı (paddle mı lemon squeezy mi) damla'nın kararı. bir de ortak projeye çalıştırması için hazır sql şemasını repoya koydum.
+
+---
+
+## 07 — "modelim kavgayı flört sanıyordu, sayılara veto hakkı verdim"
+
+hook: yapay zeka ürünlerinin en tehlikeli anı, emin bir sesle yanlış konuşması. benimki bir kavgaya "yüzde 63 flört" dedi. bugün ona haddini bildirdim.
+
+ürünü bir müşteri gibi baştan sona gezdim ve üç ağır hata yakaladım. tek taraflı ölü bir sohbete "flört yüzde 99" diyordu çünkü "özledim seni" kelimelerini görüyor ama kimin yazdığına bakmıyordu. sorgu suali bir kavgaya "flört havası" diyordu çünkü soru işaretlerini ilgi sanıyordu. üstelik aynı ekranda dört kırmızı bayrak basıp kapanışta "birileri diğerini merak ediyor" diye romantik cümle kuruyordu, yani kendi kendiyle çelişiyordu.
+
+çözüm iki katmanlı. bir: istatistik model artık sadece öneriyor, sayılabilir sinyaller hükmü kesiyor. iki ayrı kırmızı bayrak türü varsa flört hükmü geçersiz, gerginlik kazanır. yakınlık dili tek taraftan akıyorsa ve karşı taraf kısa cevap + erteleme yapıyorsa hüküm "tek taraflı" olur, flört sinyali de tek sayı yerine "sende yüzde 40, onda yüzde 0" diye iki taraflı gösterilir. iki: veriyi büyüttüm, 169 örnekten 211'e, tam da bu üç karışıklığı hedefleyen örneklerle. doğruluk yüzde 79'dan 83.7'ye çıktı.
+
+açıklamalar da somutlaştı. "kim daha çok istiyor" artık kanıtını da söylüyor: mesaj 9–5, soru 3–0, hep senden yana. mesaj okumaları artık sohbetin tamamını tarıyor, aynı cümleyi iki kez söylemiyor, sorgu cümlesini "gerçek bir soru" diye övmüyor. en alta bir "nasıl okudum?" bölümü koydum: kaç mesaj sayıldı, model ne dedi, hangi sayımlar hükmü değiştirdi. ve reveal artık seni bekletmiyor: baloncuk araları kısaldı, ekrana dokununca hepsi anında iniyor.
+
+bir de günlük 5 okuma sınırını ve premium ekranını tamamen söktüm. bu ürün ücretsiz bir fikir aracı, yayılsın diye var; kapıya turnike koymanın alemi yoktu.

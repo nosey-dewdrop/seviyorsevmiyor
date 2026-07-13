@@ -192,6 +192,21 @@ textarea.paste:focus { outline: none; }
 /* closing */
 .closing-b { font-family: var(--disp); font-size: 1.2rem; font-weight: 500; line-height: 1.35; padding: 16px 18px; }
 
+/* verdict override / short-chat caveat line */
+.ton-why { margin-top: 8px; font-size: 0.86rem; opacity: 0.65; }
+
+/* per-side flirt meters (one-sided cases) */
+.side-label { font-size: 0.9rem; margin-top: 8px; opacity: 0.85; }
+
+/* tap-to-skip hint */
+.skip-hint { align-self: center; font-size: 0.76rem; color: var(--ink-3); margin: 2px 0 4px; cursor: pointer; }
+
+/* "how I read it" — counted evidence, expandable */
+.howread { align-self: stretch; max-width: 86%; margin-top: 4px; font-size: 0.85rem; color: var(--ink-2); }
+.howread summary { cursor: pointer; color: var(--ink-3); font-size: 0.82rem; padding: 4px 2px; }
+.howread summary:hover { color: var(--ink); }
+.howread p { margin: 6px 2px; line-height: 1.45; }
+
 /* unsure + cloud */
 .unsure .cloud-row { margin-top: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .unsure .btn.small { background: var(--sent-ink); color: var(--sent); border-color: transparent; }
