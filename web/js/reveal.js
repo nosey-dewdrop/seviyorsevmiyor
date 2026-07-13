@@ -16,12 +16,15 @@ const TONE_TR = {
 };
 // Voice (Damla, 13 Tem): playful screenshot-bait "kanka" register, lowercase. Tense/red-flag
 // screens stay serious — a joke under "kontrol dili" would cheapen the product.
+// Voice bans (Damla, 13 Tem night): no sports metaphors, no gendered registers (neither
+// bro-talk nor girl-talk), no AI filler. Reference register: The Pudding's Spotify roast bot —
+// react to the data, don't narrate it.
 const TONE_LINE = {
   flirty: 'kanka burada muhabbet muhabbeti aşmış, ikiniz de biliyorsunuz :D',
   friendly: 'temiz muhabbet kanka, hem de iyisinden. ama romantizm dedektörüm uyuyor.',
   cold: 'kanka cevaplar buz gibi. klimanın önünde yazışıyor gibisiniz.',
   tense: 'Havada bir gerginlik var. Konuşma sitem, savunma ve suçlama ekseninde dönüyor.',
-  onesided: 'kanka üzülerek söylüyorum, bu maçta tek kale oynanıyor ve kale sensin.',
+  onesided: 'kanka üzülerek söylüyorum: bu sohbeti tek başına sen taşıyorsun, karşıdan gelen yok.',
 };
 
 const CONF_THRESHOLD = 0.15;   // margin below this = we are not sure → offer fallback
