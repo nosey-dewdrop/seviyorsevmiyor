@@ -6,7 +6,6 @@ import { playReveal } from './ui.js?v=5';
 import { cloudRead } from './api.js?v=5';
 import { ocrToText } from './ocr.js?v=5';
 import { readWhatsApp } from './wa.js?v=5';
-import { getUser, sendMagicLink, signOut, isPremium, onAuthChange } from './supa.js?v=5';
 
 const FREE_PER_DAY = 5;
 const QKEY = 'wdym.quota.v1';
@@ -201,49 +200,9 @@ $('onboardClose').addEventListener('click', () => {
   try { localStorage.setItem(ONBOARD_KEY, '1'); } catch {}
 });
 
-// ---- auth + paywall ----
-const authBtn = $('authBtn');
-const authSheet = $('authSheet');
-const authMsg = $('authMsg');
-
-function openAuth() { authSheet.classList.remove('hidden'); $('authEmail').focus(); }
-function closeAuth() { authSheet.classList.add('hidden'); authMsg.textContent = ''; }
-
-authBtn.addEventListener('click', async () => {
-  const user = await getUser();
-  if (user) {
-    if (confirm(`${user.email} olarak girdin. Çıkış yapılsın mı?`)) { await signOut(); location.reload(); }
-  } else { openAuth(); }
-});
-$('authCancel').addEventListener('click', closeAuth);
-$('authSend').addEventListener('click', async () => {
-  const email = $('authEmail').value.trim();
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { authMsg.textContent = 'Geçerli bir e-posta gir.'; return; }
-  authMsg.textContent = 'Gönderiliyor…';
-  try { await sendMagicLink(email); authMsg.textContent = 'Bağlantı gönderildi. E-postandaki linke tıkla.'; }
-  catch (e) { authMsg.textContent = e.message; }
-});
-
+// ---- paywall (no login, nothing stored server-side — theyseeyourphotos has no account either) ----
 $('pwClose').addEventListener('click', () => $('paywall').classList.add('hidden'));
-$('pwPremium').addEventListener('click', async () => {
-  if (!(await getUser())) { $('paywall').classList.add('hidden'); openAuth(); return; }
-  alert('Premium çok yakında. Giriş yaptığın için açıldığında hesabına tanımlanacak.');
-});
-
-async function refreshAuthUi() {
-  const user = await getUser();
-  if (user) {
-    premium = await isPremium();
-    authBtn.textContent = premium ? 'Premium' : user.email.split('@')[0];
-    closeAuth();
-  } else {
-    premium = false;
-    authBtn.textContent = 'Giriş';
-  }
-  renderQuota();
-}
-onAuthChange(() => refreshAuthUi());
-refreshAuthUi();
+$('pwPremium').addEventListener('click', () => { alert('Premium çok yakında.'); });
 
 renderQuota();
 
