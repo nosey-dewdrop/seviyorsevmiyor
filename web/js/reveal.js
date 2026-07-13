@@ -4,8 +4,8 @@
 // The model PROPOSES the tone; counted signals can VETO it (red flags, one-sidedness) — the
 // deterministic layer is the honest part, so on a clear conflict it wins and we say why.
 
-import { flirtSignal, flirtSides, interestBalance, flags as computeFlags } from './balance.js?v=16';
-import { lowerTr } from './features.js?v=16';
+import { flirtSignal, flirtSides, interestBalance, flags as computeFlags } from './balance.js?v=17';
+import { lowerTr } from './features.js?v=17';
 
 const TONE_TR = {
   flirty: 'flört havası',
@@ -14,12 +14,14 @@ const TONE_TR = {
   tense: 'gergin',
   onesided: 'tek taraflı',
 };
+// Voice (Damla, 13 Tem): playful screenshot-bait "kanka" register, lowercase. Tense/red-flag
+// screens stay serious — a joke under "kontrol dili" would cheapen the product.
 const TONE_LINE = {
-  flirty: 'Bu konuşmanın altında açık bir ilgi var. Kelimeler arkadaşça görünse de yön flört tarafında.',
-  friendly: 'Sıcak ama romantik değil. İki taraf da rahat, iş birbirini kollamaya değil muhabbete dayanıyor.',
-  cold: 'Bir taraf mesafe koyuyor. Cevaplar kısa, kapı biraz aralık ama içeri davet yok.',
+  flirty: 'kanka burada muhabbet muhabbeti aşmış, ikiniz de biliyorsunuz :D',
+  friendly: 'temiz muhabbet kanka, hem de iyisinden. ama romantizm dedektörüm uyuyor.',
+  cold: 'kanka cevaplar buz gibi. klimanın önünde yazışıyor gibisiniz.',
   tense: 'Havada bir gerginlik var. Konuşma sitem, savunma ve suçlama ekseninde dönüyor.',
-  onesided: 'Bir taraf yakınlık dili kuruyor, diğeri kısa cevaplarla idare ediyor. İlgi var ama tek yönden akıyor.',
+  onesided: 'kanka üzülerek söylüyorum, bu maçta tek kale oynanıyor ve kale sensin.',
 };
 
 const CONF_THRESHOLD = 0.15;   // margin below this = we are not sure → offer fallback
@@ -50,14 +52,14 @@ function balanceLine(bal) {
   if (my.doubles >= 2 || their.doubles >= 2) bits.push(`üst üste yazma ${my.doubles}–${their.doubles}`);
   const ev = bits.length ? ` Sayım (sen–o): ${bits.join(', ')}.` : '';
   if (bal.leans === 'even') {
-    return `İlgi iki tarafta da dengeli görünüyor. Kimse diğerinin peşinden koşmuyor, konuşmayı beraber taşıyorsunuz.${ev}`;
+    return `dengeli gidiyor kanka, kimse kimsenin peşinden koşmuyor. konuşmayı beraber taşıyorsunuz.${ev}`;
   }
   const reachingIsMe = bal.leans === bal.me;
   const pct = Math.round((bal.leans === 'A' ? bal.aShare : 1 - bal.aShare) * 100);
   if (reachingIsMe) {
-    return `Bu konuşmayı daha çok sen taşıyorsun (~%${pct}). Daha uzun yazan, daha çok soran, daha çok dönen taraf sensin.${ev}`;
+    return `kanka bu konuşmanın hamalı sensin (~%${pct}). daha uzun yazan, daha çok soran, daha çok dönen hep sen.${ev}`;
   }
-  return `Bu konuşmada daha çok isteyen taraf karşı taraf gibi görünüyor (~%${pct}). Sana doğru uzanan onlar.${ev}`;
+  return `kanka daha çok isteyen karşı taraf (~%${pct}). sana doğru uzanan onlar, sen sadece varsın.${ev}`;
 }
 
 const FLAG_TR = {
@@ -77,27 +79,27 @@ const READ_PATTERNS = [
   { kind: 'interrogate', pri: 7, re: /(neredeydin|nerdeydin|kiminleydin|kiminle|isim ver|hesap ver|konumunu|telefonunu)/,
     read: 'Bu bir merak sorusu değil, sorgu. Cevap değil kontrol arıyor.' },
   { kind: 'defer', pri: 6, re: /(bakarız|göreceğiz|belki sonra|sonra konuşuruz|artık bakarız)/,
-    read: 'Yumuşak bir erteleme. "Hayır" demeden kapıyı yavaşça kapatıyor.' },
+    read: '"bakarız" kanka, evrensel dilde "hayır ama kibarım" demek.' },
   { kind: 'reach', pri: 6, re: /(özledim|aklımdasın|aklımdaydı|seni düşündüm|rüyama|rüyamda)/,
-    read: 'Açık bir yakınlaşma hamlesi. Karşıdakini kendine çekmeye çalışıyor.' },
+    read: 'düpedüz yakınlaşma hamlesi kanka. seni kendine çekmeye çalışıyor.' },
   { kind: 'wish', pri: 5, re: /(keşke)/,
-    read: '"Keşke" bir itiraf: orada olmanı istemiş, söylemenin en güvenli yolunu seçmiş.' },
+    read: '"keşke" bir itiraf kanka: orada olmanı istemiş, söylemenin en garantili yolunu seçmiş.' },
   { kind: 'pursue', pri: 5, re: /(ben seni bulurum|seni bulurum|ben yazarım|ben ararım|peşindeyim)/,
-    read: 'Takibi üstleniyor: bir dahaki adımı kendine görev yapıyor. Net sinyal.' },
+    read: 'takibi üstlenmiş kanka: bir dahaki adımı kendine görev yapmış. bundan net sinyal olmaz.' },
   { kind: 'sitem', pri: 5, re: /(neden yazmadın|neden aramadın|görüp geçiyorsun|umursam)/,
-    read: 'Sitemin altında "sana ulaşamıyorum" kaygısı var. İlgi isteği, kırgınlık kılığında.' },
+    read: 'sitemin altında "sana ulaşamıyorum" var kanka. ilgi isteği, kırgınlık kılığına girmiş.' },
   { kind: 'compliment', pri: 5, re: /(güzelsin|yakışıklısın|gülüşün|çok tatlısın|güzel olmuşsun|iddialısın)/,
-    read: 'Bu bir açık kart: iltifat, arkadaşlıkta pek gerekmeyen bir risktir.' },
+    read: 'iltifat açık karttır kanka: arkadaşlıkta pek gerekmez, burada atılmış.' },
   { kind: 'dismiss', pri: 5, test: (low, text) => /^(hı|hı hı|hm+|peki|ok|okey|tamam|👍)\.?$/.test(low.trim()) || ([...text].length <= 4 && !text.includes('?')),
-    read: 'Kısa ve düz. İlgiden çok "konuşmayı uzatmak istemiyorum" demenin nazik hali.' },
+    read: 'kanka bu cevap kısa ve düz. "konuşmayı uzatmayalım"ın kibar hali.' },
   { kind: 'excuse', pri: 4, test: (low) => /(yoğunum|işim var|müsait değilim|vaktim yok|bu ara çok)/.test(low) && !/(olur|olabilir|gelirim|geliyorum|yaparız|ararım)/.test(low),
-    read: 'Meşguliyet gerçek olabilir; ama tekrar ediyorsa, nazikçe kurulmuş bir mesafedir.' },
+    read: 'meşguliyet gerçek olabilir kanka, ama tekrarlıyorsa adı mesafedir.' },
   { kind: 'stonewall', pri: 4, re: /(boşver|her neyse|fark etmez|konuşmak istemiyorum)/,
     read: 'Konu tartışılmadan kapatılıyor. Geri çekilmek de bir cevap, ama çözüm değil.' },
   { kind: 'repair', pri: 3, re: /(özür dilerim|kusura bakma|haklısın)/,
-    read: 'Bir onarım denemesi: tansiyonu düşürmeye çalışıyor. Kavgada değerli bir işaret.' },
+    read: 'özür gelmiş kanka: tansiyonu düşürme çabası. kavgada değerli bir işaret.' },
   { kind: 'question', pri: 1, test: (low, text) => text.includes('?') && [...text].length > 12,
-    read: 'Gerçek bir soru: karşı tarafı konuşmaya, kendini açmaya davet ediyor.' },
+    read: 'gerçek bir soru bu kanka: karşıyı konuşmaya, açılmaya davet ediyor.' },
 ];
 
 function messageReadings(messages) {
@@ -126,16 +128,16 @@ function closingLine(toneKey, bal, flagList) {
   }
   if (toneKey === 'onesided') {
     return bal.leans === bal.me
-      ? 'Sen uzanıyorsun, karşılık ölçülü geliyor. Bunu bilmek de bir cevap.'
-      : 'Sana uzanan biri var ve sen ölçülü dönüyorsun. Kapıyı sen tutuyorsun.';
+      ? 'sen uzanıyorsun, karşılık ölçülü kanka. bunu bilmek de bir cevap.'
+      : 'sana uzanan biri var, sen ölçülü dönüyorsun. kapıyı tutan sensin kanka.';
   }
-  if (toneKey === 'flirty') return 'Kısacası: bu sadece muhabbet değil. Birileri diğerini merak ediyor.';
+  if (toneKey === 'flirty') return 'kısacası kanka: bu sadece muhabbet değil. gerisini sen anla 👀';
   if (toneKey === 'cold') {
-    if (bal.leans === bal.me) return 'Sen uzanıyorsun, karşılık ölçülü geliyor. Bunu bilmek de bir cevap.';
-    return 'Kapı aralık ama içeri davet yok. Belki de gördüğün mesafe, gerçekten mesafe.';
+    if (bal.leans === bal.me) return 'sen uzanıyorsun, karşılık ölçülü kanka. bunu bilmek de bir cevap.';
+    return 'kapı aralık ama davet yok kanka. belki de gördüğün mesafe, gerçekten mesafe.';
   }
   if (toneKey === 'tense') return 'İlgi hâlâ var ama iletişim yorulmuş. Mesele sevgi değil, konuşma biçimi.';
-  return 'Net ve sağlıklı bir muhabbet. Bazen alt-metin, göründüğü gibidir.';
+  return 'temiz muhabbet kanka, alt-metin aramana gerek yok. bazen her şey göründüğü gibidir.';
 }
 
 export function buildReveal({ toneResult, messages, me }) {
@@ -162,20 +164,20 @@ export function buildReveal({ toneResult, messages, me }) {
   const signal = flirtSignal(toneResult.probs, toneResult.classes, messages);
   let reason;
   if (v.key === 'onesided') {
-    reason = `Yakınlık dili tek yönlü: sende %${meWarm}, onda %${otherWarm}. Sinyal var ama karşılıklı değil.`;
+    reason = `yakınlık dili tek yönlü kanka: sende %${meWarm}, onda %${otherWarm}. sinyal var ama karşılıklı değil.`;
   } else if (v.key === 'tense' && toneResult.top !== 'tense') {
     reason = 'Sıcak kelimeler geçiyor ama kırmızı bayrakların gölgesinde. Bu flört değil, tansiyon.';
   } else {
-    reason = signal >= 65 ? 'Sıcaklık, iltifat ve yakınlaşma dili yüksek.'
-      : signal >= 35 ? 'Ara ara ilgi kıvılcımı var ama net değil.'
-        : 'İlgi sinyali düşük, konuşma daha çok işlevsel.';
+    reason = signal >= 65 ? 'sıcaklık, iltifat, yakınlaşma dili... kanka bu kadarı tesadüf olmaz :D'
+      : signal >= 35 ? 'ara ara kıvılcım var kanka ama net değil, dosya henüz kapanmadı.'
+        : 'kanka ilgi sinyali dipte. bu daha çok ödev grubu enerjisi.';
   }
 
   return {
     unsure,
     genel_ton: {
       key: v.key, cssKey: v.cssKey, label: v.label, line: v.line, why: v.why,
-      caveat: shortChat ? 'Kısa bir kesit bu; okuma sınırlı, kesin hüküm yok.' : null,
+      caveat: shortChat ? 'kanka bu çok kısa bir kesit; okuma sınırlı, kesin hüküm çıkaramam.' : null,
     },
     flort_sinyali: { score: signal, reason, me: meWarm, other: otherWarm, oneSided: v.key === 'onesided' },
     ilgi_dengesi: { leans: bal.leans, line: balanceLine(bal), aShare: bal.aShare },

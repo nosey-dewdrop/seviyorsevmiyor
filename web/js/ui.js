@@ -164,7 +164,7 @@ export async function playReveal(root, r, messages, me) {
   sbtn.addEventListener('click', async () => {
     sbtn.disabled = true; sbtn.textContent = 'Hazırlanıyor…';
     try {
-      const { shareReveal } = await import('./share.js?v=16');
+      const { shareReveal } = await import('./share.js?v=17');
       const how = await shareReveal(r);
       sbtn.textContent = how === 'downloaded' ? 'İndirildi' : how === 'shared' ? 'Paylaşıldı' : 'Sonucu görsel al';
     } catch { sbtn.textContent = 'Olmadı, tekrar dene'; }
@@ -180,7 +180,7 @@ export async function playReveal(root, r, messages, me) {
   // 7 — unsure → cloud offer (only on-device, uncertain)
   if (r.unsure && !r.fromCloud) {
     const u = el('div', 'bubble unsure');
-    u.appendChild(el('div', 'said', 'Bu vakada tam emin değilim. Sinyaller karışık ya da sohbet kısa.'));
+    u.appendChild(el('div', 'said', 'kanka bu vakada tam emin değilim. sinyaller karışık ya da sohbet kısa.'));
     u.appendChild(el('div', 'mean', 'İstersen daha derin okuması için buluta gönderebilirsin. Sadece bu sohbet gider, isim taşımadan, onay kutusu işaretliyse.'));
     const cr = el('div', 'cloud-row');
     const btn = el('button', 'btn small', 'Buluta sor');
