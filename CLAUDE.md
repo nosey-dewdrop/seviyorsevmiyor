@@ -5,7 +5,17 @@ conversation and the engine reads what's really going on: flirty or friendly, wh
 interest level, green/red flags, and a per-message "what did they mean". Theyseeyourphotos energy,
 but for messaging, printed in a chat-bubble reveal. Born with a paywall. Turkish-first.
 
-STATUS 2026-07-13: FAZ 1 + 2 + 6 done locally, NOT deployed yet.
+STATUS 2026-07-13: LIVE at https://damlahelloworld.github.io/whatdoyoumean/ (gh-pages). Faz 0–7 shipped (7 partial).
+Deploy: `git subtree split --prefix web -b t && git push -f origin t:gh-pages && git branch -D t`; bump ?v=N + footer stamp each time.
+
+DAMLA'S TODO (blocks full launch):
+1. Supabase: run backend/supabase-schema.sql in the SHARED project's SQL editor (wdym_ tables + RLS + signup trigger). Also enable Email auth (magic link) for the project. URL she gave was .supabase.com; correct is .supabase.co (already set in config.js).
+2. Worker: `cd backend && wrangler login` → create KV, paste id in wrangler.toml → `wrangler secret put GEMINI_API_KEY` (her Google AI Studio key) + `APP_TOKEN` → set PUBLIC_READ="on" → `wrangler deploy`. Until then the "buluta sor" button degrades to "cloud read not open".
+3. Payment provider decision (Paddle vs Lemon Squeezy) → then server-enforced quota (wdym_daily_reads + use_read rpc) + set is_premium on webhook.
+4. Grow train/data.jsonl beyond the 120-example seed and re-run train.py (accuracy climbs with data). Review the seed labels.
+5. Look at the design in dev and steer — it's a v1, not blindly iterated (kör iterasyon yasağı).
+
+
 - Faz 1: own tone engine (numpy tfidf+logistic, 120-example TR seed, 79% held-out), on-device JS inference,
   Python↔JS parity harness (diff 1e-16), paste + WhatsApp-text parsing, deterministic balance + flag rules,
   templated TR reveal, chat-bubble UI, onboarding, daily free quota. Verified end to end in Node.
