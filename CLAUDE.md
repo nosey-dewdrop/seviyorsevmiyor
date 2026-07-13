@@ -1,27 +1,37 @@
-# whatdoyoumean
+# mesajibirokusana (renamed from whatdoyoumean, 13 Tem night)
 
 A "read the subtext" site for chats. You paste (or screenshot, or drop a WhatsApp export of) a
-conversation and the engine reads what's really going on: flirty or friendly, who wants it more,
-green/red flags, per-message "what did they mean". Theyseeyourphotos energy but for messaging.
-Turkish-first, FREE and unlimited (no quota, no paywall, no accounts — virality tool by design).
+conversation and the engine answers "flört var mı, yok mu?" with a COMMITTED call plus evidence.
+Theyseeyourphotos energy but for messaging. Turkish-first, FREE and unlimited.
 
-STATUS 2026-07-13 night: LIVE at https://damlahelloworld.github.io/whatdoyoumean/ (v17).
-One marathon session shipped v11→v17: rule-guarded verdict (counted signals veto the model:
-red flags kill flirty, one-sided gets "tek taraflı" with per-side flirt), evidence counts +
-"nasıl okudum?" expandable, whole-chat readings, ~3s reveal + tap-to-skip, demo-chat button,
-on-device PNG share card with roast dare line, denser sea (10-15 bubbles, Damla's spec) with
-textured sprites in both themes, hero = "sana kırmızı çok yakışıyor / bu kız bana aşık mı? /
-kesin aşık kanka :D", caps ink privacy badge → gizlilik. VOICE LAW: playful screenshot-bait
-"kanka" register, lowercase, Damla-calibrated; tense + red-flag screens STAY SERIOUS.
-Seed 268 (hard boundary cases), held-out 72.2% on the harder set (old easy-set 83.7% is not
-comparable), parity 1e-16. VC/PM/league report: reports/2026-07-13-whatdoyoumean-vc.md.
+STATUS 2026-07-13 late night: LIVE at https://damlahelloworld.github.io/mesajibirokusana/ (v18,
+old /whatdoyoumean/ URL is dead 404). v18 shipped in one session, all Damla-directed:
+- RENAME everywhere (repo, folder, worker `mesajibirokusana-api`, copy, share card, og). Reason:
+  TR product with an EN name kills word of mouth; new name IS the sentence users say.
+- LLAMA SPIKER LIVE: worker `/api/spiker` (Groq llama-3.3-70b, secrets set, deployed) rewrites the
+  engine's lines fresh per request + returns "gözden kaçanlar" (evidence-quoted observations:
+  self-talk, over-investment, manipulation/gaslight smell, green flags). Engine facts are LAW;
+  facts sent as explicit named numbers (never "5-3" strings — Llama misread those). Consent
+  checkbox gates it (KVKK text shipped same session); no consent / worker down → template floor.
+  Fuses: 6/min + 60/day per IP, 2000/day global, SPIKER_OPEN kill switch, KV = MESAJ_RATE_LIMIT.
+- NET HÜKÜM (Damla: "varsa var yoksa yok deyin, bıktık"): headline commits — flört var. / flört
+  yok. / flört var, ama tek taraflı. (>=50 or flirty verdict = var; onesided = tek). Mumbling
+  middle-band lines deleted; honesty lives in score + counts + "nasıl okudum?".
+- VOICE LAW additions: NO sports metaphors (gol/kale dead), NO gendered registers, NO ai filler,
+  no repeated-word tics; "red flag/green flag" (never "kırmızı bayrak"); Pudding Spotify-roast
+  register = react to data, don't narrate. Questions end with "?" (copy law).
+- DESIGN: dark ONLY (light mode + theme toggle removed), Arial everywhere (Fraunces/Inter gone,
+  no Google Fonts requests), content text bold (web 1.0 chunky), denser sea 16-26 bubbles,
+  sprites re-keyed via tools/clean_bubbles.py (body mask + edge unpremultiply; dirty px 54k→4.5k).
+- Legacy Gemini /api/read path kept but off; old unsure→"buluta sor" UI removed.
+Seed 268, held-out 72.2% (hard set), parity 1e-16. VC report: reports/2026-07-13-whatdoyoumean-vc.md.
 
-NEXT: EN second engine in a fresh session (lexicons + EN seed + model.en.json + routing;
-greenlit "lig arttır"). DAMLA-ONLY: worker deploy (`cd backend && wrangler login` → secrets
-GEMINI_API_KEY + APP_TOKEN → PUBLIC_READ=on → deploy) for the fallback flywheel; 10 real
-screenshots for an OCR quality run; more MJ bubble sprites if she wants.
+NEXT: spiker polish (LLM sometimes slips "sanki" tic + capitalizes lowercase voice — tighten
+prompt or post-process), EN second engine (greenlit "lig arttır"), 10 real screenshots OCR run.
+DAMLA-ONLY: rotate the Groq key (it touched terminal history + chat 13 Tem — make new key at
+console.groq.com, then `npx wrangler secret put GROQ_API_KEY` in HER OWN terminal, blind paste).
 Deploy: `git subtree split --prefix web -b t && git push -f origin t:gh-pages && git branch -D t`; bump ?v=N + footer.
-Retrain: `python3 train/train.py`; verify `python3 train/parity_check.py && node train/parity_check.mjs`; product walk harness lives at /tmp/wdym_walk.mjs (recreate from git history of this note if gone).
+Retrain: `python3 train/train.py`; verify `python3 train/parity_check.py && node train/parity_check.mjs`; walk harness /tmp/mbo_walk/walk.mjs (recreate from git history of this note if gone).
 
 ## The one non-negotiable idea: cascade, not wrapper
 This is NOT a GPT/Gemini wrapper. The engine is a **cascade**:

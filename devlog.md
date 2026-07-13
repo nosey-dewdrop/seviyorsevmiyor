@@ -259,3 +259,27 @@ tek taraflı sohbette flört dili gerçekten var, ama tamamı senden. eski ekran
 hook: bugün ürünümün bütün cümlelerini sildim ve yerine arkadaşınızın atacağı mesajları yazdım.
 
 sorun şuydu: analiz doğruydu ama ses kasıntıydı. "ilgi var ama tek yönden akıyor" diyordu; doğru ama kimse bunun ekran görüntüsünü atmaz. yeni hali: "kanka üzülerek söylüyorum, bu maçta tek kale oynanıyor ve kale sensin." aynı veri, aynı hüküm, ama artık paylaşılabilir. soğuk sohbet "klimanın önünde yazışıyor gibisiniz" oldu, "bakarız" cevabı "evrensel dilde hayır ama kibarım demek" oldu. tek istisna bilinçli: kırmızı bayrak basan ekranlar ciddi kaldı, çünkü "kontrol dili" uyarısının altına şaka yazmak ürünü ucuzlatır. mizah her yere değil, güvenli yerlere.
+
+## m18 — "ürünümün adını sildim çünkü kimse ingilizce hecelemek istemez" (reel)
+
+hook: dün ürünümün adı whatdoyoumean'di. bugün mesajibirokusana. sebep pazarlama değil, fizik.
+
+türkçe bir ürünün ingilizce ismi ağızdan ağıza yayılamıyor: arkadaşına önerirken heceleyemiyorsun, yanlış yazıyorsun, aramada bulamıyorsun. yeni isim zaten kullanırken kurduğun cümle: ekran görüntüsünü arkadaşına atıp "mesajı bir okusana" diyorsun. ismin işi bu; ürünün kullanıldığı cümlenin kendisi olmak. bonus ders: whatdoyoumean bir soruydu ama sonunda soru işareti yoktu. soru cümleleri soru işaretiyle biter.
+
+## m19 — "yapay zekaya hüküm verdirmiyorum, sadece konuşturuyorum" (reel)
+
+hook: bugün ürünüme llama bağladım ama kararları hâlâ cihazdaki küçük modelim veriyor.
+
+sorun: elle yazılmış kırk şablon cümle, herkese aynı yazı. "generik, ai gibi" eleştirisi haklıydı. çözüm mimaride: hükmü, yüzdeleri, sayımları cihazdaki motor veriyor; llama o raporu kanka ağzıyla yeniden yazıyor ve gözden kaçanları söylüyor: "hep kendini anlatmış, sana bir kez bile sen nasılsın dememiş" gibi. her gözlem sohbetten alıntıyla kanıtlanmak zorunda, alıntı yoksa gözlem yok. beyin bizim, ağız kiralık. bulut çökerse şablonlar hâlâ orada: ürün internetsiz de cevap veriyor.
+
+## m20 — "flört var mı, yok mu? artık cevap veriyorum" (reel)
+
+hook: kullanıcı dedi ki: varsa var deyin yoksa yok deyin, bıktık.
+
+eskiden orta banda düşen sohbetlere "kıvılcım var ama net değil, dosya henüz kapanmadı" diyordum. edebiyat güzel ama cevap değil; insan bu siteye tek bir soruyla geliyor. artık başlık taraf tutuyor: flört var. flört yok. flört var, ama tek taraflı. dürüstlük kaybolmadı, yer değiştirdi: yüzde ve sayımlar hâlâ kanıt satırında ve "nasıl okudum?" bölümünde. karar vermek riskli; karar vermeyen ürünse zaten cevapsız.
+
+## m21 — "balonlarımın arkası kirliydi, kullanıcı yakaladı" (post)
+
+hook: koyu temada kusursuz görünen şey, beyaz temada rezalet çıktı.
+
+midjourney balonlarını siyah zeminden kaba bir eşikle ayırmıştım. koyu zeminde görünmüyordu; beyaz temada kenarlarda kirli saçaklar belirdi. iki katmanlı ders: önce temizliği doğru yap (gövde maskesi + kenar renginin geri çözülmesi; kirli piksel 54 binden 4 bine düştü), sonra yüzeyi azalt: light mode tamamen kalktı, site artık tek kimlikli. az mod, az yüzey, az utanç.

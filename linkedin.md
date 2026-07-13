@@ -73,3 +73,17 @@ Yapay zeka ürünlerinin en tehlikeli anı, emin bir sesle yanlış konuşması.
 5. Dürüst durum tespiti: 211 örnekli bir motor henüz küçük lig. Yol belli: etiketli veriyi bine çıkarmak, bulut destekli öğrenme döngüsünü canlıya almak, veri büyüyünce Türkçe BERT koluna geçmek. Ve en zoru: gerçek kullanıcı.
 
 Bu serinin kendisi de o kararlardan biri: süreci saklamak yerine göstermek. Çünkü bir ürünün slopware olmadığının en iyi kanıtı, altındaki kararların hesabını verebilmesi.
+
+## essay 5 — beyni kiralamadım, ağzı kiraladım
+
+bu hafta mesaj analiz ürünüme büyük dil modeli bağladım. ilginç olan ne bağladığım değil, neyi bağlamadığım.
+
+ürünün işi tek cümle: bir sohbet yapıştırıyorsun, "flört var mı, yok mu?" sorusuna net cevap alıyorsun. bu cevabı baştan beri cihazda çalışan kendi küçük istatistik modelim veriyor: kim daha çok yazmış, kim soru sormuş, hangi red flag kalıpları geçmiş; hepsi sayılıyor, hiçbiri uydurulmuyor. sorun cevapta değil, cümlelerdeydi. kırk tane elle yazılmış şablonum vardı ve herkes aynı yazıyı görüyordu. ilk gerçek kullanıcı yorumu acımasızdı: "generik, ai gibi."
+
+ilk refleks tahmin edilebilir: her şeyi gpt'ye devret. bunu yapmadım, çünkü o zaman ürünüm bir sargı kağıdı olurdu; hüküm de, hata da, kimlik de kiralık olurdu. onun yerine işi ikiye böldüm. hükmü, yüzdeleri ve sayımları cihazdaki motor veriyor; bunlar değişmez, kanun. llama ise o raporu alıp arkadaşının atacağı mesaja çeviriyor ve sohbette gözden kaçanları söylüyor: "hep kendini anlatmış, sana bir kez bile sen nasılsın dememiş." kural şu: her gözlem sohbetten gerçek bir alıntıyla kanıtlanmak zorunda. alıntı bulamıyorsa o gözlemi yazamıyor.
+
+bu mimarinin üç getirisi oldu. bir: tutarlılık. aynı sohbete hep aynı karar çıkıyor çünkü karar deterministik; sadece anlatım tazeleniyor. iki: dayanıklılık. bulut çökerse, kota biterse, kullanıcı onay vermezse şablonlar devrede; ürün internetsiz de cevap veriyor. üç: dürüstlük. yapay zekanın en tehlikeli huyu olan "güzel yazılmış uydurma", sayıları değiştiremediği bir kafese kapatıldı.
+
+isim de bu hafta değişti: whatdoyoumean gitti, mesajibirokusana geldi. türkçe bir ürünün ingilizce ismi ağızdan ağıza yayılamıyor; yeni isim zaten ürünü kullanırken kurduğun cümle. bir de hüküm dili netleşti: "kıvılcım var ama dosya kapanmadı" tarzı orta yol cümlelerini sildim. varsa var, yoksa yok. dürüstlük kanıt satırında yaşamaya devam ediyor, ama başlık artık taraf tutuyor.
+
+ders: yapay zekayı ürünün beyni yapmak kolay ve tembel bir karar. onu spiker yapmak, beyni kendinde tutmak daha çok iş; ama ürünü senin yapan da o iş.
