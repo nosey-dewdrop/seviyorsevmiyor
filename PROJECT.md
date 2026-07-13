@@ -38,7 +38,7 @@ shrinks over time. See CLAUDE.md for the full cascade contract.
 - [x] **Faz 4 — WhatsApp .txt/.zip:** JSZip + WhatsApp line parser.
 - [ ] **Faz 5 — Reveal + design:** chat-bubble output, onboarding, emotional layer, damla-ui pass.
 - [x] **Faz 6 — KVKK + security:** privacy, consent, third-party warning, rate-limit hardening, sec pass.
-- [ ] **Faz 7 — Paywall + revenue.**
+- [~] **Faz 7 — Paywall + revenue:** magic-link auth on the shared Supabase, premium flag, paywall sheet + local quota. OPEN: payment provider (Paddle vs Lemon Squeezy) + server-enforced quota.
 - [ ] **Faz 8 (ongoing) — beaver:** retrain from consented hard cases; option to upgrade to BERTurk later.
 
 ## Label schema (seed set, train/data.jsonl)

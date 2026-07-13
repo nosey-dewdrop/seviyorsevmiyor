@@ -13,7 +13,7 @@
 <div class="wrap">
   <header class="site-head">
     <span class="brand">whatdoyoumean<span class="dot">.</span></span>
-    <span class="muted">alt-metin okuyucu</span>
+    <button class="lang-toggle" id="authBtn">Giriş</button>
   </header>
 
   <section class="hero">
@@ -82,6 +82,31 @@
       <li><b>Emin değilse.</b> Sadece zor vakada, senin onayınla buluta sorar. Onu da zamanla öğrenip bırakır.</li>
     </ol>
     <button class="btn" id="onboardClose">Başla</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="authSheet">
+  <div class="sheet">
+    <h2>Giriş yap</h2>
+    <p class="muted">Şifre yok. E-postana bir bağlantı gönderiyoruz, tıklayınca girmiş oluyorsun.</p>
+    <input type="email" id="authEmail" class="paste" style="min-height:auto;height:46px" placeholder="e-posta adresin" />
+    <div class="row">
+      <button class="btn" id="authSend">Bağlantı gönder</button>
+      <button class="btn ghost small" id="authCancel">Vazgeç</button>
+    </div>
+    <p class="muted" id="authMsg"></p>
+  </div>
+</div>
+
+<div class="overlay hidden" id="paywall">
+  <div class="sheet">
+    <h2>Günlük hakkın doldu</h2>
+    <p>Bugünlük ücretsiz okuma bitti. whatdoyoumean premium ile sınırsız okuma, daha derin analiz ve çok-sohbetli ilişki raporu geliyor.</p>
+    <div class="row">
+      <button class="btn" id="pwPremium">Premium (yakında)</button>
+      <button class="btn ghost small" id="pwClose">Kapat</button>
+    </div>
+    <p class="muted">Yarın sayaç sıfırlanır. Giriş yaptıysan premium açıldığında hesabına tanımlanır.</p>
   </div>
 </div>
 

@@ -6,6 +6,7 @@ import { renderReveal } from './ui.js';
 import { cloudRead } from './api.js';
 import { ocrToText } from './ocr.js';
 import { readWhatsApp } from './wa.js';
+import { getUser, sendMagicLink, signOut, isPremium, onAuthChange } from './supa.js';
 
 const FREE_PER_DAY = 5;
 const QKEY = 'wdym.quota.v1';
@@ -24,6 +25,7 @@ const consentBox = $('consentBox');
 
 let parsed = null;   // { messages, speakers, me, ambiguous }
 let lastReveal = null;
+let premium = false;
 
 // ---- quota (paywall groundwork) ----
 function quota() {
@@ -34,6 +36,7 @@ function quota() {
 }
 function saveQuota(q) { try { localStorage.setItem(QKEY, JSON.stringify(q)); } catch {} }
 function renderQuota() {
+  if (premium) { quotaEl.textContent = 'Premium: sınırsız okuma'; return; }
   const q = quota();
   const left = Math.max(0, FREE_PER_DAY - q.used);
   quotaEl.textContent = `Bugün kalan ücretsiz okuma: ${left}/${FREE_PER_DAY}`;
@@ -116,8 +119,8 @@ function renderWhois() {
 goBtn.addEventListener('click', async () => {
   if (!parsed) return;
   const q = quota();
-  if (q.used >= FREE_PER_DAY) {
-    reveal.innerHTML = '<div class="unsure"><b>Günlük ücretsiz hakkın doldu.</b> Sınırsız okuma ve derin analiz için premium yakında açılıyor.</div>';
+  if (!premium && q.used >= FREE_PER_DAY) {
+    $('paywall').classList.remove('hidden');
     return;
   }
   goBtn.disabled = true;
@@ -129,7 +132,7 @@ goBtn.addEventListener('click', async () => {
     const r = buildReveal({ toneResult, messages: parsed.messages, me: parsed.me });
     lastReveal = r;
     showReveal(r);
-    saveQuota({ day: q.day, used: q.used + 1 });
+    if (!premium) saveQuota({ day: q.day, used: q.used + 1 });
     renderQuota();
     resetBtn.classList.remove('hidden');
     reveal.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -189,5 +192,49 @@ $('onboardClose').addEventListener('click', () => {
   $('onboard').classList.add('hidden');
   try { localStorage.setItem(ONBOARD_KEY, '1'); } catch {}
 });
+
+// ---- auth + paywall ----
+const authBtn = $('authBtn');
+const authSheet = $('authSheet');
+const authMsg = $('authMsg');
+
+function openAuth() { authSheet.classList.remove('hidden'); $('authEmail').focus(); }
+function closeAuth() { authSheet.classList.add('hidden'); authMsg.textContent = ''; }
+
+authBtn.addEventListener('click', async () => {
+  const user = await getUser();
+  if (user) {
+    if (confirm(`${user.email} olarak girdin. Çıkış yapılsın mı?`)) { await signOut(); location.reload(); }
+  } else { openAuth(); }
+});
+$('authCancel').addEventListener('click', closeAuth);
+$('authSend').addEventListener('click', async () => {
+  const email = $('authEmail').value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { authMsg.textContent = 'Geçerli bir e-posta gir.'; return; }
+  authMsg.textContent = 'Gönderiliyor…';
+  try { await sendMagicLink(email); authMsg.textContent = 'Bağlantı gönderildi. E-postandaki linke tıkla.'; }
+  catch (e) { authMsg.textContent = e.message; }
+});
+
+$('pwClose').addEventListener('click', () => $('paywall').classList.add('hidden'));
+$('pwPremium').addEventListener('click', async () => {
+  if (!(await getUser())) { $('paywall').classList.add('hidden'); openAuth(); return; }
+  alert('Premium çok yakında. Giriş yaptığın için açıldığında hesabına tanımlanacak.');
+});
+
+async function refreshAuthUi() {
+  const user = await getUser();
+  if (user) {
+    premium = await isPremium();
+    authBtn.textContent = premium ? 'Premium' : user.email.split('@')[0];
+    closeAuth();
+  } else {
+    premium = false;
+    authBtn.textContent = 'Giriş';
+  }
+  renderQuota();
+}
+onAuthChange(() => refreshAuthUi());
+refreshAuthUi();
 
 renderQuota();

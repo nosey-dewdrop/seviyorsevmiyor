@@ -58,3 +58,13 @@ hook: sohbeti yazmak zor, çoğu insan ekran görüntüsü atıyor. ben görünt
 ekran görüntüsü sekmesini açtım. bir sohbet fotosu seçiyorsun, tesseract ile cihazında türkçe okunuyor, görsel hiçbir yere gitmiyor. asıl numara şu: chat ekranlarında bir kişinin baloncukları solda, diğerininki sağda durur. o yüzden her satırın x konumuna bakıp "sol" ve "sağ" diye ayırıyorum, yani kimin yazdığını tahmin ediyorum. çıkan metni düzenlenebilir şekilde yapıştır kutusuna koyuyorum, sen de "bu sohbette ben hangisiyim" diye seçiyorsun. yanlış olduysa elle düzeltebiliyorsun.
 
 whatsapp sekmesini de açtım. sohbeti dışa aktarıp .txt ya da .zip olarak veriyorsun, zip'i tarayıcıda açıp içinden _chat.txt'yi çıkarıyorum, hepsi cihazında. böylece üç giriş yolu da (yapıştır, ekran görüntüsü, whatsapp) aynı okuma motoruna iniyor.
+
+---
+
+## 06 — "kendi supabase'imi açmadım, damlahelloworld'ün ortak hesabına bağladım"
+
+hook: her uygulama kendi kullanıcı sistemini kurunca dağılıyorsun. ben whatdoyoumean'i şirketin ortak kimlik sunucusuna bağladım.
+
+paywall'ın iskeletini kurdum ama sıfırdan bir backend açmadım. damlahelloworld'ün tek ortak supabase projesi var, tüm uygulamalar onu kullanacak, ben de whatdoyoumean'i ona bağladım. tablolarımı wdym_ önekiyle açıyorum ki aynı projede diğer uygulamalarla karışmasın. giriş şifresiz: e-postana bir bağlantı gidiyor, tıklıyorsun, giriyorsun. premium durumu kullanıcının profilinden okunuyor, satırı sadece o kişi görebiliyor, kimse tarayıcıdan kendini premium yapamıyor çünkü o alan sunucu tarafında açılacak.
+
+her şeyi de kırılmaya karşı yazdım: supabase yüklenmezse ya da tablo henüz açılmamışsa uygulama çökmüyor, herkes ücretsiz sayaçla devam ediyor. günlük hak dolunca premium ekranı çıkıyor, şimdilik "yakında" çünkü ödeme sağlayıcısı (paddle mı lemon squeezy mi) damla'nın kararı. bir de ortak projeye çalıştırması için hazır sql şemasını repoya koydum.
