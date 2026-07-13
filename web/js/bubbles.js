@@ -29,7 +29,7 @@ if (cvs) {
     cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     // fewer, so a solid sea has room to breathe without constant gridlock
-    const target = Math.min(34, Math.max(10, Math.round((W * H) / 42000)));
+    const target = Math.min(16, Math.max(6, Math.round((W * H) / 110000)));
     if (bubbles.length !== target) spawn(target);
   }
 
@@ -65,12 +65,13 @@ if (cvs) {
     ctx.clearRect(0, 0, W, H);
     const dark = isDark();
     for (const b of bubbles) {
-      ctx.globalAlpha = b.alpha;
       const s = b.sprite;
       if (dark && s && s.complete && s.naturalWidth) {
-        const dw = b.w * 2, dh = dw * (s.naturalHeight / s.naturalWidth);
-        ctx.drawImage(s, b.x - dw / 2, b.y - dh / 2, dw, dh);
+        ctx.globalAlpha = 1;                                    // solid matter, not ghosts
+        const dw = b.r * 2, dh = dw * (s.naturalHeight / s.naturalWidth);
+        ctx.drawImage(s, b.x - dw / 2, b.y - dh / 2, dw, dh);   // visual width = collision diameter
       } else {
+        ctx.globalAlpha = b.alpha;
         ctx.fillStyle = b.color;
         bubblePath(b.x, b.y, b.w, b.h); ctx.fill();
       }
