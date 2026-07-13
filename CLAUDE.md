@@ -77,3 +77,10 @@ Site = gh-pages subtree push (stitchu pattern). Worker = Cloudflare (Gemini fall
 + APP_TOKEN as wrangler secrets, x-app-token from the app. Damla supplies the Gemini key + does OAuth.
 
 Read PROJECT.md for the full roadmap and open items.
+
+## Build story (13 Tem format)
+- `linkedin.md` — the numbered build story (idea origin → why each addition → pivots + the decision
+  underneath → road to a real product). Damla's standing format for ALL projects.
+- `devlog.md` (renamed from devlog-tr.md) — same spirit during development.
+- EVERY entry in both = a 30-60s reel script, first line is the hook. No count limit. All entries
+  must come from the real history (commits/plan) — no fabricated steps.
