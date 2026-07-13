@@ -78,9 +78,12 @@ Site = gh-pages subtree push (stitchu pattern). Worker = Cloudflare (Gemini fall
 
 Read PROJECT.md for the full roadmap and open items.
 
-## Build story (13 Tem format)
-- `linkedin.md` — the numbered build story (idea origin → why each addition → pivots + the decision
-  underneath → road to a real product). Damla's standing format for ALL projects.
-- `devlog.md` (renamed from devlog-tr.md) — same spirit during development.
-- EVERY entry in both = a 30-60s reel script, first line is the hook. No count limit. All entries
-  must come from the real history (commits/plan) — no fabricated steps.
+## Build story (13 Tem format — Damla's standing format for ALL projects)
+- `linkedin.md` — damla essays: 300-500 word blog posts, each carrying the numbered chain (idea
+  origin + the feeling → why each addition → pivots + the decision underneath → road to a real
+  product). Never inflate one sentence into a post.
+- `devlog.md` (renamed from devlog-tr.md) — Instagram build-in-public: the SMALLEST possible pieces,
+  lots of content (no limit, "yüz reels olabilir"). Reel / post / carousel. Every entry = a 30-60s
+  hooked reel script, spoken dev-diary voice: "bugün şunu değiştirdim arkadaşlar, çünkü şöyle bir
+  sorun vardı" (problem → change → decision underneath).
+- All entries must come from the real history (commits/plan) — no fabricated steps.
