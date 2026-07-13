@@ -80,13 +80,16 @@ export async function buildShareCard(r) {
   x.font = 'italic 500 52px Fraunces, Georgia, serif';
   for (const line of wrap(x, r.kapanis, W - PAD * 2)) { x.fillText(line, PAD, y); y += 70; }
 
-  // footer
+  // footer: the dare (how-bad-is-your-spotify energy), then the address, then the honest small print
+  x.fillStyle = '#fafafa';
+  x.font = 'italic 600 52px Fraunces, Georgia, serif';
+  x.fillText('peki senin sohbetin ne diyor?', PAD, H - 210);
+  x.fillStyle = '#a1a1aa';
+  x.font = '500 38px Inter, sans-serif';
+  x.fillText('cesaretin varsa: damlahelloworld.github.io/whatdoyoumean', PAD, H - 140);
   x.fillStyle = '#52525b';
-  x.font = '400 34px Inter, sans-serif';
-  x.fillText('otomatik tahmin · analiz cihazda yapıldı', PAD, H - 150);
-  x.fillStyle = '#71717a';
-  x.font = '500 36px Inter, sans-serif';
-  x.fillText('damlahelloworld.github.io/whatdoyoumean', PAD, H - 90);
+  x.font = '400 32px Inter, sans-serif';
+  x.fillText('otomatik tahmin · analiz cihazda yapıldı, mesajlar görselde yok', PAD, H - 82);
 
   return c;
 }
