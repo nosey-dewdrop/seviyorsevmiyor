@@ -34,10 +34,18 @@
   </div>
 
   <div class="pane hidden" id="pane-shot">
-    <div class="dropzone">Ekran görüntüsü okuma (cihazında OCR) bir sonraki sürümde açılıyor.</div>
+    <label class="dropzone" id="shotZone">
+      <input type="file" id="shotInput" accept="image/*" hidden />
+      Bir sohbet ekran görüntüsü seç. Metin cihazında okunur (OCR), görsel yüklenmez.
+    </label>
+    <p class="paste-hint muted">Sol/sağ baloncuk konumundan kimin yazdığını tahmin eder; sonucu düzeltebilirsin.</p>
   </div>
   <div class="pane hidden" id="pane-wa">
-    <div class="dropzone">WhatsApp .txt / .zip dışa aktarımı bir sonraki sürümde açılıyor.</div>
+    <label class="dropzone" id="waZone">
+      <input type="file" id="waInput" accept=".txt,.zip" hidden />
+      WhatsApp dışa aktarımını (.txt ya da .zip) seç. Tarayıcında açılır, yüklenmez.
+    </label>
+    <p class="paste-hint muted">WhatsApp'ta sohbet → ⋮ → Dışa aktar → medyasız. Dosya cihazında çözülür.</p>
   </div>
 
   <div class="whois hidden" id="whois">

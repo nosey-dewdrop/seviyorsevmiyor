@@ -4,6 +4,8 @@ import { parseChat, toDoc } from './parse.js';
 import { buildReveal } from './reveal.js';
 import { renderReveal } from './ui.js';
 import { cloudRead } from './api.js';
+import { ocrToText } from './ocr.js';
+import { readWhatsApp } from './wa.js';
 
 const FREE_PER_DAY = 5;
 const QKEY = 'wdym.quota.v1';
@@ -43,6 +45,49 @@ document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () 
   t.classList.add('active');
   ['paste', 'shot', 'wa'].forEach((k) => $(`pane-${k}`).classList.toggle('hidden', k !== t.dataset.tab));
 }));
+
+// ---- screenshot (OCR) + WhatsApp file inputs feed the same paste flow ----
+function activateTab(name) {
+  document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x.dataset.tab === name));
+  ['paste', 'shot', 'wa'].forEach((k) => $(`pane-${k}`).classList.toggle('hidden', k !== name));
+}
+function ingestText(text) {
+  pasteBox.value = (text || '').trim();
+  activateTab('paste');
+  refreshParse();
+  pasteBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+const shotZone = $('shotZone');
+$('shotInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  shotZone.classList.add('hot');
+  shotZone.lastChild.textContent = ' Ekran görüntüsü okunuyor…';
+  try {
+    const text = await ocrToText(file, (p) => { shotZone.lastChild.textContent = ` Okunuyor… %${Math.round(p * 100)}`; });
+    if (!text) throw new Error('Metin çıkmadı');
+    ingestText(text);
+  } catch (err) {
+    shotZone.lastChild.textContent = ' Okunamadı, başka bir görsel dene ya da metni yapıştır.';
+  } finally {
+    shotZone.classList.remove('hot');
+    e.target.value = '';
+  }
+});
+
+$('waInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await readWhatsApp(file);
+    ingestText(text);
+  } catch (err) {
+    $('waZone').lastChild.textContent = ' ' + (err.message || 'Dosya okunamadı');
+  } finally {
+    e.target.value = '';
+  }
+});
 
 // ---- parse as the user types ----
 pasteBox.addEventListener('input', refreshParse);

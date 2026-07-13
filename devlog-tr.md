@@ -48,3 +48,13 @@ burada hassas bir şey var: kişi başkasının da olduğu bir sohbeti yüklüyo
 hook: çoğu yapay zeka emin olmadığında bile kendinden emin konuşur. benimki emin değilse bunu açıkça yazıyor.
 
 kademeli motorun kalbini bağladım. model bir sohbete baktığında bir de güven marjı üretiyor. marj düşükse, yani en yakın iki ton birbirine çok yakınsa, cevabın üstüne "bu vakada emin değilim, sinyaller karışık" notunu koyuyorum ve "buluta sor" düğmesi çıkıyor. bastığında sohbet, onay kutusu işaretliyse, isim taşımadan bir cloudflare worker'ına gidiyor, o da gemini'ye soruyor ve cevabı aynı sohbet baloncuğu ekranında "buluttan" etiketiyle gösteriyor. worker gemini anahtarını saklayan tek yer, içeriği loglamıyor, dakikada ve günde ip başına sınırı var. şu an kapalı geliyor çünkü her çağrı para, damla kendi google anahtarını girip açacak. güzel taraf şu: bu buluta giden zor vakalar ileride modeli yeniden eğitmek için birikip fallback'i küçültecek.
+
+---
+
+## 05 — "ekran görüntüsünü de okuyor, üstelik kimin yazdığını baloncuğun yerinden anlıyor"
+
+hook: sohbeti yazmak zor, çoğu insan ekran görüntüsü atıyor. ben görüntüyü okuyorum ama düz metne çevirip bırakmıyorum.
+
+ekran görüntüsü sekmesini açtım. bir sohbet fotosu seçiyorsun, tesseract ile cihazında türkçe okunuyor, görsel hiçbir yere gitmiyor. asıl numara şu: chat ekranlarında bir kişinin baloncukları solda, diğerininki sağda durur. o yüzden her satırın x konumuna bakıp "sol" ve "sağ" diye ayırıyorum, yani kimin yazdığını tahmin ediyorum. çıkan metni düzenlenebilir şekilde yapıştır kutusuna koyuyorum, sen de "bu sohbette ben hangisiyim" diye seçiyorsun. yanlış olduysa elle düzeltebiliyorsun.
+
+whatsapp sekmesini de açtım. sohbeti dışa aktarıp .txt ya da .zip olarak veriyorsun, zip'i tarayıcıda açıp içinden _chat.txt'yi çıkarıyorum, hepsi cihazında. böylece üç giriş yolu da (yapıştır, ekran görüntüsü, whatsapp) aynı okuma motoruna iniyor.

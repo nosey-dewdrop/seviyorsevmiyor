@@ -34,8 +34,8 @@ shrinks over time. See CLAUDE.md for the full cascade contract.
 - [x] **Faz 1 — Own engine v0:** seed labels → numpy logistic model → export weights → JS inference;
       **paste input works end to end** (no Gemini). Report held-out accuracy.
 - [x] **Faz 2 — Confidence threshold + Gemini fallback:** worker proxy, low-confidence routing + consent.
-- [ ] **Faz 3 — Screenshot OCR:** Tesseract.js on-device text extraction → cascade.
-- [ ] **Faz 4 — WhatsApp .txt/.zip:** JSZip + WhatsApp line parser.
+- [x] **Faz 3 — Screenshot OCR:** Tesseract.js on-device text extraction → cascade.
+- [x] **Faz 4 — WhatsApp .txt/.zip:** JSZip + WhatsApp line parser.
 - [ ] **Faz 5 — Reveal + design:** chat-bubble output, onboarding, emotional layer, damla-ui pass.
 - [x] **Faz 6 — KVKK + security:** privacy, consent, third-party warning, rate-limit hardening, sec pass.
 - [ ] **Faz 7 — Paywall + revenue.**

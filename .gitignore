@@ -1,7 +1,6 @@
 .DS_Store
 node_modules/
-train/.venv/
 train/__pycache__/
-*.pyc
-.app-token-note.txt
-train/parity-report.json
+train/.venv/
+backend/.dev.vars
+*.log
