@@ -253,3 +253,9 @@ reveal'i mesajlaşma gibi kurgulamıştım: yazıyor animasyonu, baloncuk, bekle
 hook: tek sayı bazen koca bir yalandır. yüzde 99 flört: doğru ama seni aldatır.
 
 tek taraflı sohbette flört dili gerçekten var, ama tamamı senden. eski ekran tek sayı basıyordu: yüzde 99. yeni ekran iki çubuk gösteriyor: sende yüzde 40, onda yüzde 0. aynı veri, bambaşka gerçek. sayıyı yükselten kelimelerin kimden geldiğini söylemeyen her metrik eksik anlatıdır. (carousel: eski ekran / yeni ekran / "hangi soruyu soruyorsun" kapanışı)
+
+## m17 — "ürünüme kanka gibi konuşmayı öğrettim" (reel)
+
+hook: bugün ürünümün bütün cümlelerini sildim ve yerine arkadaşınızın atacağı mesajları yazdım.
+
+sorun şuydu: analiz doğruydu ama ses kasıntıydı. "ilgi var ama tek yönden akıyor" diyordu; doğru ama kimse bunun ekran görüntüsünü atmaz. yeni hali: "kanka üzülerek söylüyorum, bu maçta tek kale oynanıyor ve kale sensin." aynı veri, aynı hüküm, ama artık paylaşılabilir. soğuk sohbet "klimanın önünde yazışıyor gibisiniz" oldu, "bakarız" cevabı "evrensel dilde hayır ama kibarım demek" oldu. tek istisna bilinçli: kırmızı bayrak basan ekranlar ciddi kaldı, çünkü "kontrol dili" uyarısının altına şaka yazmak ürünü ucuzlatır. mizah her yere değil, güvenli yerlere.

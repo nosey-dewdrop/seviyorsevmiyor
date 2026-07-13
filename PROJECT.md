@@ -47,20 +47,23 @@ shrinks over time. See CLAUDE.md for the full cascade contract.
 One line per example: `{ "text": "<A/B tagged conversation>", "tone": "flirty|friendly|cold|tense" }`.
 `text` uses `A:` / `B:` line prefixes. Interest balance and flags are computed by rules, not labeled.
 
-## Last session (2026-07-13 night — PM pass, v11)
-Walked the product end to end as a customer and closed the gaps: rule-guarded verdict (counted signals
-veto the model — red flags kill a flirty verdict, one-sided reaching gets its own "tek taraflı" verdict
-with per-side flirt numbers), evidence in every claim (count citations + "nasıl okudum?" expandable),
-whole-chat message readings with richer patterns (interrogation, keşke, pursue; excuse-with-acceptance
-guard; deflected plans no longer a green flag), reveal pacing cut ~60% + tap-to-skip, short-chat caveat.
-Seed 169→211 targeting the confusions the walk found; held-out 79%→83.7%, parity ok. Quota + paywall
-REMOVED (free unlimited tool, Damla's 13 Tem direction).
+## Last session (2026-07-13 night marathon, v11→v17 all live)
+PM pass (v11): rule-guarded verdict (red flags veto flirty; one-sided → "tek taraflı" + per-side flirt),
+evidence counts + "nasıl okudum?", whole-chat readings, ~3s reveal + tap-to-skip, quota/paywall removed.
+VC pass (v12): demo-chat button, on-device PNG share card; seed 268 hard-boundary cases (held-out 72.2%
+on the harder set), parity ok; VC/league report at reports/2026-07-13-whatdoyoumean-vc.md.
+Damla design pass (v13-v17): sea = 10-15 bubbles (sizes untouched), textured sprites in BOTH themes,
+hero "sana kırmızı çok yakışıyor / bu kız bana aşık mı? / kesin aşık kanka :D", caps ink privacy badge
+→ gizlilik, share-card dare line, FULL kanka-voice rewrite of the reveal (screenshot-bait, lowercase;
+tense/red-flag screens stay serious). Content system: linkedin.md (4 essays 300-500w) + devlog.md
+(8 session logs + 14 series reels + 16 atomic pieces).
 
 ## Open items
-1. Seed still small (211); grow + human-review — reads improve with data (the whole promise rides on this).
-2. Gemini worker not deployed — Damla supplies key from her Google account → wrangler secret (optional).
-3. Light-mode bubble sea still uses vector bubbles (dark uses textured sprites) — could adapt sprites for light.
-4. EN second engine deferred (do not replace TR) — see CLAUDE.md LATER note.
+1. EN second engine — next big block, greenlit ("lig arttır"); fresh session budget.
+2. Gemini worker not deployed — Damla: wrangler login + GEMINI_API_KEY (fallback flywheel starts here).
+3. OCR never tested on real screenshots — needs 10 samples from Damla, then a quality run.
+4. Seed 268 still small; grow toward 1000 + weekly retrain ritual.
+5. More MJ bubble sprites whenever Damla generates them (drop into web/assets/bubbles/).
 
 ## Revenue model
 None by direction (2026-07-13): free idea-tool, audience first. Money is not a current goal for

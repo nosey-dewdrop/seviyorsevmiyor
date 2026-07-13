@@ -2,37 +2,26 @@
 
 A "read the subtext" site for chats. You paste (or screenshot, or drop a WhatsApp export of) a
 conversation and the engine reads what's really going on: flirty or friendly, who wants it more,
-interest level, green/red flags, and a per-message "what did they mean". Theyseeyourphotos energy,
-but for messaging, printed in a chat-bubble reveal. Born with a paywall. Turkish-first.
+green/red flags, per-message "what did they mean". Theyseeyourphotos energy but for messaging.
+Turkish-first, FREE and unlimited (no quota, no paywall, no accounts — virality tool by design).
 
-STATUS 2026-07-13 (latest, Damla design pass): LIVE (v13) — bubble sea COUNT up (sizes untouched, cap 16→34), textured sprites now in BOTH themes (no vector bubbles in light), hero demo = "sana kırmızı çok yakışıyor" + italic hook "bu kız bana aşık mı?", privacy badge ALL-CAPS ink-colored linking to gizlilik.html. NEXT BIG BLOCK (league, needs a fresh session's budget): EN second engine (lexicons + EN seed + model.en.json + language routing) — Damla greenlit "lig arttır, ne gerekiyorsa". Still Damla-only: wrangler+Gemini key for the fallback flywheel.
-Previous (v12 VC pass): LIVE — demo-chat button (instant first value), on-device PNG share card (viral loop, chat never leaves device), seed 211→268 with HARD boundary cases (held-out 72.2% on the harder set — honest number, not comparable to the easy-set 83.7%), parity 1e-16, 6-scenario product walk green. VC report: reports/2026-07-13-whatdoyoumean-vc.md (league verdict: not Mindra-league TODAY; path = launch wave + live fallback flywheel + EN engine + category growth).
-Previous (v11 PM pass): LIVE at https://damlahelloworld.github.io/whatdoyoumean/. Faz 0–6 shipped; FREE tool — quota + paywall REMOVED entirely (Damla direction 13 Tem: money is not a goal; unlimited reads, no account, nothing stored).
-Deploy: `git subtree split --prefix web -b t && git push -f origin t:gh-pages && git branch -D t`; bump ?v=N + footer stamp each time.
-PM iteration session (13 Tem night): walked the product as a customer, found + fixed the big ones —
-- RULE-GUARDED VERDICT: the model proposes, counted signals veto. ≥2 red-flag kinds kills a flirty/friendly verdict (→ tense, with a "why" line); one-sided reaching (warm language from one side + short/deferring replies from the other) → new "tek taraflı" verdict, flirt shown per side ("sende %40, onda %0") instead of one misleading number. Fixes: argument read as "flört %63", dead one-sided chat read as "flört %99", closing line contradicting the flags.
-- EVIDENCE IN EVERY CLAIM: balance line cites counts ("Sayım (sen–o): mesaj 9–5, soru 3–0"); "nasıl okudum?" expandable at the end (msgs counted, model verdict + confidence, whether rules overrode it, flag counts, on-device note).
-- READINGS: scan the WHOLE chat (was: first 3 matches), one per pattern kind, max 4, new patterns (interrogation ≠ real question, keşke, pursue, excuse-with-acceptance guard); plans deflected by "bakarız" no longer count as a green flag.
-- REVEAL PACING: waits cut ~60% (7-10s → ~3s), tap-anywhere-to-skip with a hint line; short chats (<6 msgs) get an honest caveat + unsure.
-- SEED 169→211 (targeted at the three confusions), held-out 79%→83.7%, parity ok.
+STATUS 2026-07-13 night: LIVE at https://damlahelloworld.github.io/whatdoyoumean/ (v17).
+One marathon session shipped v11→v17: rule-guarded verdict (counted signals veto the model:
+red flags kill flirty, one-sided gets "tek taraflı" with per-side flirt), evidence counts +
+"nasıl okudum?" expandable, whole-chat readings, ~3s reveal + tap-to-skip, demo-chat button,
+on-device PNG share card with roast dare line, denser sea (10-15 bubbles, Damla's spec) with
+textured sprites in both themes, hero = "sana kırmızı çok yakışıyor / bu kız bana aşık mı? /
+kesin aşık kanka :D", caps ink privacy badge → gizlilik. VOICE LAW: playful screenshot-bait
+"kanka" register, lowercase, Damla-calibrated; tense + red-flag screens STAY SERIOUS.
+Seed 268 (hard boundary cases), held-out 72.2% on the harder set (old easy-set 83.7% is not
+comparable), parity 1e-16. VC/PM/league report: reports/2026-07-13-whatdoyoumean-vc.md.
 
-DAMLA'S TODO (all optional, none block):
-1. Worker — ONLY if you want the "buluta sor" cloud fallback live: `cd backend && wrangler login` → KV → `wrangler secret put GEMINI_API_KEY` (your Google AI Studio key) + `APP_TOKEN` → PUBLIC_READ="on" → `wrangler deploy`. Until then the button says "cloud read not open" (graceful).
-2. Grow train/data.jsonl further + re-run train.py (reads sharpen with data).
-3. Generate more bubble sprites in Midjourney if you want; drop into web/assets/bubbles/ and I bump the version.
-
-LATER (Damla, deferred to save tokens 2026-07-13): add a SECOND engine for English — do NOT replace the Turkish one. Needs EN lexicons (features/balance), EN labeled seed data + model.en.json, EN reveal templates, and a TR/EN toggle with language routing. Only once the TR engine's data has grown; theyseeyourphotos is EN + global = bigger reach.
-
-
-- Faz 1: own tone engine (numpy tfidf+logistic, 120-example TR seed, 79% held-out), on-device JS inference,
-  Python↔JS parity harness (diff 1e-16), paste + WhatsApp-text parsing, deterministic balance + flag rules,
-  templated TR reveal, chat-bubble UI, onboarding, daily free quota. Verified end to end in Node.
-- Faz 2: Gemini fallback worker (backend/, PUBLIC_READ off by default) + on-device confidence threshold;
-  low-confidence conversations show a "buluta sor" button (consent-gated). Worker NOT deployed (Damla: Google key + wrangler login).
-- Faz 6: gizlilik.html (KVKK/GDPR), third-party-consent checkbox, no persistent storage, worker logs no content.
-- OPEN: retrain repo path (data.jsonl is a small honest seed — grow it), screenshot OCR (Faz 3), WhatsApp .zip (Faz 4),
-  paywall provider + real gate (Faz 7), deploy (gh-pages + worker), EN copy. See PROJECT.md.
-- Retrain: `python3 train/train.py` (writes web/data/model.json). Verify: `python3 train/parity_check.py && node train/parity_check.mjs`.
+NEXT: EN second engine in a fresh session (lexicons + EN seed + model.en.json + routing;
+greenlit "lig arttır"). DAMLA-ONLY: worker deploy (`cd backend && wrangler login` → secrets
+GEMINI_API_KEY + APP_TOKEN → PUBLIC_READ=on → deploy) for the fallback flywheel; 10 real
+screenshots for an OCR quality run; more MJ bubble sprites if she wants.
+Deploy: `git subtree split --prefix web -b t && git push -f origin t:gh-pages && git branch -D t`; bump ?v=N + footer.
+Retrain: `python3 train/train.py`; verify `python3 train/parity_check.py && node train/parity_check.mjs`; product walk harness lives at /tmp/wdym_walk.mjs (recreate from git history of this note if gone).
 
 ## The one non-negotiable idea: cascade, not wrapper
 This is NOT a GPT/Gemini wrapper. The engine is a **cascade**:
