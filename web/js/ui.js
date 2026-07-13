@@ -164,7 +164,7 @@ export async function playReveal(root, r, messages, me) {
   sbtn.addEventListener('click', async () => {
     sbtn.disabled = true; sbtn.textContent = 'Hazırlanıyor…';
     try {
-      const { shareReveal } = await import('./share.js?v=12');
+      const { shareReveal } = await import('./share.js?v=13');
       const how = await shareReveal(r);
       sbtn.textContent = how === 'downloaded' ? 'İndirildi' : how === 'shared' ? 'Paylaşıldı' : 'Sonucu görsel al';
     } catch { sbtn.textContent = 'Olmadı, tekrar dene'; }

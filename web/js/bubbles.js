@@ -14,8 +14,6 @@ if (cvs) {
   const sprites = Array.from({ length: 14 }, (_, i) => {
     const im = new Image(); im.src = `./assets/bubbles/b${String(i).padStart(2, '0')}.png?v=9`; return im;
   });
-  const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
-
   let W = 0, H = 0, DPR = 1;
   let bubbles = [];                          // each: {x,y = CENTER, w, h, r, vx, vy, color, alpha}
   const pointer = { x: -9999, y: -9999, on: false };
@@ -28,8 +26,8 @@ if (cvs) {
     W = cvs.clientWidth; H = cvs.clientHeight;
     cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    // fewer, so a solid sea has room to breathe without constant gridlock
-    const target = Math.min(16, Math.max(6, Math.round((W * H) / 110000)));
+    // denser sea (Damla, 13 Tem: COUNT up, size untouched) — still solid, spawn guard prevents gridlock
+    const target = Math.min(34, Math.max(12, Math.round((W * H) / 48000)));
     if (bubbles.length !== target) spawn(target);
   }
 
@@ -63,10 +61,11 @@ if (cvs) {
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    const dark = isDark();
+    // Damla 13 Tem: her textured sprites in BOTH themes (no vector bubbles in light mode);
+    // the colored vector path stays only as a fallback while a sprite is still loading.
     for (const b of bubbles) {
       const s = b.sprite;
-      if (dark && s && s.complete && s.naturalWidth) {
+      if (s && s.complete && s.naturalWidth) {
         ctx.globalAlpha = 1;                                    // solid matter, not ghosts
         const dw = b.r * 2, dh = dw * (s.naturalHeight / s.naturalWidth);
         ctx.drawImage(s, b.x - dw / 2, b.y - dh / 2, dw, dh);   // visual width = collision diameter
