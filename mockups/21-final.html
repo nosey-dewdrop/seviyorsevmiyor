@@ -28,18 +28,18 @@
   .giris { position:relative; z-index:1; max-width:1000px; margin:40px auto 0; }
   .kaynaklar { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
   @media (max-width:760px){ .kaynaklar { grid-template-columns:1fr; } }
-  .kaynak { background:#232327; border:1px dashed #4a4a52; padding:26px 22px 24px; cursor:pointer; transition:border-color .15s, background .15s; }
+  .kaynak { background:#232327; border:1px dashed #4a4a52; border-radius:14px; padding:26px 22px 24px; cursor:pointer; transition:border-color .15s, background .15s; }
   .kaynak:hover { border-color:#fafafa; background:#28282d; }
   .kaynak .k-ad { color:#fafafa; font-size:15px; font-weight:700; margin-bottom:8px; }
   .kaynak .k-kisa { font-family:Helvetica,Arial,sans-serif; font-size:13.5px; line-height:1.7; color:#a1a1aa; }
-  .kaynak .k-tus { display:inline-block; margin-top:12px; font-size:11px; color:#8a8a92; border:1px solid #3a3a40; padding:3px 8px; }
+  .kaynak .k-tus { display:inline-block; margin-top:12px; font-size:11px; color:#8a8a92; border:1px solid #3a3a40; border-radius:6px; padding:3px 8px; }
   .demo { margin-top:18px; text-align:center; font-size:13px; }
-  .demo button { background:none; border:0; color:#3ddc8a; font:inherit; font-size:13px; cursor:pointer; text-decoration:underline; }
+  .demo button { background:none; border:0; color:#ff8a70; font:inherit; font-size:13px; cursor:pointer; text-decoration:underline; }
 
   .akis { position:relative; z-index:1; max-width:640px; margin:70px auto 0; display:none;
     font-family:Helvetica,Arial,sans-serif; font-size:19px; line-height:1.65; color:#e4e4e7; min-height:200px; }
   .akis.on { display:block; }
-  .akis .imlec { display:inline-block; width:9px; height:18px; background:#3ddc8a; vertical-align:-3px; animation:blink 1s steps(1) infinite; }
+  .akis .imlec { display:inline-block; width:9px; height:18px; background:#ff8a70; vertical-align:-3px; animation:blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity:0; } }
 
   .sahne { position:relative; z-index:1; display:none; grid-template-columns:430px 1fr; gap:64px; max-width:1150px; margin:60px auto 0; align-items:start; }
@@ -47,7 +47,7 @@
   @media (max-width:900px){ .sahne { grid-template-columns:1fr; gap:40px; } }
   @keyframes otur { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
 
-  .kart { background:#232327; border:1px solid #3a3a40; padding:26px 24px 24px; }
+  .kart { background:#232327; border:1px solid #3a3a40; border-radius:16px; padding:26px 24px 24px; }
   .kart .marka { font-size:12.5px; color:#8a8a92; display:flex; justify-content:space-between; margin-bottom:20px; }
   .kart .hukum { color:#fafafa; font-size:26px; font-weight:700; line-height:1.35; margin-bottom:20px; }
 
@@ -66,33 +66,33 @@
   }
   .t-soz { text-align:center; font-size:12px; color:#8a8a92; margin-bottom:16px; }
   .t-etiketler { display:flex; justify-content:space-between; font-size:12px; line-height:1.7; margin-bottom:16px; }
-  .t-etiketler .sen { color:#3ddc8a; }
+  .t-etiketler .sen { color:#ff8a70; }
   .t-etiketler div { max-width:48%; }
   .t-etiketler .sag { text-align:right; }
 
   .barlar { border-top:1px solid #3a3a40; padding-top:16px; margin-bottom:14px; }
   .barlar .b-etiket { font-size:12px; margin-bottom:6px; display:flex; justify-content:space-between; }
   .barlar .dizi { display:flex; align-items:flex-end; gap:3px; height:44px; margin-bottom:14px; }
-  .barlar .dizi i { flex:1; background:#3ddc8a; min-height:2px; }
+  .barlar .dizi i { flex:1; background:#ff8a70; min-height:2px; border-radius:4px 4px 0 0; }
   .barlar .dizi.o i { background:#4a4a52; }
   .olcumler { font-size:12.5px; line-height:2.1; border-top:1px solid #3a3a40; padding-top:12px; margin-bottom:14px; }
   .olcumler b { color:#fafafa; font-weight:700; }
   .kart .kisa { font-family:Helvetica,Arial,sans-serif; font-size:15px; line-height:1.6; color:#b6b6bd; border-top:1px solid #3a3a40; padding-top:14px; }
   .kart .dip { font-size:9.5px; color:#8a8a92; margin-top:14px; }
-  .indir { margin-top:14px; width:100%; background:#fafafa; color:#1a1a1e; border:0; font:inherit; font-size:12px; font-weight:700; padding:11px; cursor:pointer; }
+  .indir { margin-top:14px; width:100%; background:#fafafa; color:#1a1a1e; border:0; border-radius:9px; font:inherit; font-size:12px; font-weight:700; padding:11px; cursor:pointer; }
 
   .yorum { font-family:Helvetica,Arial,sans-serif; font-size:18px; line-height:1.65; color:#e4e4e7; max-width:560px; }
   .yorum p { margin-bottom:18px; }
   .yorum b { color:#fafafa; font-weight:700; }
   .yorum p.satir { cursor:pointer; }
-  .yorum p.satir:hover::after { content:" yanlış mı?"; font-size:12px; color:#3ddc8a; }
-  .gerekce { display:none; background:#232327; border:1px solid #3a3a40; padding:16px 18px; margin:-6px 0 20px; font-size:14px; line-height:1.65; color:#b6b6bd; }
+  .yorum p.satir:hover::after { content:" yanlış mı?"; font-size:12px; color:#ff8a70; }
+  .gerekce { display:none; background:#232327; border:1px solid #3a3a40; border-radius:12px; padding:16px 18px; margin:-6px 0 20px; font-size:14px; line-height:1.65; color:#b6b6bd; }
   .gerekce.on { display:block; }
   .gerekce .g-b { font-size:11px; letter-spacing:1px; color:#8a8a92; display:block; margin:8px 0 4px; }
   .gerekce .g-b:first-child { margin-top:0; }
-  .gerekce .bagis { margin-top:12px; background:none; border:1px solid #3ddc8a; color:#3ddc8a; font:inherit; font-size:12px; padding:7px 12px; cursor:pointer; }
+  .gerekce .bagis { margin-top:12px; background:none; border:1px solid #ff8a70; border-radius:8px; color:#ff8a70; font:inherit; font-size:12px; padding:7px 12px; cursor:pointer; }
   .yorum .itiraz { font-size:12.5px; color:#8a8a92; }
-  .yorum .itiraz a { color:#3ddc8a; text-decoration:none; }
+  .yorum .itiraz a { color:#ff8a70; text-decoration:none; }
 </style>
 </head>
 <body>
@@ -144,7 +144,7 @@
         <g class="t-pan-l">
           <line x1="60" y1="49" x2="38" y2="118" stroke="#6a6a72" stroke-width="2"/>
           <line x1="60" y1="49" x2="82" y2="118" stroke="#6a6a72" stroke-width="2"/>
-          <path d="M28 118 L92 118 Q90 146 60 146 Q30 146 28 118 Z" fill="#3ddc8a"/>
+          <path d="M28 118 L92 118 Q90 146 60 146 Q30 146 28 118 Z" fill="#ff8a70"/>
         </g>
         <!-- sag kefe (O) -->
         <g class="t-pan-r">
@@ -161,7 +161,7 @@
     </div>
 
     <div class="barlar">
-      <div class="b-etiket"><span style="color:#3ddc8a">SEN · mesaj boyu</span><span>kelime / mesaj</span></div>
+      <div class="b-etiket"><span style="color:#ff8a70">SEN · mesaj boyu</span><span>kelime / mesaj</span></div>
       <div class="dizi" id="barSen"></div>
       <div class="b-etiket"><span>O · mesaj boyu</span><span id="barOzet"></span></div>
       <div class="dizi o" id="barO"></div>
@@ -300,9 +300,9 @@ document.getElementById('indir').addEventListener('click', function () {
     x.quadraticCurveTo(px + 56, py + 172, px, py + 172);
     x.quadraticCurveTo(px - 56, py + 172, px - 60, py + 120); x.closePath(); x.fill();
   };
-  kefe(cx - kolX, ty - kolY, '#3ddc8a');
+  kefe(cx - kolX, ty - kolY, '#ff8a70');
   kefe(cx + kolX, ty + kolY, '#4a4a52');
-  x.fillStyle = '#3ddc8a'; x.font = '30' + mono;
+  x.fillStyle = '#ff8a70'; x.font = '30' + mono;
   x.fillText('SEN: ' + V.senSoru + ' soru · başlatan sen', 130, ty + 420);
   x.fillStyle = '#8a8a92'; x.textAlign = 'right';
   x.fillText('O: %' + V.kuruOran + ' kuru cevap', 950, ty + 420); x.textAlign = 'left';
@@ -317,7 +317,7 @@ document.getElementById('indir').addEventListener('click', function () {
     });
   };
   x.fillStyle = '#8a8a92'; x.font = '26' + mono;
-  x.fillText('SEN · mesaj boyu (kelime)', 130, 1180); ciz(V.senKelimeler, 1340, '#3ddc8a');
+  x.fillText('SEN · mesaj boyu (kelime)', 130, 1180); ciz(V.senKelimeler, 1340, '#ff8a70');
   x.fillText('O · mesaj boyu (kelime)', 130, 1400); ciz(V.oKelimeler, 1560, '#4a4a52');
 
   x.fillStyle = '#e4e4e7'; x.font = '31' + helv;
