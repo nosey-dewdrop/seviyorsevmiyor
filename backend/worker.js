@@ -199,7 +199,7 @@ async function handleSpiker(request, env) {
   let out;
   try { out = JSON.parse(text); } catch { return json({ error: 'Could not read this one' }, 502); }
 
-  const spiker = validateSpiker(out, Array.isArray(facts.okumalar) ? facts.okumalar.length : 0);
+  const spiker = validateSpiker(out, Array.isArray(facts.okumalar) ? facts.okumalar.length : 0, doc);
   if (!spiker) return json({ error: 'Could not read this one' }, 502);
   const serious = facts?.hukum?.tur === 'tense' || (facts?.sayim?.red_flag_turu || 0) >= 1;
   postProcess(spiker, serious);
@@ -230,8 +230,23 @@ function postProcess(spiker, serious) {
 
 // The client merges these over its template lines; anything malformed is dropped so the
 // on-device templates always remain the floor.
-function validateSpiker(out, readingCount) {
+// A quote counts as real evidence only if it actually appears in the conversation. Llama
+// sometimes invents "kanit" strings (e.g. "sen de fazla kaptirmissin" that no one said); we
+// normalize both sides (lowercase TR, collapse whitespace, strip punctuation) and require the
+// quote to be a substring of the doc. A too-short "quote" (< 4 chars) is not evidence either.
+function quoteIsInDoc(quote, docNorm) {
+  if (!quote) return false;
+  const q = normForMatch(quote);
+  if (q.length < 4) return false;
+  return docNorm.includes(q);
+}
+function normForMatch(s) {
+  return trLower(String(s)).replace(/[^\p{L}\p{N} ]/gu, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function validateSpiker(out, readingCount, doc) {
   const str = (v, max) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null);
+  const docNorm = normForMatch(doc || '');
   const spiker = {
     ton_line: str(out.ton_line, 300),
     sinyal_reason: str(out.sinyal_reason, 300),
@@ -249,7 +264,7 @@ function validateSpiker(out, readingCount) {
       baslik: str(g?.baslik, 60),
       line: str(g?.line, 400),
       kanit: str(g?.kanit, 200),
-    })).filter((g) => g.baslik && g.line && g.kanit);
+    })).filter((g) => g.baslik && g.line && g.kanit && quoteIsInDoc(g.kanit, docNorm));
   }
   if (!spiker.ton_line && !spiker.gozden_kacanlar.length) return null;
   return spiker;
