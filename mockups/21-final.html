@@ -72,9 +72,11 @@
 
   .barlar { border-top:1px solid #3a3a40; padding-top:16px; margin-bottom:14px; }
   .barlar .b-etiket { font-size:12px; margin-bottom:6px; display:flex; justify-content:space-between; }
-  .barlar .dizi { display:flex; align-items:flex-end; gap:3px; height:44px; margin-bottom:14px; }
-  .barlar .dizi i { flex:1; background:#ff8a70; min-height:2px; border-radius:4px 4px 0 0; }
+  .barlar .dizi { display:flex; align-items:flex-end; gap:3px; height:56px; }
+  .barlar .dizi i { flex:1; background:#ff8a70; min-height:2px; border-radius:4px 4px 0 0; position:relative; }
+  .barlar .dizi i::after { content:attr(data-k); position:absolute; top:-16px; left:0; right:0; text-align:center; font-size:9px; color:#8a8a92; }
   .barlar .dizi.o i { background:#4a4a52; }
+  .barlar .eksen { display:flex; justify-content:space-between; font-size:9px; color:#8a8a92; margin:4px 0 14px; }
   .olcumler { font-size:12.5px; line-height:2.1; border-top:1px solid #3a3a40; padding-top:12px; margin-bottom:14px; }
   .olcumler b { color:#fafafa; font-weight:700; }
   .kart .kisa { font-family:Helvetica,Arial,sans-serif; font-size:15px; line-height:1.6; color:#b6b6bd; border-top:1px solid #3a3a40; padding-top:14px; }
@@ -161,10 +163,12 @@
     </div>
 
     <div class="barlar">
-      <div class="b-etiket"><span style="color:#ff8a70">SEN · mesaj boyu</span><span>kelime / mesaj</span></div>
+      <div class="b-etiket"><span style="color:#ff8a70">SEN · her mesajın boyu</span><span>y: kelime</span></div>
       <div class="dizi" id="barSen"></div>
-      <div class="b-etiket"><span>O · mesaj boyu</span><span id="barOzet"></span></div>
+      <div class="eksen"><span>ilk mesajın</span><span>son mesajın</span></div>
+      <div class="b-etiket"><span>O · her mesajın boyu</span><span id="barOzet"></span></div>
       <div class="dizi o" id="barO"></div>
+      <div class="eksen"><span>ilk mesajı</span><span>son mesajı</span></div>
     </div>
     <div class="olcumler" id="olcumler"></div>
     <p class="kisa" id="kisa"></p>
@@ -254,7 +258,7 @@ function yerles() {
   document.getElementById('kefeO').innerHTML = 'O · kefe hafif<br>%' + V.kuruOran + ' kuru cevap · ort ' + V.oOrt + ' kelime';
   var doldur = function (id, dizi) {
     var kap = document.getElementById(id), maks = Math.max.apply(null, V.senKelimeler.concat(V.oKelimeler));
-    kap.innerHTML = dizi.map(function (k) { return '<i style="height:' + Math.max(4, Math.round(100 * k / maks)) + '%" title="' + k + ' kelime"></i>'; }).join('');
+    kap.innerHTML = dizi.map(function (k) { return '<i style="height:' + Math.max(4, Math.round(100 * k / maks)) + '%" data-k="' + k + '" title="' + k + ' kelime"></i>'; }).join('');
   };
   doldur('barSen', V.senKelimeler); doldur('barO', V.oKelimeler);
   document.getElementById('barOzet').textContent = 'soru ' + V.senSoru + "'e " + V.oSoru;
@@ -314,11 +318,16 @@ document.getElementById('indir').addEventListener('click', function () {
     dizi.forEach(function (k, i) {
       var h = Math.max(10, 130 * k / maks);
       x.fillStyle = renk; x.fillRect(130 + i * bw, y0 - h, bw - 12, h);
+      x.fillStyle = '#8a8a92'; x.font = '20px Menlo, monospace'; x.textAlign = 'center';
+      x.fillText(k, 130 + i * bw + (bw - 12) / 2, y0 - h - 10); x.textAlign = 'left';
     });
+    x.fillStyle = '#8a8a92'; x.font = '20px Menlo, monospace';
+    x.fillText('ilk mesaj', 130, y0 + 30);
+    x.textAlign = 'right'; x.fillText('son mesaj', 970, y0 + 30); x.textAlign = 'left';
   };
   x.fillStyle = '#8a8a92'; x.font = '26' + mono;
-  x.fillText('SEN · mesaj boyu (kelime)', 130, 1180); ciz(V.senKelimeler, 1340, '#ff8a70');
-  x.fillText('O · mesaj boyu (kelime)', 130, 1400); ciz(V.oKelimeler, 1560, '#4a4a52');
+  x.fillText('SEN · her mesajın boyu (y: kelime)', 130, 1180); ciz(V.senKelimeler, 1340, '#ff8a70');
+  x.fillText('O · her mesajın boyu (y: kelime)', 130, 1400); ciz(V.oKelimeler, 1560, '#4a4a52');
 
   x.fillStyle = '#e4e4e7'; x.font = '31' + helv;
   x.fillText('soru ' + V.senSoru + ' · ' + V.oSoru + '    kuru cevap %' + V.kuruOran + '    çift mesaj ' + V.cift + '    erteleme ' + V.erteleme, 130, 1640);
