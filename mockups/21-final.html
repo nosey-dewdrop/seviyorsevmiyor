@@ -12,17 +12,17 @@
      fis yok. kart fis gorunumlu degil, sitenin kendi dili.
      deniz degismedi, sabit 12 baloncuk. tire yok. */
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#050506; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; padding:36px 40px 90px; overflow-x:hidden; }
+  body { background:#1a1a1e; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; padding:36px 40px 90px; overflow-x:hidden; }
   .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#3f3f46; z-index:5; }
   .sea { position:fixed; inset:0; pointer-events:none; z-index:0; }
-  .sea img { position:absolute; width:105px; }
+  .sea img { position:absolute; width:105px; opacity:.55; }
   header { position:relative; z-index:1; display:flex; justify-content:space-between; align-items:baseline; margin-bottom:30px; }
   h1 { color:#fafafa; font-size:20px; font-weight:400; letter-spacing:-.5px; }
   .meta { font-size:11px; color:#71717a; }
 
   .giris { position:relative; z-index:1; max-width:680px; margin:0 auto; }
-  textarea { width:100%; height:120px; background:rgba(5,5,6,.85); border:1px solid #27272a; color:#fafafa; font:inherit; font-size:13px; padding:14px; resize:none; border-radius:0; }
-  .go { margin-top:12px; background:#fafafa; color:#050506; border:0; font:inherit; font-size:13px; font-weight:700; padding:11px 24px; cursor:pointer; }
+  textarea { width:100%; height:120px; background:#232327; border:1px solid #3a3a40; color:#fafafa; font:inherit; font-size:13px; padding:14px; resize:none; border-radius:0; }
+  .go { margin-top:12px; background:#fafafa; color:#1a1a1e; border:0; font:inherit; font-size:13px; font-weight:700; padding:11px 24px; cursor:pointer; }
   .go:active { transform:translateY(1px); }
 
   /* --- analiz ani: ortada akan yorum --- */
@@ -39,7 +39,7 @@
   @keyframes otur { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
 
   /* printable: sitenin kendi dili. fis degil. */
-  .kart { background:#0b0b0c; border:1px solid #27272a; padding:26px 24px 24px; }
+  .kart { background:#232327; border:1px solid #3a3a40; padding:26px 24px 24px; }
   .kart .marka { font-size:12.5px; color:#71717a; display:flex; justify-content:space-between; margin-bottom:22px; }
   .kart .hukum { color:#fafafa; font-size:26px; font-weight:700; line-height:1.35; margin-bottom:26px; }
 
@@ -59,12 +59,12 @@
   .terazi .soz { position:absolute; left:50%; top:64px; transform:translateX(-50%); font-size:11px; color:#71717a; animation:sozler 3.2s steps(1) both; }
   @keyframes sozler { 0% { content:""; } }
 
-  .barlar { border-top:1px solid #27272a; padding-top:16px; margin-bottom:16px; }
+  .barlar { border-top:1px solid #3a3a40; padding-top:16px; margin-bottom:16px; }
   .barlar .b-etiket { font-size:12px; margin-bottom:6px; display:flex; justify-content:space-between; }
   .barlar .dizi { display:flex; align-items:flex-end; gap:2px; height:44px; margin-bottom:14px; }
   .barlar .dizi i { flex:1; background:#3ddc8a; }
   .barlar .dizi.o i { background:#3f3f46; }
-  .kart .kisa { font-family:Helvetica,Arial,sans-serif; font-size:15px; line-height:1.8; color:#a1a1aa; border-top:1px solid #27272a; padding-top:14px; }
+  .kart .kisa { font-family:Helvetica,Arial,sans-serif; font-size:15px; line-height:1.8; color:#b6b6bd; border-top:1px solid #3a3a40; padding-top:14px; }
   .kart .dip { font-size:9.5px; color:#52525b; margin-top:14px; }
   .indir { margin-top:14px; width:100%; background:#fafafa; color:#050506; border:0; font:inherit; font-size:12px; font-weight:700; padding:11px; cursor:pointer; }
 
@@ -141,6 +141,7 @@ var YORUM = [
   'once iyi haber: bu sohbette flört var. kötü haber: akış tek yönde.',
   '<b>soru dengesi</b> en az yanıltan ölçü. yedi ayda senden 41 soru çıkmış, 3 soru dönmüş. merak tek taraflı.',
   '<b>"bakarız"</b> iki kez geldi. ikisi de senin planına. bu bir desen, tesadüf değil.',
+  'bir şey daha gördüm. son 12 konuşmanın 11\'i cevapsız bitmiş ve son mesaj hep senin. saatlere de baktım: sen geceye doğru yazıyorsun, cevaplar ertesi öğlen geliyor. kısalarak.',
   'en açık cümlen "özledim seni ya" idi. cevap "ok" oldu. hükmün en ağır kalemi bu satır.',
   'cevaplar yedi ayda 9 kelimeden 1.6 kelimeye indi. soğuma eğrisi net.',
   '<span class="itiraz">yanlış mı okudum? <a href="#">bence yanlış okudun</a> de, satırlarını göster.</span>'
