@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mockup 11 · soruşturma panosu</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#050506; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; padding:36px 40px 80px; }
+  .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#3f3f46; z-index:5; }
+  header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:30px; }
+  h1 { color:#fafafa; font-size:18px; font-weight:400; }
+  .meta { font-size:11px; color:#71717a; }
+
+  /* pano: genişliğin tamamı kanıt kartlarına ait */
+  .board { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:22px; align-items:start; }
+  .card { background:#fafafa; color:#18181b; padding:16px 14px 14px; font-size:11.5px; line-height:1.7; position:relative; }
+  .card::before { content:""; position:absolute; top:-9px; left:50%; width:56px; height:16px; margin-left:-28px; background:rgba(161,161,170,.5); }
+  .card .no { font-size:9px; color:#52525b; letter-spacing:1px; }
+  .card .sen { margin-top:6px; }
+  .card .o { color:#52525b; }
+  .card .okuma { margin-top:8px; padding-top:8px; border-top:1px dashed #a1a1aa; font-size:10.5px; }
+  .card:nth-child(1){ transform:rotate(-1.6deg);} .card:nth-child(2){ transform:rotate(1.2deg);}
+  .card:nth-child(3){ transform:rotate(-.8deg);} .card:nth-child(4){ transform:rotate(1.8deg);}
+  .card:nth-child(5){ transform:rotate(-2deg);}
+
+  /* hüküm: dosya kapağı damgası, panonun sağ alt köşesine oturur */
+  .verdict { margin:40px 0 0 auto; max-width:420px; background:#fafafa; color:#18181b; padding:22px 20px; transform:rotate(-1deg); }
+  .verdict .k { font-size:10px; color:#52525b; letter-spacing:1px; }
+  .verdict .h { font-size:19px; font-weight:700; margin:6px 0 10px; }
+  .verdict .stamp { display:inline-block; border:3px solid #a61b42; color:#a61b42; font-weight:700; font-size:12px; letter-spacing:2px; padding:4px 10px; transform:rotate(-4deg); }
+  .verdict .not { margin-top:12px; font-size:11px; line-height:1.7; border-top:1px dashed #a1a1aa; padding-top:10px; }
+</style>
+</head>
+<body>
+<span class="tag">mockup 11 · soruşturma panosu</span>
+<header>
+  <h1>mesajı bir okusana</h1>
+  <p class="meta">1024 mesaj tarandı · 5 kanıt dosyaya girdi · mesajlar cihazdan çıkmadı</p>
+</header>
+<div class="board">
+  <div class="card"><span class="no">KANIT 01</span><div class="sen">sen: "bu hafta sonu müsait misin? şu sergiye gidelim mi demiştik"</div><div class="o">o: "bakarız"</div><div class="okuma">plan senden, erteleme ondan. ikinci kez.</div></div>
+  <div class="card"><span class="no">KANIT 02</span><div class="sen">sen: "aklıma sen geldin"</div><div class="o">o: "hı"</div><div class="okuma">duygu cümlesine tek hece. yatırım karşılıksız.</div></div>
+  <div class="card"><span class="no">KANIT 03</span><div class="sen">sen: "özledim seni ya"</div><div class="o">o: "ok"</div><div class="okuma">en açık cümlene en kapalı cevap.</div></div>
+  <div class="card"><span class="no">KANIT 04</span><div class="sen">soru dengesi</div><div class="o">senden 4 soru, ondan 0</div><div class="okuma">merak tek yönde. dört sorduğun yerde bir soru dönmemiş.</div></div>
+  <div class="card"><span class="no">KANIT 05</span><div class="sen">cevap uzunluğu</div><div class="o">sen ort. 9 kelime, o 1.6</div><div class="okuma">sen paragraf yazıyorsun, o kelime bırakıyor.</div></div>
+</div>
+<div class="verdict">
+  <span class="k">DOSYA NO 0268 · 14.07.2026</span>
+  <div class="h">flört var, ama tek taraflı.</div>
+  <span class="stamp">DOSYA KAPANDI</span>
+  <p class="not">not: ilgi akışı tek yönlü. bir sonraki adımı ona bırak; dosya yeniden açılırsa damgalar yan yana gelsin.</p>
+</div>
+</body>
+</html>

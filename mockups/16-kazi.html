@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mockup 16 · kazı raporu</title>
+<style>
+  /* bin mesajlık yığından çıkarılan bulgular: envanter plakalı kazı raporu. */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0b0b0c; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; padding:36px 40px 80px; }
+  .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#3f3f46; }
+  header { margin-bottom:8px; }
+  h1 { color:#fafafa; font-size:18px; font-weight:400; }
+  .katman { font-size:11px; color:#71717a; margin:6px 0 30px; }
+  .katman b { color:#fafafa; font-weight:700; }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1px; background:#27272a; border:1px solid #27272a; }
+  .bulgu { background:#0b0b0c; padding:20px 18px; }
+  .bulgu .no { font-size:9px; letter-spacing:2px; color:#52525b; }
+  .bulgu .parca { margin:12px 0; background:#18181b; border:1px solid #27272a; padding:12px; color:#e4e4e7; font-size:12px; line-height:1.8; }
+  .bulgu .parca .o { color:#71717a; }
+  .bulgu .etiket { font-size:10.5px; line-height:1.7; color:#a1a1aa; }
+  .bulgu .derinlik { font-size:9px; color:#52525b; margin-top:8px; }
+
+  .plaka { margin-top:34px; border:1px solid #27272a; padding:22px 24px; display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; align-items:center; }
+  .plaka .h { color:#fafafa; font-size:19px; font-weight:700; }
+  .plaka .n { font-size:11.5px; color:#71717a; max-width:540px; line-height:1.8; }
+</style>
+</head>
+<body>
+<span class="tag">mockup 16 · kazı raporu</span>
+<header>
+  <h1>mesajı bir okusana</h1>
+  <p class="katman">kazılan yığın: <b>1024 mesaj, 7 ay</b> · çıkarılan bulgu: <b>5</b> · mesajlar cihazdan çıkmaz</p>
+</header>
+<div class="grid">
+  <div class="bulgu"><span class="no">BULGU 001</span><div class="parca">"şu sergiye gidelim mi demiştik" <div class="o">→ "bakarız"</div></div><p class="etiket">plan katmanı: teklif hep aynı elden, erteleme hep aynı elden.</p><span class="derinlik">derinlik: son 2 hafta · 2 kez tekrarlanmış</span></div>
+  <div class="bulgu"><span class="no">BULGU 002</span><div class="parca">"aklıma sen geldin" <div class="o">→ "hı"</div></div><p class="etiket">duygu katmanı: yatırım tek yönlü, karşılık tek hece.</p><span class="derinlik">derinlik: 3 hafta önce</span></div>
+  <div class="bulgu"><span class="no">BULGU 003</span><div class="parca">"özledim seni ya" <div class="o">→ "ok"</div></div><p class="etiket">en açık cümle, en kapalı cevapla aynı katmanda bulundu.</p><span class="derinlik">derinlik: geçen hafta</span></div>
+  <div class="bulgu"><span class="no">BULGU 004</span><div class="parca">soru dengesi <div class="o">→ sen 41 · o 3</div></div><p class="etiket">merak katmanı: yedi ayda sorulan her 14 soruya 1 soru dönmüş.</p><span class="derinlik">derinlik: tüm katmanlar</span></div>
+  <div class="bulgu"><span class="no">BULGU 005</span><div class="parca">cevap uzunluğu <div class="o">→ 9 kelime / 1.6</div></div><p class="etiket">üst katmanlara çıktıkça karşı taraf inceliyor; senin tarafın sabit.</p><span class="derinlik">derinlik: giderek yüzeye yakın</span></div>
+</div>
+<div class="plaka">
+  <span class="h">flört var, ama tek taraflı.</span>
+  <span class="n">kazı özeti: bu yığının altından çift taraflı bir şey çıkmadı. beş bulgunun beşi de aynı yöne bakıyor. kazmayı biraz ona bırak.</span>
+</div>
+</body>
+</html>

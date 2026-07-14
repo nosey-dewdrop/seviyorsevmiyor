@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mockup 13 · nabız monitörü</title>
+<style>
+  /* sohbetin hayati değerleri: tam genişlik monitör, iki kanal, yorum sağda */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#050506; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; padding:36px 40px 80px; }
+  .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#3f3f46; }
+  header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:26px; }
+  h1 { color:#fafafa; font-size:18px; font-weight:400; }
+  .meta { font-size:11px; color:#71717a; }
+  .monitor { display:grid; grid-template-columns:1fr 300px; gap:0; border:1px solid #27272a; }
+  @media (max-width:760px){ .monitor { grid-template-columns:1fr; } }
+  .waves { padding:26px 24px; }
+  .ch { margin-bottom:26px; }
+  .ch .label { font-size:11px; margin-bottom:8px; }
+  .ch svg { width:100%; height:64px; display:block; }
+  .sen .label { color:#3ddc8a; }
+  .o .label { color:#71717a; }
+  .side { border-left:1px solid #27272a; padding:26px 22px; font-size:12px; line-height:2; }
+  @media (max-width:760px){ .side { border-left:0; border-top:1px solid #27272a; } }
+  .side b { color:#fafafa; font-weight:700; }
+  .alarm { margin-top:14px; color:#ff9d8f; }
+  .verdict { border-top:1px solid #27272a; grid-column:1 / -1; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+  .verdict .h { color:#fafafa; font-size:16px; font-weight:700; }
+  .verdict .n { font-size:11px; color:#71717a; max-width:520px; line-height:1.7; }
+</style>
+</head>
+<body>
+<span class="tag">mockup 13 · nabız monitörü</span>
+<header>
+  <h1>mesajı bir okusana</h1>
+  <p class="meta">1024 mesaj · son 30 gün izlendi · mesajlar cihazdan çıkmaz</p>
+</header>
+<div class="monitor">
+  <div class="waves">
+    <div class="ch sen">
+      <div class="label">SEN · ilgi nabzı</div>
+      <svg viewBox="0 0 800 64" preserveAspectRatio="none"><polyline fill="none" stroke="#3ddc8a" stroke-width="2" points="0,40 60,40 80,12 100,58 120,40 220,40 240,10 260,60 280,40 380,40 400,8 420,60 440,40 540,40 560,12 580,58 600,40 700,40 720,10 740,60 760,40 800,40"/></svg>
+    </div>
+    <div class="ch o">
+      <div class="label">O · ilgi nabzı</div>
+      <svg viewBox="0 0 800 64" preserveAspectRatio="none"><polyline fill="none" stroke="#71717a" stroke-width="2" points="0,40 120,40 140,30 160,46 180,40 420,40 440,34 460,44 480,40 800,40"/></svg>
+    </div>
+  </div>
+  <div class="side">
+    soru: <b>sen 4 · o 0</b><br>
+    cevap uzunluğu: <b>9 kelime · 1.6 kelime</b><br>
+    plan: <b>2 teklif · 2 erteleme</b><br>
+    duygu cümlesi: <b>1 · karşılık "ok"</b>
+    <div class="alarm">uyarı: karşı kanalda nabız giderek düzleşiyor.</div>
+  </div>
+  <div class="verdict">
+    <span class="h">flört var, ama tek taraflı.</span>
+    <span class="n">not: senin çizgin her mesajda atıyor, onunki düz çizgiye yakın. bir sonraki vuruşu ona bırak; çizgi kıpırdarsa buraya yine bak.</span>
+  </div>
+</div>
+</body>
+</html>

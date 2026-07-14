@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mockup 12 · daktilo tutanağı</title>
+<style>
+  /* tam sayfa belge: koyu dünya yok, sahne kağıdın kendisi. satır numaralı resmi tutanak. */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#e8e6e1; min-height:100vh; display:flex; justify-content:center; padding:0; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; }
+  .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#71717a; z-index:5; }
+  .sheet { background:#fafafa; color:#18181b; width:min(860px,100%); min-height:100vh; padding:64px 72px 80px 96px; position:relative; font-size:13px; line-height:2.1; box-shadow:0 0 60px rgba(0,0,0,.18); }
+  .sheet::before { content:""; position:absolute; top:0; bottom:0; left:64px; width:1px; background:#f2b8c6; }
+  .ln { position:absolute; left:-58px; width:40px; text-align:right; color:#a1a1aa; font-size:10px; }
+  .row { position:relative; }
+  h1 { font-size:15px; font-weight:700; letter-spacing:2px; text-align:center; margin-bottom:2px; }
+  .alt { text-align:center; font-size:10px; color:#52525b; letter-spacing:1px; margin-bottom:36px; }
+  .soru { color:#52525b; }
+  .vurgu { background:#fde68a; }
+  .bosluk { color:#a1a1aa; }
+  .hukum { margin-top:36px; border-top:1px solid #18181b; padding-top:18px; }
+  .hukum .h { font-size:17px; font-weight:700; letter-spacing:1px; }
+  .muhur { display:inline-block; margin-top:14px; border:3px double #1e3a8a; color:#1e3a8a; padding:8px 14px; font-size:10px; letter-spacing:2px; transform:rotate(-2deg); }
+</style>
+</head>
+<body>
+<span class="tag">mockup 12 · daktilo tutanağı</span>
+<div class="sheet">
+  <h1>OKUMA TUTANAĞI</h1>
+  <p class="alt">SAYI: 2026/0268 · KONU: FLÖRT VAR MI · MESAJLAR CİHAZDAN ÇIKMAMIŞTIR</p>
+  <div class="row"><span class="ln">01</span><span class="soru">soruldu:</span> taraflar kimdir, kaç mesaj incelenmiştir?</div>
+  <div class="row"><span class="ln">02</span><span class="soru">cevap:</span> iki kişi; 1024 mesaj okunmuş, 5 satır kayda geçmiştir.</div>
+  <div class="row"><span class="ln">03</span><span class="soru">soruldu:</span> plan teklifleri kimden gelmiştir?</div>
+  <div class="row"><span class="ln">04</span><span class="soru">cevap:</span> tamamı birinci taraftan. karşılık iki kez <span class="vurgu">"bakarız"</span> olmuştur.</div>
+  <div class="row"><span class="ln">05</span><span class="soru">soruldu:</span> duygu beyanına ne cevap verilmiştir?</div>
+  <div class="row"><span class="ln">06</span><span class="soru">cevap:</span> <span class="vurgu">"özledim seni ya"</span> beyanına <span class="vurgu">"ok"</span> denilmiştir. tutanağa aynen geçirilmiştir.</div>
+  <div class="row"><span class="ln">07</span><span class="soru">soruldu:</span> karşı tarafın merakına dair kayıt var mıdır?</div>
+  <div class="row"><span class="ln">08</span><span class="soru">cevap:</span> yoktur. dört soruya sıfır soru dönmüştür. <span class="bosluk">(bu satır boş bırakılmamıştır; dönen soru gerçekten sıfırdır.)</span></div>
+  <div class="hukum">
+    <div class="h">HÜKÜM: FLÖRT VAR, AMA TEK TARAFLI.</div>
+    <p>gerekçe: emek, merak ve plan tek tarafta toplanmıştır. karşı tarafın katkısı ortalama 1.6 kelimedir.</p>
+    <span class="muhur">HÜKÜM CİHAZDA VERİLDİ ★ İTİRAZ YOLU AÇIK</span>
+  </div>
+</div>
+</body>
+</html>
