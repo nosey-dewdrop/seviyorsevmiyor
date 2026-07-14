@@ -243,7 +243,7 @@ function yerles() {
     var cls = GEREKCE[ix] ? ' class="satir" data-ix="' + ix + '"' : '';
     return '<p' + cls + '>' + p + '</p>' + (GEREKCE[ix] ?
       '<div class="gerekce" id="g' + ix + '"><span class="g-b">NEDEN BÖYLE OKUDUM</span>' + GEREKCE[ix].n +
-      '<span class="g-b">BAŞKA TÜRLÜSÜ MÜMKÜN MÜ</span>' + GEREKCE[ix].a +
+      '<span class="g-b">BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?</span>' + GEREKCE[ix].a +
       '<br><button class="bagis" type="button">hâlâ yanlışsa: bu satırları rızamla bağışla, model öğrensin</button></div>' : '');
   }).join('');
   hedef.querySelectorAll('p.satir').forEach(function (p) {
