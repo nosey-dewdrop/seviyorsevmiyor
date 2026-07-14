@@ -4,7 +4,7 @@ A "read the subtext" site for chats. You paste (or screenshot, or drop a WhatsAp
 conversation and the engine answers "flört var mı, yok mu?" with a COMMITTED call plus evidence.
 Theyseeyourphotos energy but for messaging. Turkish-first, FREE and unlimited.
 
-STATUS 2026-07-13 late night: LIVE at https://damlahelloworld.github.io/mesajibirokusana/ (v18,
+STATUS 2026-07-13 late night: LIVE at https://nosey-dewdrop.github.io/mesajibirokusana/ (v18,
 old /whatdoyoumean/ URL is dead 404). v18 shipped in one session, all Damla-directed:
 - RENAME everywhere (repo, folder, worker `mesajibirokusana-api`, copy, share card, og). Reason:
   TR product with an EN name kills word of mouth; new name IS the sentence users say.

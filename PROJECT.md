@@ -67,4 +67,4 @@ tense/red-flag screens stay serious). Content system: linkedin.md (4 essays 300-
 
 ## Revenue model
 None by direction (2026-07-13): free idea-tool, audience first. Money is not a current goal for
-damlahelloworld products; nothing here is gated.
+nosey-dewdrop products; nothing here is gated.

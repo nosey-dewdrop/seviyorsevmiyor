@@ -1,4 +1,4 @@
--- whatdoyoumean tables on the SHARED damlahelloworld Supabase project.
+-- whatdoyoumean tables on the SHARED nosey-dewdrop Supabase project.
 -- Run once in the project's SQL editor. App-prefixed (wdym_) so apps can share one project.
 -- Anon key is client-side; row-level security is what actually protects the data.
 

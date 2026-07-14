@@ -86,7 +86,7 @@ export async function buildShareCard(r) {
   x.fillText('peki senin sohbetin ne diyor?', PAD, H - 210);
   x.fillStyle = '#a1a1aa';
   x.font = 'bold 38px Arial, sans-serif';
-  x.fillText('cesaretin varsa: damlahelloworld.github.io/mesajibirokusana', PAD, H - 140);
+  x.fillText('cesaretin varsa: nosey-dewdrop.github.io/mesajibirokusana', PAD, H - 140);
   x.fillStyle = '#52525b';
   x.font = '32px Arial, sans-serif';
   x.fillText('otomatik tahmin · hüküm cihazda verildi, mesajlar görselde yok', PAD, H - 82);
