@@ -20,10 +20,16 @@
   h1 { color:#fafafa; font-size:20px; font-weight:400; letter-spacing:-.5px; }
   .meta { font-size:11px; color:#71717a; }
 
-  .giris { position:relative; z-index:1; max-width:680px; margin:0 auto; }
-  textarea { width:100%; height:120px; background:#232327; border:1px solid #3a3a40; color:#fafafa; font:inherit; font-size:13px; padding:14px; resize:none; border-radius:0; }
-  .go { margin-top:12px; background:#fafafa; color:#1a1a1e; border:0; font:inherit; font-size:13px; font-weight:700; padding:11px 24px; cursor:pointer; }
-  .go:active { transform:translateY(1px); }
+  .giris { position:relative; z-index:1; max-width:1000px; margin:40px auto 0; }
+  .kaynaklar { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  @media (max-width:760px){ .kaynaklar { grid-template-columns:1fr; } }
+  .kaynak { background:#232327; border:1px dashed #4a4a52; padding:26px 22px 24px; cursor:pointer; transition:border-color .15s, background .15s; }
+  .kaynak:hover { border-color:#fafafa; background:#28282d; }
+  .kaynak .k-ad { color:#fafafa; font-size:15px; font-weight:700; margin-bottom:8px; }
+  .kaynak .k-kisa { font-family:Helvetica,Arial,sans-serif; font-size:13.5px; line-height:1.7; color:#a1a1aa; }
+  .kaynak .k-tus { display:inline-block; margin-top:12px; font-size:11px; color:#71717a; border:1px solid #3a3a40; padding:3px 8px; }
+  .demo { margin-top:18px; text-align:center; font-size:13px; }
+  .demo button { background:none; border:0; color:#3ddc8a; font:inherit; font-size:13px; cursor:pointer; text-decoration:underline; }
 
   /* --- analiz ani: ortada akan yorum --- */
   .akis { position:relative; z-index:1; max-width:640px; margin:70px auto 0; display:none;
@@ -98,15 +104,12 @@
 </header>
 
 <div class="giris" id="giris">
-  <textarea readonly>Ben: naber, bugün ne yaptın?
-O: iş güç işte
-Ben: ben bugün o kafeye gittim hani beraber gitmiştik ya, aklıma sen geldin
-O: hı
-Ben: bu hafta sonu müsait misin? şu sergiye gidelim mi demiştik
-O: bakarız
-Ben: geçen de öyle demiştin ama :( özledim seni ya
-O: yoğunum bu ara</textarea>
-  <button class="go" id="oku" type="button">bir okusana</button>
+  <div class="kaynaklar">
+    <div class="kaynak" id="oku"><div class="k-ad">yapıştır</div><p class="k-kisa">sohbeti kopyala, buraya bırak. uygulama fark etmez, düz metin yeter.</p><span class="k-tus">ctrl + v</span></div>
+    <div class="kaynak"><div class="k-ad">ekran görüntüsü</div><p class="k-kisa">konuşmanın ekran görüntüsünü sürükle. yazıyı cihazında ben okurum.</p><span class="k-tus">png · jpg</span></div>
+    <div class="kaynak"><div class="k-ad">whatsapp arşivi</div><p class="k-kisa">sohbeti dışa aktar, zip'i olduğu gibi bırak. bin mesajsa bin mesaj.</p><span class="k-tus">.zip</span></div>
+  </div>
+  <p class="demo">elinde sohbet yok mu? <button type="button" id="demoBtn">örneği izle</button></p>
 </div>
 
 <div class="akis" id="akis"><span id="akisText"></span><span class="imlec"></span></div>
@@ -150,6 +153,7 @@ var giris = document.getElementById('giris'), akis = document.getElementById('ak
     akisText = document.getElementById('akisText'), sahne = document.getElementById('sahne'),
     hedef = document.getElementById('yorumHedef'), soz = document.getElementById('soz');
 
+var basla = function(){}; document.getElementById('demoBtn').addEventListener('click', function(){ document.getElementById('oku').click(); });
 document.getElementById('oku').addEventListener('click', function () {
   giris.style.display = 'none';
   akis.classList.add('on');
