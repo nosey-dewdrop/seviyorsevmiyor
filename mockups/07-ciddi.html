@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mockup 07 · ciddi ekran</title>
+<link rel="stylesheet" href="fis-core.css">
+<style>
+  /* kırmızı-bayrak kuralı: bu ekranda şaka yok. aynı dünya, kısık ses. */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#040404; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:48px 16px 96px; }
+  .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#3f3f46; }
+  .stage { width:100%; max-width:560px; display:flex; flex-direction:column; align-items:center; }
+  h1 { color:#fafafa; font-size:20px; font-weight:400; align-self:flex-start; }
+  .sub { font-size:12px; color:#71717a; margin:6px 0 28px; align-self:flex-start; }
+  .uyari { align-self:stretch; border:1px solid #7f1d1d; color:#fca5a5; font-size:12px; line-height:1.8; padding:14px 16px; margin-bottom:36px; }
+  .uyari b { color:#fecaca; font-weight:700; }
+
+  .receipt-wrap { animation:print 2.6s linear both .3s; }
+  @keyframes print { from { clip-path:inset(0 0 100% 0); } to { clip-path:inset(0 0 0 0); } }
+  /* ciddi fiş: roast yok, vurgu rengi tek ve kırmızı ailesi */
+  .receipt .total { color:#7f1d1d; }
+  .destek { margin-top:28px; font-size:11px; color:#71717a; line-height:1.9; text-align:center; }
+  .destek a { color:#fca5a5; }
+</style>
+</head>
+<body>
+<span class="tag">mockup 07 · ciddi ekran</span>
+<div class="stage">
+  <h1>mesajı bir okusana</h1>
+  <p class="sub">sohbeti bırak, hükmü al. mesajlar cihazdan çıkmaz.</p>
+  <div class="uyari">bu sohbette <b>tek yönlü ısrar ve geri itme</b> deseni var. bu ekranda espri yapmıyoruz; satırlar aşağıda, yorum sende.</div>
+  <div class="receipt-wrap"><div class="receipt" data-fis data-ciddi></div></div>
+  <p class="destek">bu fiş bir teşhis değil, satırların dökümü.<br>kendini kötü hissettiren bir sohbetse <a href="#">konuşabileceğin yerler</a> var.</p>
+</div>
+<script src="fis.js"></script>
+</body>
+</html>

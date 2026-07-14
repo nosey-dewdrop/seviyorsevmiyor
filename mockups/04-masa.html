@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mockup 04 · masa</title>
+<link rel="stylesheet" href="fis-core.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0b0b0c; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:48px 16px 96px; }
+  /* masa dokusu: deterministik svg grain, gradyan değil */
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.5;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.04 0"/></filter><rect width="200" height="200" filter="url(%23n)"/></svg>'); }
+  .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#3f3f46; }
+  .stage { position:relative; z-index:1; width:100%; max-width:560px; display:flex; flex-direction:column; }
+  h1 { color:#fafafa; font-size:20px; font-weight:400; margin-bottom:6px; }
+  .sub { font-size:12px; color:#71717a; margin-bottom:36px; }
+  textarea { width:100%; height:120px; background:#050506; border:1px solid #27272a; color:#fafafa; font:inherit; font-size:13px; padding:14px; resize:none; border-radius:0; }
+  .go { margin-top:12px; align-self:flex-start; background:#ff6b52; color:#0b0b0c; border:0; font:inherit; font-size:13px; font-weight:700; padding:10px 22px; cursor:pointer; }
+
+  /* fiş masaya atılmış: hafif dönük, ağır gölge */
+  .receipt-wrap { margin:64px auto 0; transform:rotate(-2.2deg); animation:drop .7s cubic-bezier(.2,.8,.3,1.2) both .3s; }
+  @keyframes drop { from { transform:rotate(-7deg) translateY(-40px); opacity:0; } to { transform:rotate(-2.2deg) translateY(0); opacity:1; } }
+  .receipt::after { content:""; display:block; }
+</style>
+</head>
+<body>
+<span class="tag">mockup 04 · masa</span>
+<div class="stage">
+  <h1>mesajı bir okusana</h1>
+  <p class="sub">sohbeti bırak, hükmü al. mesajlar cihazdan çıkmaz.</p>
+  <textarea readonly>Ben: naber, bugün ne yaptın?
+O: iş güç işte
+Ben: ben bugün o kafeye gittim hani beraber gitmiştik ya, aklıma sen geldin
+O: hı
+Ben: bu hafta sonu müsait misin? şu sergiye gidelim mi demiştik
+O: bakarız
+Ben: geçen de öyle demiştin ama :( özledim seni ya
+O: yoğunum bu ara</textarea>
+  <button class="go" type="button">bir okusana</button>
+  <div class="receipt-wrap"><div class="receipt" data-fis></div></div>
+</div>
+<script src="fis.js"></script>
+</body>
+</html>

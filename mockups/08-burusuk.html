@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mockup 08 · buruşuk parodi</title>
+<link rel="stylesheet" href="fis-core.css">
+<style>
+  /* maksimal parodi: doku ağır, fiş uzun, market fişi ciddiyetiyle */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0b0b0c; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:48px 16px 96px; }
+  .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#3f3f46; }
+  h1 { color:#fafafa; font-size:20px; font-weight:400; margin-bottom:6px; }
+  .sub { font-size:12px; color:#71717a; margin-bottom:44px; }
+
+  .receipt-wrap { animation:print 3s linear both .2s; }
+  @keyframes print { from { clip-path:inset(0 0 100% 0); } to { clip-path:inset(0 0 0 0); } }
+  /* buruşuk termal kağıt: deterministik svg kırışık dokusu */
+  .receipt { position:relative;
+    background-color:#f6f5f1;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340"><filter id="w"><feTurbulence type="turbulence" baseFrequency="0.012 0.03" numOctaves="3" seed="41"/><feColorMatrix values="0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0 0.09  0 0 0 0.10 0"/></filter><rect width="340" height="340" filter="url(%23w)"/></svg>'); }
+  /* ekstra parodi satırları bu mockup'a özel */
+  .ekstra { font-size:10px; color:#52525b; margin-top:6px; }
+</style>
+</head>
+<body>
+<span class="tag">mockup 08 · buruşuk parodi</span>
+<h1>mesajı bir okusana</h1>
+<p class="sub">cebinde unutulmuş market fişi gibi: buruşuk, dürüst, atması zor.</p>
+<div class="receipt-wrap">
+  <div class="receipt">
+    <div class="r-head">MESAJI BİR OKUSANA</div>
+    <div class="r-meta">ŞUBE: CİHAZIN · KASA: 01 · FİŞ NO: 0268<br>14.07.2026 23:41 · KASİYER: MOTOR v17</div>
+    <hr class="dash">
+    <div class="row"><span>SORU SORDUN, TEK KELİME DÖNDÜ</span><span>x3</span></div>
+    <div class="row"><span>PLAN ATTIN, "BAKARIZ" YEDİN</span><span>x2</span></div>
+    <div class="row"><span>ANI HATIRLATTIN, "HI" ALDIN</span><span>x1</span></div>
+    <div class="row"><span>ÖZLEDİM DEDİN, "OK" GELDİ</span><span>x1</span></div>
+    <div class="row"><span>SORU İŞARETİ SENDE, ONDA YOK</span><span>x4</span></div>
+    <div class="row"><span>İADE EDİLEN PLAN</span><span>2 ADET</span></div>
+    <hr class="dash">
+    <div class="row"><span>ARA TOPLAM</span><span>SEN %78 · O %12</span></div>
+    <div class="row"><span>EMEK İNDİRİMİ</span><span>UYGULANMADI</span></div>
+    <div class="row"><span>KDV</span><span>%0 (BEDAVA)</span></div>
+    <div class="row total"><span>TOPLAM</span><span>FLÖRT VAR, AMA TEK TARAFLI.</span></div>
+    <hr class="dash">
+    <p class="not">KASADAN NOT: sen sergi planı yapıyosun, o "bakarız" kasasında bozuk para sayıyor. bileti tek kişilik al.</p>
+    <p class="ekstra">İADE KOŞULLARI: bu sohbet 14 gün içinde ısınmazsa fişle birlikte getirin, "bence yanlış okudun" gişesi açık.</p>
+    <hr class="dash">
+    <div class="row"><span>MÜŞTERİ</span><span>SEN</span></div>
+    <div class="row"><span>KART</span><span>**** **** **** 2026</span></div>
+    <svg class="barcode" width="220" height="40" aria-hidden="true">
+      <g fill="#18181b"><rect x="0" width="4" height="32"/><rect x="7" width="1" height="32"/><rect x="12" width="3" height="32"/><rect x="19" width="1" height="32"/><rect x="24" width="2" height="32"/><rect x="30" width="4" height="32"/><rect x="38" width="1" height="32"/><rect x="43" width="2" height="32"/><rect x="49" width="1" height="32"/><rect x="53" width="3" height="32"/><rect x="61" width="1" height="32"/><rect x="66" width="4" height="32"/><rect x="74" width="2" height="32"/><rect x="80" width="1" height="32"/><rect x="85" width="3" height="32"/><rect x="92" width="1" height="32"/><rect x="97" width="2" height="32"/><rect x="103" width="4" height="32"/><rect x="111" width="1" height="32"/><rect x="116" width="2" height="32"/><rect x="122" width="3" height="32"/><rect x="129" width="1" height="32"/><rect x="134" width="2" height="32"/><rect x="140" width="1" height="32"/><rect x="145" width="4" height="32"/><rect x="153" width="1" height="32"/><rect x="158" width="2" height="32"/><rect x="164" width="3" height="32"/><rect x="171" width="1" height="32"/><rect x="176" width="2" height="32"/><rect x="182" width="1" height="32"/><rect x="187" width="4" height="32"/><rect x="195" width="1" height="32"/><rect x="200" width="2" height="32"/><rect x="206" width="3" height="32"/><rect x="213" width="2" height="32"/></g>
+      <text x="110" y="40" text-anchor="middle" font-size="8" fill="#18181b" font-family="inherit">2 6 8 0 7 2 2 1 4 0 7 2 6</text>
+    </svg>
+    <p class="center">MESAJIN İÇİN TEŞEKKÜRLER, YİNE BEKLERİZ<br>HÜKÜM CİHAZDA VERİLDİ · MESAJLAR KİMSEYE GİTMEZ</p>
+  </div>
+</div>
+<script src="fis.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mockup 06 · iki sütun</title>
+<link rel="stylesheet" href="fis-core.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#050506; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; padding:48px 24px 96px; }
+  .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#3f3f46; }
+  header { max-width:980px; margin:0 auto 40px; }
+  h1 { color:#fafafa; font-size:20px; font-weight:400; }
+  .sub { font-size:12px; color:#71717a; margin-top:6px; }
+  .cols { max-width:980px; margin:0 auto; display:grid; grid-template-columns:1fr 360px; gap:56px; align-items:start; }
+  @media (max-width:800px) { .cols { grid-template-columns:1fr; } }
+
+  /* sol: sohbet düz transkript, kutu yok — kanıt satırları işaretli */
+  .chat { font-size:13px; line-height:2.1; color:#e4e4e7; }
+  .chat .ben { color:#fafafa; }
+  .chat .o { color:#71717a; }
+  .chat mark { background:transparent; color:#ff9d8f; }
+  .chat .kanit { font-size:10px; color:#52525b; }
+
+  .receipt-wrap { margin:0 auto; animation:print 2.2s cubic-bezier(.2,.8,.2,1) both .4s; }
+  @keyframes print { from { clip-path:inset(0 0 100% 0); } to { clip-path:inset(0 0 0 0); } }
+</style>
+</head>
+<body>
+<span class="tag">mockup 06 · iki sütun</span>
+<header>
+  <h1>mesajı bir okusana</h1>
+  <p class="sub">solda sohbetin, sağda hükmün. işaretli satırlar fişteki kalemler.</p>
+</header>
+<div class="cols">
+  <div class="chat">
+    <div class="ben">Ben: naber, bugün ne yaptın?</div>
+    <div class="o">O: iş güç işte <span class="kanit">← kalem 1</span></div>
+    <div class="ben">Ben: ben bugün o kafeye gittim hani beraber gitmiştik ya, <mark>aklıma sen geldin</mark></div>
+    <div class="o">O: <mark>hı</mark> <span class="kanit">← kalem 3</span></div>
+    <div class="ben">Ben: bu hafta sonu müsait misin? <mark>şu sergiye gidelim mi demiştik</mark></div>
+    <div class="o">O: <mark>bakarız</mark> <span class="kanit">← kalem 2</span></div>
+    <div class="ben">Ben: geçen de öyle demiştin ama :( <mark>özledim seni ya</mark></div>
+    <div class="o">O: yoğunum bu ara</div>
+    <div class="ben">Ben: tamam, haber ver o zaman?</div>
+    <div class="o">O: <mark>ok</mark> <span class="kanit">← kalem 4</span></div>
+  </div>
+  <div class="receipt-wrap"><div class="receipt" data-fis></div></div>
+</div>
+<script src="fis.js"></script>
+</body>
+</html>

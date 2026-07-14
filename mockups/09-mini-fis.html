@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mockup 09 · deniz önde, mini fiş</title>
+<link rel="stylesheet" href="fis-core.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#050506; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:48px 16px 96px; overflow-x:hidden; }
+  .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#3f3f46; z-index:3; }
+
+  /* deniz sahnenin sahibi: baloncuklar iri ve canlı, dünya hissi burada */
+  .sea { position:fixed; inset:0; pointer-events:none; z-index:0; }
+  .sea img { position:absolute; opacity:.38; width:150px; animation:floaty 7s ease-in-out infinite alternate; }
+  .sea img:nth-child(2n) { width:100px; opacity:.26; animation-duration:9s; }
+  .sea img:nth-child(3n) { width:200px; opacity:.18; animation-duration:11s; }
+  @keyframes floaty { from { transform:translateY(0); } to { transform:translateY(-14px); } }
+
+  .stage { position:relative; z-index:1; width:100%; max-width:560px; display:flex; flex-direction:column; align-items:center; }
+  h1 { color:#fafafa; font-size:22px; font-weight:400; }
+  .sub { font-size:12px; color:#71717a; margin:6px 0 32px; }
+  textarea { width:100%; height:110px; background:rgba(5,5,6,.78); border:1px solid #27272a; color:#fafafa; font:inherit; font-size:13px; padding:14px; resize:none; border-radius:0; }
+  .go { margin-top:12px; align-self:flex-start; background:#3ddc8a; color:#050506; border:0; font:inherit; font-size:13px; font-weight:700; padding:10px 22px; cursor:pointer; }
+
+  /* atm fişi: küçük, üstten sarkar, çekip alınası */
+  .slot { margin-top:56px; width:300px; }
+  .slot .lip { height:8px; background:#18181b; border:1px solid #27272a; }
+  .receipt-wrap { width:272px; margin:0 auto; animation:spit 1.8s cubic-bezier(.3,.9,.4,1) both .4s; transform-origin:top center; }
+  @keyframes spit { from { clip-path:inset(0 0 100% 0); } to { clip-path:inset(0 0 0 0); } }
+  .receipt { font-size:10.5px; padding:20px 16px 24px; }
+  .receipt .r-head { font-size:12px; }
+</style>
+</head>
+<body>
+<span class="tag">mockup 09 · deniz önde, mini fiş</span>
+<div class="sea" aria-hidden="true">
+  <img src="../web/assets/bubbles/b00.png" style="top:4%;left:2%">
+  <img src="../web/assets/bubbles/b01.png" style="top:14%;left:74%">
+  <img src="../web/assets/bubbles/b02.png" style="top:38%;left:6%">
+  <img src="../web/assets/bubbles/b03.png" style="top:56%;left:80%">
+  <img src="../web/assets/bubbles/b04.png" style="top:72%;left:10%">
+  <img src="../web/assets/bubbles/b02.png" style="top:84%;left:64%">
+  <img src="../web/assets/bubbles/b01.png" style="top:6%;left:42%">
+  <img src="../web/assets/bubbles/b04.png" style="top:46%;left:48%">
+</div>
+<div class="stage">
+  <h1>mesajı bir okusana</h1>
+  <p class="sub">sohbeti bırak, fişini çek. mesajlar cihazdan çıkmaz.</p>
+  <textarea readonly>Ben: naber, bugün ne yaptın?
+O: iş güç işte
+Ben: bu hafta sonu müsait misin? şu sergiye gidelim mi demiştik
+O: bakarız
+Ben: geçen de öyle demiştin ama :( özledim seni ya
+O: yoğunum bu ara</textarea>
+  <button class="go" type="button">bir okusana</button>
+  <div class="slot">
+    <div class="lip"></div>
+    <div class="receipt-wrap"><div class="receipt" data-fis></div></div>
+  </div>
+</div>
+<script src="fis.js"></script>
+</body>
+</html>
