@@ -1,3 +1,34 @@
+# seviyorsevmiyor (renamed from mesajibirokusana, 15 Tem 00:xx — Damla: terazi mekanigi + "repo adi bu olsun")
+
+STATUS 2026-07-15 early: REPO RENAMED (github nosey-dewdrop/seviyorsevmiyor, local folder renamed).
+REDESIGN LOCKED via mockups/21-final.html (Damla approved piece by piece through the night):
+- entry: THREE SOURCE DOORS side by side (ctrl+v paste / screenshot png-jpg / whatsapp .zip) + "ornegi izle" demo link. no lone textarea.
+- analysis moment: the commentary types out CENTERED like a typewriter (Helvetica, 19px, line-height 1.65, green→NO, accent is PEACH).
+- settle moment: commentary slides RIGHT (Helvetica/Arial, human voice), PRINTABLE card sits LEFT.
+- printable card: brand row + verdict (26px bold) + REAL-LOOKING SCALE (svg: pedestal, tapered pillar, ring finial w/ peach dot, rounded beam, 3 chains per pan, elegant bowls; beam swings "seviyor... sevmiyor..." then settles) + per-message word-count bars WITH AXES (values above bars, "ilk mesajin → son mesajin" below, y label: kelime) + computed metrics + short note + "karti indir".
+- card download: canvas 1080x1920 story PNG, SINGLE SURFACE (no box-in-box frame), same scale/bars/axes drawn, peach accent.
+- receipt/fis concept is DEAD (Damla: para satirlari alakasiz, fis gorunumu sacma). card speaks the product's own visual language.
+- itiraz: click ANY commentary line → under it opens "NEDEN BOYLE OKUDUM?" + "BASKA TURLUSU MUMKUN MU?" + consent donation button. approved flow.
+- colors: bg #1a1a1e (NOT pitch black — Damla: "dark mode bu degil"), surfaces #232327, borders #3a3a40, accent PEACH-CORAL #ff8a70 (green rejected as final, pink reserved for gymgyme). rounded corners 8-16px (Damla: keskin kose sevmedim).
+- bubble sea: UNCHANGED sprites, but count FIXED 10-12 (not random-looking), bubbles STAY AT EDGES and drift slowly; never over center content. line-heights tightened (1.65).
+- copy law additions: NO AI dashes ever (split the sentence instead); question-shaped copy ALWAYS ends with "?"; dost agzi NOT mahalle agzi (esprili != gevsek; "yapiyosun" style rejected); stats named with gen z terms where natural (dry texting/kuru cevap, breadcrumbing).
+- VOICE DECISION (Damla, night of 14-15 Tem): LLAMA SAYS EVERYTHING on the result screen — verdict sentence, scale caption, metric explanations, right commentary, card note. Engine numbers remain LAW (llama miscounts; facts as named numbers). Template lines remain ONLY as fire escape (no consent / worker down).
+- eerie theyseeyourphotos layer approved: computable-from-timestamps observations (who ends convos, night-writing pattern, reply delay asymmetry — need zip/timestamps; omit honestly on plain paste).
+- stats set (research-backed, trend-arastirmaci 15 Tem): kim baslatiyor, soru dengesi, kuru cevap orani (dry texting, Hinge %41), cift mesaj, plan erteleme (breadcrumbing), gorulmede birakma + cevap suresi (zip only).
+
+TRAINING TRACK (Damla: "yap hepsini, kendini de kullanabilirsin"): teacher distillation for the tone model.
+- 3 Claude agents generating labeled synthetic TR chats (150 flirty/friendly, 150 cold/tense, 120 gray/hard) → train/synth_claude_*.jsonl (NOTE: agents wrote to OLD folder name mesajibirokusana/train — move files in).
+- HONESTY RULE: held-out eval stays on the ORIGINAL 268 real seed's every-5th split; synthetic goes to TRAIN SPLIT ONLY (train.py needs a small patch for this). Report old vs new accuracy side by side; ship model.json only if it improves.
+- Later teachers: Llama (Groq) + Gemini via worker keys; disagreement cases go to a "hard" pile for human/donation labeling.
+- Long game (Damla): donations label the motor; at millions of samples switch everything (voice included) to own models.
+
+DONE 15 Tem: 21-final scene PORTED into web/ as v21 (three source doors, centered typewriter then card-left/commentary-right scene, real svg terazi with heavy pan down, per-message word bars with values+axes capped at last 40 msgs, metrics computed from parsed chat via ui.js computeStats + balance.js deflectedPlans, 1080x1920 story canvas seviyorsevmiyor-<no>.png, per-paragraph itiraz boxes wired to /api/itiraz, bubbles fixed 10-12 deterministic edge-only). "okuma NNNN" = device-local analysis counter (localStorage svs.okuma.no). Spiker response has NO reasoning/alternative fields, so itiraz boxes use engine-fact template lines; spiker still voices verdict/denge/okumalar/kapanis/gozden as before (contract untouched).
+STILL TO DO (in order): KVKK text pass for v21, ship-check, gh-pages deploy (URL becomes /seviyorsevmiyor/), THEN training run + report.
+Worker rename mesajibirokusana-api → seviyorsevmiyor-api needs wrangler/Damla (secrets); site can ship pointing at old worker URL first, rename after.
+
+
+---- OLDER NOTES (mesajibirokusana era, still valid where not overridden) ----
+
 # mesajibirokusana (renamed from whatdoyoumean, 13 Tem night)
 
 A "read the subtext" site for chats. You paste (or screenshot, or drop a WhatsApp export of) a

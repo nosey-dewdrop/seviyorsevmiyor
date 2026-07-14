@@ -2,7 +2,7 @@
 // this is the honest statistics part the plan insists on. No fabrication: every number here
 // comes from a countable signal in the conversation.
 
-import { lowerTr } from './features.js?v=20';
+import { lowerTr } from './features.js?v=21';
 
 const ENDEAR = ['canım', 'canim', 'aşkım', 'askim', 'sevgilim', 'hayatım', 'hayatim',
   'bir tanem', 'birtanem', 'tatlım', 'tatlim', 'bebeğim', 'bebegim', 'bir taneciğim'];

@@ -4,8 +4,8 @@
 // The model PROPOSES the tone; counted signals can VETO it (red flags, one-sidedness) — the
 // deterministic layer is the honest part, so on a clear conflict it wins and we say why.
 
-import { flirtSignal, flirtSides, interestBalance, flags as computeFlags } from './balance.js?v=20';
-import { lowerTr } from './features.js?v=20';
+import { flirtSignal, flirtSides, interestBalance, flags as computeFlags } from './balance.js?v=21';
+import { lowerTr } from './features.js?v=21';
 
 const TONE_TR = {
   flirty: 'flört havası',
@@ -50,10 +50,10 @@ function balanceLine(bal) {
   const my = meIsA ? d.A : d.B;
   const their = meIsA ? d.B : d.A;
   const bits = [];
-  if (my.msgs !== their.msgs) bits.push(`mesaj ${my.msgs}–${their.msgs}`);
-  if (my.questions !== their.questions) bits.push(`soru ${my.questions}–${their.questions}`);
-  if (my.doubles >= 2 || their.doubles >= 2) bits.push(`üst üste yazma ${my.doubles}–${their.doubles}`);
-  const ev = bits.length ? ` Sayım (sen–o): ${bits.join(', ')}.` : '';
+  if (my.msgs !== their.msgs) bits.push(`mesaj sende ${my.msgs}, onda ${their.msgs}`);
+  if (my.questions !== their.questions) bits.push(`soru sende ${my.questions}, onda ${their.questions}`);
+  if (my.doubles >= 2 || their.doubles >= 2) bits.push(`üst üste yazma sende ${my.doubles}, onda ${their.doubles}`);
+  const ev = bits.length ? ` Sayım: ${bits.join('; ')}.` : '';
   if (bal.leans === 'even') {
     return `dengeli gidiyor kanka, kimse kimsenin peşinden koşmuyor. konuşmayı beraber taşıyorsunuz.${ev}`;
   }

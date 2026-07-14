@@ -1,262 +1,206 @@
-/* ============ each block is its own chat bubble on the sea ============ */
-.card-bubble {
-  position: relative;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 30px;
-  padding: 26px clamp(20px, 5vw, 38px);
-  box-shadow: var(--page-shadow);
-  margin: 0 0 clamp(30px, 6vw, 52px);
+/* ============ v21: mockups/21-final.html dünyası ============
+   giriş: üç kaynak kapısı · analiz anı: ortada daktilo · son an: solda kart, sağda yorum */
+
+/* ---- üç kaynak kapısı ---- */
+.giris { max-width: 1000px; margin: 40px auto 0; }
+.kaynaklar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media (max-width: 760px) { .kaynaklar { grid-template-columns: 1fr; } }
+.kaynak {
+  display: block; text-align: left; background: var(--surface);
+  border: 1px dashed var(--line-2); border-radius: var(--r-box);
+  padding: 26px 22px 24px; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
 }
-/* each bubble's tail, bottom-left, like a message in a thread */
-.card-bubble::after {
-  content: '';
-  position: absolute; left: 40px; bottom: -18px;
-  width: 40px; height: 34px;
-  background: var(--bg);
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  border-bottom-right-radius: 30px 26px;
-  transform: skewX(-24deg);
-}
-@media (max-width: 600px) {
-  .card-bubble { border-radius: 22px; padding: 20px 18px; margin-bottom: 34px; }
-  .card-bubble::after { left: 26px; width: 32px; height: 28px; bottom: -15px; }
-}
-.hero.card-bubble { padding-top: 30px; padding-bottom: 30px; }
-.card-bubble .tabs { margin-top: 0; }
+.kaynak:hover { border-color: var(--ink); background: var(--surface-2); }
+.kaynak.active { border-style: solid; border-color: var(--accent); }
+.kaynak .k-ad { display: block; font-family: var(--mono); color: var(--ink); font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.kaynak .k-kisa { display: block; font-family: var(--sans); font-size: 13.5px; line-height: 1.7; color: var(--ink-2); }
+.kaynak .k-tus { display: inline-block; margin-top: 12px; font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; }
+.demo { margin-top: 18px; text-align: center; font-size: 13px; color: var(--ink-2); }
+.linklike { background: none; border: 0; color: var(--accent); font: inherit; font-size: 13px;
+  cursor: pointer; text-decoration: underline; padding: 0; }
 
-/* hero bubble + tool bubble sit side by side on desktop, stack on mobile */
-.lead { display: flex; align-items: flex-start; gap: clamp(22px, 3vw, 36px); }
-.lead > .hero { flex: 1 1 44%; min-width: 0; margin-bottom: clamp(30px, 6vw, 52px); }
-.lead > .tool { flex: 1 1 56%; min-width: 0; }
-@media (max-width: 820px) {
-  .lead { flex-direction: column; }
-  .lead > .hero, .lead > .tool { flex: none; }
-}
-/* the analysis stays a centered chat-width thread under the two bubbles */
-.reveal { max-width: var(--thread); margin-left: auto; margin-right: auto; }
-
-/* ============ bubbles (shared) ============ */
-.q, .app, .bubble {
-  position: relative;
-  max-width: 82%;
-  padding: 11px 15px;
-  font-size: 1.02rem;
-  line-height: 1.42;
-  border-radius: var(--r-bubble);
-  word-break: break-word;
-}
-/* received / other / the app = left; tail corner drops bottom-left */
-.q.them, .app { align-self: flex-start; border-bottom-left-radius: var(--r-tail); }
-.q.them { background: var(--surface); color: var(--ink); }
-/* the app speaks in ink */
-.app { background: var(--sent); color: var(--sent-ink); }
-.app b { font-weight: 600; }
-.app.soft { background: var(--surface); color: var(--ink); }
-/* your own quoted messages = right, ink, tail bottom-right */
-.q.you { align-self: flex-end; background: var(--sent); color: var(--sent-ink); border-bottom-right-radius: var(--r-tail); }
-
-/* ============ hero ============ */
-.hero h1 { font-size: clamp(2.1rem, 6.5vw, 3.1rem); font-weight: 600; letter-spacing: -0.02em; margin-bottom: 16px; }
-.hero .sub { font-size: 1.08rem; color: var(--ink-2); max-width: 30em; }
-
-/* caps, ink-on-ink (white on dark / black on light), links to gizlilik (Damla 13 Tem) */
-.privacy-badge { display: inline-flex; align-items: center; gap: 7px; margin-top: 22px;
-  font-size: 0.78rem; letter-spacing: 0.07em; font-weight: 500; color: var(--ink);
-  text-decoration: none; }
-.privacy-badge:hover { text-decoration: underline; }
-.privacy-badge .lock { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); flex: none; }
-
-/* ============ tabs ============ */
-.tabs { display: flex; gap: 2px; margin: 34px 0 0; border-bottom: 1px solid var(--line); }
-.tab { background: none; border: none; padding: 10px 15px; font-size: 0.92rem; color: var(--ink-3);
-  border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.2s; }
-.tab:hover { color: var(--ink-2); }
-.tab.active { color: var(--ink); border-bottom-color: var(--ink); }
-
-/* ============ input ============ */
+/* ---- panes ---- */
 .pane { padding: 18px 0 0; }
-.composer { border: 1px solid var(--line-2); border-radius: var(--r-card); background: var(--bg);
+.composer { border: 1px solid var(--line-2); border-radius: var(--r-card); background: var(--surface);
   transition: border-color 0.2s, box-shadow 0.2s; }
-.composer:focus-within { border-color: var(--ink); box-shadow: var(--shadow); }
+.composer:focus-within { border-color: var(--accent); box-shadow: var(--shadow); }
 textarea.paste {
   width: 100%; min-height: 176px; resize: vertical; padding: 16px; display: block;
   border: none; background: none; font-family: var(--sans);
-  font-size: 1.02rem; line-height: 1.5; color: var(--ink);
+  font-size: 1rem; line-height: 1.5; color: var(--ink);
 }
 textarea.paste:focus { outline: none; }
-.field { width: 100%; height: 48px; padding: 0 15px; border: 1px solid var(--line-2);
-  border-radius: var(--r-ui); font-family: var(--sans); font-size: 1rem; color: var(--ink); background: var(--bg); margin: 8px 0 4px; }
-.field:focus { outline: none; border-color: var(--ink); }
-.paste-hint { margin-top: 10px; }
+.paste-hint { margin-top: 10px; font-size: 0.86rem; }
 
 .dropzone { display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center;
-  border: 1.5px dashed var(--line-2); border-radius: var(--r-card); padding: 40px 20px;
+  border: 1px dashed var(--line-2); border-radius: var(--r-card); padding: 40px 20px;
   background: var(--surface); cursor: pointer; transition: border-color 0.2s, background 0.2s; }
-.dropzone:hover { border-color: var(--ink-2); }
-.dropzone.hot { border-color: var(--ink); }
-.dz-title { color: var(--ink); font-weight: 500; }
+.dropzone:hover { border-color: var(--ink); background: var(--surface-2); }
+.dropzone.hot { border-color: var(--accent); }
+.dz-title { color: var(--ink); font-weight: 700; }
 .dz-sub { color: var(--ink-3); font-size: 0.86rem; }
 
-/* ============ who-is-me + consent ============ */
+/* ---- who-is-me + consent ---- */
 .whois { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-ui);
   background: var(--surface); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.whois-q { font-size: 0.95rem; }
+.whois-q { font-size: 0.95rem; color: var(--ink); font-weight: 700; }
 .whois .seg { display: inline-flex; gap: 6px; }
-.whois .seg button { background: var(--bg); border: 1px solid var(--line-2); border-radius: 999px;
+.whois .seg button { background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--r-small);
   padding: 6px 15px; font-size: 0.9rem; color: var(--ink-2); transition: all 0.18s; }
-.whois .seg button.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.whois .seg button.on { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
 
 .consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 16px; font-size: 0.85rem;
-  color: var(--ink-2); line-height: 1.4; cursor: pointer; }
-.consent input { margin-top: 3px; flex: none; accent-color: var(--heat); }
+  color: var(--ink-2); line-height: 1.5; cursor: pointer; }
+.consent input { margin-top: 3px; flex: none; accent-color: var(--accent); }
 
-/* ============ buttons ============ */
+/* ---- buttons ---- */
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 20px; }
-.btn { background: var(--ink); color: var(--bg); border: 1px solid var(--ink); border-radius: var(--r-ui);
-  padding: 13px 24px; font-size: 1rem; font-weight: 500; transition: transform 0.15s, opacity 0.2s; }
+.btn { background: var(--ink); color: var(--bg); border: 1px solid var(--ink); border-radius: var(--r-small);
+  padding: 12px 24px; font-size: 0.95rem; font-weight: 700; transition: transform 0.15s, opacity 0.2s; }
 .btn:hover:not(:disabled) { transform: translateY(-1px); }
 .btn:active:not(:disabled) { transform: translateY(0) scale(0.99); }
 .btn:disabled { opacity: 0.35; cursor: default; }
 .btn.ghost { background: none; color: var(--ink); border-color: var(--line-2); }
-.btn.small { padding: 9px 16px; font-size: 0.9rem; }
-.quota { font-size: 0.82rem; color: var(--ink-3); margin-top: 12px; }
+.btn.small { padding: 8px 16px; font-size: 0.85rem; }
+.quota { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-3); margin-top: 12px; }
+.privacy-badge { display: inline-flex; align-items: center; gap: 7px; margin-top: 18px;
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.07em; color: var(--ink-3); }
+.privacy-badge:hover { color: var(--ink); text-decoration: none; }
+.privacy-badge .lock { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
 
-/* ============ reveal ============ */
-.reveal { margin-top: 4px; }
-.reveal:empty { margin: 0; }
-.transcript { margin: 26px 0 8px; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--bg); }
-.tlabel { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-3); margin-bottom: 12px; }
-.thread { display: flex; flex-direction: column; gap: 5px; max-height: 300px; overflow-y: auto; }
+/* ---- analiz anı: ortada daktilo ---- */
+.akis { max-width: 640px; margin: 70px auto 0; display: none;
+  font-family: var(--sans); font-size: 19px; line-height: 1.65; color: #e4e4e7;
+  min-height: 200px; white-space: pre-wrap; }
+.akis.on { display: block; }
+.akis .imlec { display: inline-block; width: 9px; height: 18px; background: var(--accent);
+  vertical-align: -3px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
 
-.stream { display: flex; flex-direction: column; gap: 9px; padding: 6px 0 8px; }
-.sys { align-self: center; font-size: 0.78rem; color: var(--ink-3); letter-spacing: 0.02em; margin: 8px 0 2px; }
-.stream .bubble, .stream .app { max-width: 86%; }
-.stream .bubble { transition: opacity 0.3s ease, transform 0.32s cubic-bezier(.22,1,.36,1); }
-.stream .bubble.enter { opacity: 0; transform: translateY(10px) scale(0.965); }
+/* ---- son an: solda kart, sağda yorum ---- */
+.sahne { display: none; grid-template-columns: 430px 1fr; gap: 64px; max-width: 1150px;
+  margin: 60px auto 0; align-items: start; }
+.sahne.on { display: grid; animation: otur 0.6s ease both; }
+@media (max-width: 900px) { .sahne { grid-template-columns: 1fr; gap: 40px; } }
+@keyframes otur { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-/* typing indicator */
-.typing { display: inline-flex; gap: 5px; align-items: center; padding: 14px 16px; }
-.typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); display: inline-block;
-  animation: typingDot 1.2s infinite ease-in-out; }
-.typing i:nth-child(2) { animation-delay: 0.18s; }
-.typing i:nth-child(3) { animation-delay: 0.36s; }
+/* ---- printable kart ---- */
+.kart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
+  padding: 26px 24px 24px; font-family: var(--mono); }
+.kart .marka { font-size: 12.5px; color: var(--ink-3); display: flex; justify-content: space-between; margin-bottom: 20px; }
+.kart .hukum { color: var(--ink); font-size: 26px; font-weight: 700; line-height: 1.35; margin-bottom: 20px; font-family: var(--mono); }
 
-/* verdict */
-.verdict-b { padding: 18px 18px 16px; }
-.verdict-b .ton { font-family: var(--disp); font-size: clamp(1.7rem, 6vw, 2.4rem); font-weight: 600; line-height: 1.05; letter-spacing: -0.01em; }
-.verdict-b .ton-line { margin-top: 8px; font-size: 1rem; opacity: 0.82; }
-.kw { display: inline-block; animation: kwRise 0.5s cubic-bezier(.22,1,.36,1) both; }
-.ton-flirty .ton, .ton-tense .ton { color: #ff9d8f; }
-.ton-friendly .ton { color: #7ff0b8; }
-.ton-cold .ton { color: #a8cdea; }
+/* terazi: gerçek terazi anatomisi svg'de. kol sallanır, kefeler karşı-dönüşle asılı kalır. */
+.terazi { margin: 0 auto 14px; display: block; width: 100%; max-width: 360px; }
+.t-kol { transform-origin: 180px 46px; animation: salinim 3.4s ease-in-out both; }
+.t-pan-l { transform-origin: 60px 46px; animation: karsi 3.4s ease-in-out both; }
+.t-pan-r { transform-origin: 300px 46px; animation: karsi 3.4s ease-in-out both; }
+/* ağır kefe aşağı iner: .sol-agir sınıfı son duruşu ayna çevirir */
+.terazi.sol-agir .t-kol { animation-name: salinimSol; }
+.terazi.sol-agir .t-pan-l, .terazi.sol-agir .t-pan-r { animation-name: karsiSol; }
+@keyframes salinim {
+  0% { transform: rotate(0); } 18% { transform: rotate(-7deg); } 36% { transform: rotate(6deg); }
+  54% { transform: rotate(-5deg); } 72% { transform: rotate(7deg); } 100% { transform: rotate(9deg); }
+}
+@keyframes karsi {
+  0% { transform: rotate(0); } 18% { transform: rotate(7deg); } 36% { transform: rotate(-6deg); }
+  54% { transform: rotate(5deg); } 72% { transform: rotate(-7deg); } 100% { transform: rotate(-9deg); }
+}
+@keyframes salinimSol {
+  0% { transform: rotate(0); } 18% { transform: rotate(7deg); } 36% { transform: rotate(-6deg); }
+  54% { transform: rotate(5deg); } 72% { transform: rotate(-7deg); } 100% { transform: rotate(-9deg); }
+}
+@keyframes karsiSol {
+  0% { transform: rotate(0); } 18% { transform: rotate(-7deg); } 36% { transform: rotate(6deg); }
+  54% { transform: rotate(-5deg); } 72% { transform: rotate(7deg); } 100% { transform: rotate(9deg); }
+}
+.t-soz { text-align: center; font-size: 12px; color: var(--ink-3); margin-bottom: 16px; }
+.t-etiketler { display: flex; justify-content: space-between; font-size: 12px; line-height: 1.7; margin-bottom: 16px; color: var(--ink-3); }
+.t-etiketler .sen { color: var(--accent); }
+.t-etiketler div { max-width: 48%; }
+.t-etiketler .sag { text-align: right; }
 
-/* headers + meters inside bubbles */
-.b-h { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.09em; opacity: 0.6; margin-bottom: 8px; }
-.b-p { margin-top: 10px; font-size: 0.92rem; opacity: 0.82; color: inherit; }
-.meter-num { font-family: var(--disp); font-size: 1.8rem; font-weight: 600; letter-spacing: -0.01em; }
-.meter { height: 7px; background: rgba(255,255,255,0.16); border-radius: 999px; overflow: hidden; margin: 8px 0 2px; }
-.app.soft .meter, .bubble:not(.app) .meter { background: var(--line); }
-.meter > span { display: block; height: 100%; width: 0; background: var(--heat); border-radius: 999px;
-  transition: width 0.9s cubic-bezier(.34,1.2,.4,1); }
+/* barlar: mesaj başına kelime, değerler üstte, eksen altta */
+.barlar { border-top: 1px solid var(--line); padding-top: 16px; margin-bottom: 14px; }
+.barlar .b-etiket { font-size: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; color: var(--ink-3); }
+.barlar .b-etiket .sen { color: var(--accent); }
+.barlar .dizi { display: flex; align-items: flex-end; gap: 3px; height: 56px; }
+.barlar .dizi i { flex: 1; background: var(--accent); min-height: 2px; border-radius: 4px 4px 0 0; position: relative; }
+.barlar .dizi i::after { content: attr(data-k); position: absolute; top: -16px; left: 0; right: 0;
+  text-align: center; font-size: 9px; color: var(--ink-3); }
+.barlar .dizi.o i { background: var(--line-2); }
+.barlar .dizi.sik i::after { content: none; }   /* çok mesajda değerler üst üste biner, gizle */
+.barlar .eksen { display: flex; justify-content: space-between; font-size: 9px; color: var(--ink-3); margin: 4px 0 14px; }
 
-/* two-sided split */
-.split { display: flex; align-items: stretch; gap: 4px; height: 42px; margin: 4px 0 2px; }
-.split span { display: flex; align-items: center; flex-grow: 0.5; flex-basis: 0; border-radius: 8px;
-  padding: 0 12px; font-size: 0.9rem; transition: flex-grow 0.7s cubic-bezier(.34,1.4,.5,1); overflow: hidden; white-space: nowrap; }
-.split .you-side { justify-content: flex-start; background: var(--heat); color: #fff; }
-.split .other-side { justify-content: flex-end; background: rgba(255,255,255,0.16); }
-.app.soft .split .other-side { background: var(--line); }
-.split b { font-weight: 600; }
-.split em { font-style: normal; opacity: 0.85; }
+.olcumler { font-size: 12.5px; line-height: 2.1; border-top: 1px solid var(--line); padding-top: 12px;
+  margin-bottom: 14px; color: var(--ink-2); }
+.olcumler b { color: var(--ink); font-weight: 700; }
+.kart .kisa { font-family: var(--sans); font-size: 15px; line-height: 1.6; color: #b6b6bd;
+  border-top: 1px solid var(--line); padding-top: 14px; }
+.kart .dip { font-size: 9.5px; color: var(--ink-3); margin-top: 14px; }
+.indir { margin-top: 14px; width: 100%; background: var(--ink); color: var(--bg); border: 0;
+  border-radius: 9px; font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 11px; cursor: pointer; }
+.indir:disabled { opacity: 0.5; cursor: default; }
 
-/* line readings */
-.reading .said { font-size: 0.95rem; }
-.reading .said .who { opacity: 0.55; }
-.reading .mean { font-size: 0.92rem; margin-top: 5px; opacity: 0.75; }
+/* ---- sağdaki yorum ---- */
+.yorum { font-family: var(--sans); font-size: 18px; line-height: 1.65; color: #e4e4e7; max-width: 560px; }
+.yorum p { margin-bottom: 18px; color: #e4e4e7; }
+.yorum b { color: var(--ink); font-weight: 700; }
+.yorum p.satir { cursor: pointer; }
+.yorum p.satir:hover::after { content: " yanlış mı?"; font-size: 12px; color: var(--accent); }
+.yorum .kanit { font-size: 14px; color: var(--ink-3); font-style: italic; }
+.yorum .itiraz { font-size: 12.5px; color: var(--ink-3); }
+.yorum .itiraz .linklike { font-size: 12.5px; }
+/* flag noktaları: durum renkleri sadece burada */
+.yorum .fdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: baseline; }
+.yorum .fdot.red { background: var(--heat); }
+.yorum .fdot.green { background: var(--calm); }
 
-/* flags */
-.flag { display: flex; gap: 11px; align-items: flex-start; }
-.flag-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 7px; flex: none;
-  animation: stamp 0.4s cubic-bezier(.34,1.56,.64,1) both; animation-delay: 0.15s; }
-.flag.red .flag-dot { background: var(--heat); }
-.flag.green .flag-dot { background: var(--calm); }
-.flag-body .ttl { font-weight: 600; font-size: 0.96rem; }
-.flag-body .txt { font-size: 0.92rem; margin-top: 2px; opacity: 0.78; }
+/* itiraz kutusu: satırın altında gerekçe + alternatif + bağış */
+.gerekce { display: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-ui);
+  padding: 16px 18px; margin: -6px 0 20px; font-size: 14px; line-height: 1.65; color: #b6b6bd; }
+.gerekce.on { display: block; }
+.gerekce .g-b { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; color: var(--ink-3);
+  display: block; margin: 8px 0 4px; }
+.gerekce .g-b:first-child { margin-top: 0; }
+.gerekce .bagis { margin-top: 12px; background: none; border: 1px solid var(--accent); border-radius: var(--r-small);
+  color: var(--accent); font: inherit; font-size: 12px; padding: 7px 12px; cursor: pointer; }
+.gerekce .bagis:disabled { opacity: 0.6; cursor: default; }
+.gerekce .bagis-not { display: block; margin-top: 10px; font-size: 12px; color: var(--ink-3); }
 
-/* closing */
-.closing-b { font-family: var(--disp); font-size: 1.2rem; font-weight: 500; line-height: 1.35; padding: 16px 18px; }
-
-/* verdict override / short-chat caveat line */
-.ton-why { margin-top: 8px; font-size: 0.86rem; opacity: 0.65; }
-
-/* per-side flirt meters (one-sided cases) */
-.side-label { font-size: 0.9rem; margin-top: 8px; opacity: 0.85; }
-
-/* tap-to-skip hint */
-.skip-hint { align-self: center; font-size: 0.76rem; color: var(--ink-3); margin: 2px 0 4px; cursor: pointer; }
-
-/* demo-chat link + share row */
-.linklike { background: none; border: none; padding: 0; margin-left: 6px; font-size: inherit;
-  color: var(--link); text-decoration: underline; cursor: pointer; }
-.share-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
-.share-row .btn.ghost { color: var(--ink); }
-
-/* "how I read it" — counted evidence, expandable */
-.howread { align-self: stretch; max-width: 86%; margin-top: 4px; font-size: 0.85rem; color: var(--ink-2); }
-.howread summary { cursor: pointer; color: var(--ink-3); font-size: 0.82rem; padding: 4px 2px; }
+/* nasıl okudum + dürüstlük notu */
+.howread { margin-top: 8px; font-size: 0.85rem; color: var(--ink-2); }
+.howread summary { cursor: pointer; color: var(--ink-3); font-size: 0.82rem; padding: 4px 2px; font-family: var(--mono); }
 .howread summary:hover { color: var(--ink); }
-.howread p { margin: 6px 2px; line-height: 1.45; }
+.howread p { margin: 6px 2px; line-height: 1.5; font-size: 0.85rem; color: var(--ink-2); }
+.reveal-note { margin: 18px 0 2px; font-size: 0.78rem; color: var(--ink-3); line-height: 1.4; }
 
-/* unsure + cloud */
-.unsure .cloud-row { margin-top: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.unsure .btn.small { background: var(--sent-ink); color: var(--sent); border-color: transparent; }
-.app.soft .unsure .btn.small, .unsure.soft .btn.small { background: var(--ink); color: var(--bg); }
-.cloud-note { font-size: 0.78rem; opacity: 0.7; }
-.cloud-badge { display: inline-block; font-size: 0.7rem; opacity: 0.7; border: 1px solid currentColor;
-  border-radius: 999px; padding: 1px 8px; margin-top: 8px; }
+/* hata durumu */
+.unsure { max-width: 640px; margin: 40px auto; text-align: center; color: var(--ink-2); }
 
-/* ============ overlays ============ */
-.overlay { position: fixed; inset: 0; background: rgba(10,10,11,0.5); backdrop-filter: blur(3px);
+/* ---- onboarding overlay ---- */
+.overlay { position: fixed; inset: 0; background: rgba(10,10,11,0.55); backdrop-filter: blur(3px);
   display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 20;
   animation: fade 0.25s ease both; }
-.sheet { background: var(--bg); border-radius: 20px; max-width: 460px; width: 100%; padding: 26px;
-  border: 1px solid var(--line-2); box-shadow: var(--shadow); animation: pop 0.35s cubic-bezier(.22,1,.36,1) both; }
-.sheet h2 { margin-bottom: 8px; }
+.sheet { background: var(--surface); border-radius: var(--r-card); max-width: 460px; width: 100%; padding: 26px;
+  border: 1px solid var(--line); box-shadow: var(--shadow); animation: pop 0.35s cubic-bezier(.22,1,.36,1) both; }
 .ob-thread { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
-.ob-thread .app { max-width: 92%; font-size: 0.98rem; animation: pop 0.4s cubic-bezier(.22,1,.36,1) both; }
+.ob-thread .app { background: var(--bg); border: 1px solid var(--line); color: var(--ink-2);
+  border-radius: var(--r-box); border-bottom-left-radius: var(--r-small);
+  padding: 11px 15px; max-width: 92%; font-size: 0.95rem; line-height: 1.55;
+  animation: pop 0.4s cubic-bezier(.22,1,.36,1) both; }
+.ob-thread .app b { color: var(--ink); }
 .ob-thread .app:nth-child(2) { animation-delay: 0.12s; }
 .ob-thread .app:nth-child(3) { animation-delay: 0.24s; }
 .ob-thread .app:nth-child(4) { animation-delay: 0.36s; }
 
-/* ============ keyframes ============ */
 @keyframes pop { from { opacity: 0; transform: translateY(10px) scale(0.96); } to { opacity: 1; transform: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes typingDot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
-@keyframes kwRise { from { opacity: 0; transform: translateY(0.5em); } to { opacity: 1; transform: none; } }
-@keyframes stamp { 0% { transform: scale(0) rotate(-8deg); } 100% { transform: scale(1) rotate(0); } }
 
-/* ---- honesty note + footer disclaimer ---- */
-.reveal-note { align-self: center; text-align: center; max-width: 40ch; margin: 6px 0 2px;
-  font-size: 0.78rem; color: var(--ink-3); line-height: 1.4; }
+/* ---- footer disclaimer ---- */
 .site-foot .disclaimer { flex-basis: 100%; color: var(--ink-3); }
 
-/* ---- Damla 13 Tem gece: yazılar bold (web 1.0 chunky, Arial) ---- */
-.q, .app, .bubble, .hero .sub, .btn, .dz-title, .b-p,
-.reading .said, .reading .mean, .flag-body .txt, .demo-ask, .whois-q { font-weight: 700; }
-.verdict-b .ton, .closing-b, .meter-num, .flag-body .ttl, .app b, .split b { font-weight: 700; }
-
-/* ---- flört karar: net hüküm, ya var ya yok (Damla: "varsa var yoksa yok deyin") ---- */
-.karar { font-family: var(--disp); font-size: clamp(1.5rem, 5.5vw, 2.1rem); font-weight: 700;
-  letter-spacing: -0.01em; line-height: 1.1; margin: 2px 0 6px; }
-
-/* ---- gözden kaçanlar (llama spiker) ---- */
-.gozden .ttl { font-weight: 700; font-size: 0.96rem; }
-.gozden .txt { font-size: 0.95rem; margin-top: 3px; opacity: 0.85; }
-.gozden .kanit { font-size: 0.84rem; margin-top: 7px; opacity: 0.6; font-style: italic; }
-
 /* ---- keyboard focus visibility (a11y) ---- */
-:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 4px; }
-.tab:focus-visible, .btn:focus-visible, .icon-btn:focus-visible,
-.whois .seg button:focus-visible, textarea.paste:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }

@@ -1,35 +1,34 @@
 :root {
-  /* dark only — Damla 13 Tem gece: light mode kalktı */
-  --bg: #0b0b0c;
-  --surface: #1c1c1f;
+  /* dark only — Damla 13 Tem gece: light mode kalktı.
+     15 Tem: mockups/21-final.html dünyası — bg #1a1a1e, yüzey #232327, vurgu şeftali. */
+  --bg: #1a1a1e;
+  --surface: #232327;
+  --surface-2: #28282d;
+  --accent: #ff8a70;         /* şeftali-mercan — 15 Tem Damla seçimi, marka vurgusu */
+  --accent-soft: #ffb39e;
   --ink: #fafafa;
   --ink-2: #a1a1aa;
-  --ink-3: #71717a;
-  --line: #27272a;
-  --line-2: #3f3f46;
+  --ink-3: #8a8a92;
+  --ink-4: #55555c;
+  --line: #3a3a40;
+  --line-2: #4a4a52;
 
-  /* the app "speaks" in ink: outgoing bubble */
-  --sent: #fafafa;
-  --sent-ink: #0b0b0c;
-
-  /* status only — never on body text */
-  --heat: #ff6b52;           /* flirt / warmth / red flag */
+  /* status only — never on body text (flag chips) */
+  --heat: #ff6b52;           /* red flag */
   --calm: #3ddc8a;           /* green flag / healthy */
   --cool: #8fb4d6;           /* cold / distance */
-  --link: #6aa0ff;
+  --link: #ff8a70;
 
-  --r-bubble: 22px;
-  --r-tail: 7px;
   --r-card: 16px;
+  --r-box: 14px;
   --r-ui: 12px;
+  --r-small: 8px;
 
-  --sea: #050506;            /* the water the big bubble floats on */
-  --thread: 560px;
-  --page: 940px;
+  --page: 1150px;
   --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 30px rgba(0,0,0,0.35);
-  --page-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.4);
 
-  /* Damla 13 Tem gece: Arial her yerde, süslü font yok (web 1.0 chunky) */
-  --disp: Arial, "Helvetica Neue", Helvetica, sans-serif;
-  --sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  /* commentary speaks Helvetica; chrome/metrics speak mono (mockup 21) */
+  --sans: Helvetica, Arial, "Helvetica Neue", sans-serif;
+  --disp: Helvetica, Arial, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }

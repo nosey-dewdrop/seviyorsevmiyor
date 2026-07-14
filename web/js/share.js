@@ -1,8 +1,8 @@
-// Share card: render the reveal as a 1080x1350 PNG entirely on device (canvas), so sharing a
-// result never sends the conversation anywhere — the user downloads/shares an image they chose.
-// This is the growth loop: the verdict is the artifact people screenshot anyway; we make it pretty.
+// v21 kart (mockups/21-final.html portu): 1080x1920 story PNG, TEK yüzey (kutu içinde kutu yok).
+// Terazi + barlar + eksenler + ölçümler kanvasa çizilir; karttaki her sayı gerçek hesaplanan
+// istatistiklerden gelir. Tamamı cihazda üretilir, sohbet hiçbir yere gitmez.
 
-const TONE_COLOR = { flirty: '#ff6b52', tense: '#ff6b52', friendly: '#3ddc8a', cold: '#8fb4d6', onesided: '#8fb4d6' };
+const KARAR_TEXT = { var: 'flört var.', yok: 'flört yok.', tek: 'flört var, ama tek taraflı.' };
 
 function wrap(ctx, text, maxWidth) {
   const words = text.split(' ');
@@ -17,88 +17,100 @@ function wrap(ctx, text, maxWidth) {
   return lines;
 }
 
-const KARAR_TEXT = { var: 'flört var.', yok: 'flört yok.', tek: 'flört var, ama tek taraflı.' };
-
-export async function buildShareCard(r) {
-  const W = 1080, H = 1350, PAD = 90;
+export function buildShareCard(r, st, okumaNo, senAgir) {
   const c = document.createElement('canvas');
-  c.width = W; c.height = H;
+  c.width = 1080; c.height = 1920;
   const x = c.getContext('2d');
+  const mono = 'px "SF Mono", Menlo, monospace', helv = 'px Helvetica, Arial';
 
-  x.fillStyle = '#0b0b0c';
-  x.fillRect(0, 0, W, H);
+  x.fillStyle = '#1a1a1e'; x.fillRect(0, 0, 1080, 1920);
 
-  // brand
-  x.fillStyle = '#71717a';
-  x.font = 'bold 40px Arial, sans-serif';
-  x.fillText('mesajibirokusana.', PAD, 150);
+  // marka satırı
+  x.fillStyle = '#8a8a92'; x.font = '30' + mono;
+  x.fillText('seviyorsevmiyor', 130, 250);
+  x.textAlign = 'right'; x.fillText(`okuma ${okumaNo}`, 950, 250); x.textAlign = 'left';
 
-  // verdict
-  const tone = r.genel_ton;
-  x.fillStyle = TONE_COLOR[tone.key] || '#fafafa';
-  x.font = 'bold 108px Arial, sans-serif';
-  let y = 320;
-  for (const line of wrap(x, tone.label, W - PAD * 2)) { x.fillText(line, PAD, y); y += 116; }
+  // hüküm (motor kararı)
+  x.fillStyle = '#fafafa'; x.font = '700 68' + mono;
+  let hy = 380;
+  for (const line of wrap(x, KARAR_TEXT[r.flort_sinyali.karar] || KARAR_TEXT.yok, 820)) {
+    x.fillText(line, 130, hy); hy += 82;
+  }
 
-  // tone line
-  x.fillStyle = '#a1a1aa';
-  x.font = 'bold 42px Arial, sans-serif';
-  y += 10;
-  for (const line of wrap(x, tone.line, W - PAD * 2)) { x.fillText(line, PAD, y); y += 60; }
+  // terazi: kaide, direk, eğik kol, zincirler, kefeler. ağır kefe aşağıda (sol = SEN).
+  const cx = 540, ty = 560, a = (senAgir ? -9 : 9) * Math.PI / 180;
+  x.strokeStyle = '#8a8a92'; x.fillStyle = '#4a4a52'; x.lineWidth = 6;
+  x.beginPath(); x.moveTo(cx - 60, ty + 330); x.lineTo(cx + 60, ty + 330); x.lineTo(cx + 40, ty + 306); x.lineTo(cx - 40, ty + 306); x.closePath(); x.fill();
+  x.fillRect(cx - 5, ty, 10, 310);
+  x.beginPath(); x.arc(cx, ty, 11, 0, 7); x.fillStyle = '#8a8a92'; x.fill();
+  x.beginPath(); x.arc(cx, ty, 4, 0, 7); x.fillStyle = '#ff8a70'; x.fill();
+  const kolX = Math.cos(a) * 300, kolY = Math.sin(a) * 300;
+  x.strokeStyle = '#8a8a92';
+  x.beginPath(); x.moveTo(cx - kolX, ty - kolY); x.lineTo(cx + kolX, ty + kolY); x.stroke();
+  const kefe = (px, py, renk, agiz) => {
+    x.strokeStyle = '#6a6a72'; x.lineWidth = 2.5;
+    [[-46, 0], [0, -6], [46, 0]].forEach((d) => {
+      x.beginPath(); x.moveTo(px, py); x.lineTo(px + d[0], py + 122 + d[1]); x.stroke();
+    });
+    x.fillStyle = agiz;
+    x.beginPath(); x.ellipse(px, py + 122, 58, 9, 0, 0, 7); x.fill();
+    x.fillStyle = renk;
+    x.beginPath(); x.moveTo(px - 58, py + 124);
+    x.quadraticCurveTo(px - 54, py + 176, px, py + 176);
+    x.quadraticCurveTo(px + 54, py + 176, px + 58, py + 124);
+    x.quadraticCurveTo(px, py + 140, px - 58, py + 124); x.closePath(); x.fill();
+  };
+  kefe(cx - kolX, ty - kolY, '#ff8a70', '#ffb39e');
+  kefe(cx + kolX, ty + kolY, '#4a4a52', '#55555c');
+  x.fillStyle = '#ff8a70'; x.font = '30' + mono;
+  x.fillText(`SEN: ${st.senSoru} soru · başlatan ${st.baslatan}`, 130, ty + 420);
+  x.fillStyle = '#8a8a92'; x.textAlign = 'right';
+  x.fillText(`O: %${st.kuruOran} kuru cevap`, 950, ty + 420); x.textAlign = 'left';
 
-  // flört: the committed call is the money shot of the card
-  y += 70;
-  x.fillStyle = '#71717a';
-  x.font = 'bold 34px Arial, sans-serif';
-  x.fillText('FLÖRT VAR MI, YOK MU?', PAD, y);
-  y += 86;
-  x.fillStyle = '#fafafa';
-  x.font = 'bold 78px Arial, sans-serif';
-  const kararLine = KARAR_TEXT[r.flort_sinyali.karar] || KARAR_TEXT.yok;
-  x.fillText(r.flort_sinyali.oneSided
-    ? `${kararLine} sende %${r.flort_sinyali.me}, onda %${r.flort_sinyali.other}`
-    : `${kararLine} (%${r.flort_sinyali.score})`, PAD, y);
-  // meter
-  y += 44;
-  const mw = W - PAD * 2;
-  x.fillStyle = '#27272a';
-  x.beginPath(); x.roundRect(PAD, y, mw, 16, 8); x.fill();
-  const pct = r.flort_sinyali.oneSided ? Math.max(r.flort_sinyali.me, r.flort_sinyali.other) : r.flort_sinyali.score;
-  x.fillStyle = TONE_COLOR[tone.key] || '#ff6b52';
-  x.beginPath(); x.roundRect(PAD, y, Math.max(16, mw * pct / 100), 16, 8); x.fill();
+  // barlar (hesaplanan kelime sayıları), değerler + eksen etiketleri
+  const CAP = 40;
+  const senDizi = st.senKelimeler.length > CAP ? st.senKelimeler.slice(-CAP) : st.senKelimeler;
+  const oDizi = st.oKelimeler.length > CAP ? st.oKelimeler.slice(-CAP) : st.oKelimeler;
+  const maks = Math.max(1, ...senDizi, ...oDizi);
+  const ciz = (dizi, y0, renk, capped) => {
+    const bw = 840 / Math.max(dizi.length, 1);
+    const gap = Math.min(12, bw * 0.25);
+    dizi.forEach((k, i) => {
+      const h = Math.max(10, 130 * k / maks);
+      x.fillStyle = renk; x.fillRect(130 + i * bw, y0 - h, bw - gap, h);
+      if (dizi.length <= 16) {
+        x.fillStyle = '#8a8a92'; x.font = '20px Menlo, monospace'; x.textAlign = 'center';
+        x.fillText(k, 130 + i * bw + (bw - gap) / 2, y0 - h - 10); x.textAlign = 'left';
+      }
+    });
+    x.fillStyle = '#8a8a92'; x.font = '20px Menlo, monospace';
+    x.fillText(capped ? `son ${CAP} mesaj` : 'ilk mesaj', 130, y0 + 30);
+    x.textAlign = 'right'; x.fillText('son mesaj', 970, y0 + 30); x.textAlign = 'left';
+  };
+  x.fillStyle = '#8a8a92'; x.font = '26' + mono;
+  x.fillText('SEN · her mesajın boyu (y: kelime)', 130, 1180);
+  ciz(senDizi, 1340, '#ff8a70', st.senKelimeler.length > CAP);
+  x.fillStyle = '#8a8a92'; x.font = '26' + mono;
+  x.fillText('O · her mesajın boyu (y: kelime)', 130, 1400);
+  ciz(oDizi, 1560, '#4a4a52', st.oKelimeler.length > CAP);
 
-  // balance one-liner (first sentence only — keep the card clean)
-  y += 110;
-  x.fillStyle = '#a1a1aa';
-  x.font = 'bold 42px Arial, sans-serif';
-  const balFirst = (r.ilgi_dengesi.line.split('.')[0] || '') + '.';
-  for (const line of wrap(x, balFirst, W - PAD * 2)) { x.fillText(line, PAD, y); y += 60; }
-
-  // closing punch
-  y += 60;
-  x.fillStyle = '#fafafa';
-  x.font = 'bold italic 52px Arial, sans-serif';
-  for (const line of wrap(x, r.kapanis, W - PAD * 2)) { x.fillText(line, PAD, y); y += 70; }
-
-  // footer: the dare (how-bad-is-your-spotify energy), then the address, then the honest small print
-  x.fillStyle = '#fafafa';
-  x.font = 'bold italic 52px Arial, sans-serif';
-  x.fillText('peki senin sohbetin ne diyor?', PAD, H - 210);
-  x.fillStyle = '#a1a1aa';
-  x.font = 'bold 38px Arial, sans-serif';
-  x.fillText('cesaretin varsa: nosey-dewdrop.github.io/mesajibirokusana', PAD, H - 140);
-  x.fillStyle = '#52525b';
-  x.font = '32px Arial, sans-serif';
-  x.fillText('otomatik tahmin · hüküm cihazda verildi, mesajlar görselde yok', PAD, H - 82);
+  // ölçüm satırı
+  x.fillStyle = '#e4e4e7'; x.font = '31' + helv;
+  x.fillText(`soru ${st.senSoru} · ${st.oSoru}    kuru cevap %${st.kuruOran}    çift mesaj ${st.cift}    erteleme ${st.erteleme}`, 130, 1640);
+  x.fillStyle = '#8a8a92'; x.font = '24' + mono;
+  x.fillText('hüküm cihazda verildi · mesajlar kimseye gitmez', 130, 1706);
+  x.fillStyle = '#55555c'; x.font = '22' + mono;
+  x.fillText('seviyorsevmiyor · otomatik tahmin, yargı değil', 130, 1756);
 
   return c;
 }
 
-export async function shareReveal(r) {
-  const canvas = await buildShareCard(r);
+export async function shareReveal(r, st, okumaNo, senAgir) {
+  const canvas = buildShareCard(r, st, okumaNo, senAgir);
   const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
   if (!blob) throw new Error('görsel üretilemedi');
-  const file = new File([blob], 'mesajibirokusana.png', { type: 'image/png' });
+  const name = `seviyorsevmiyor-${okumaNo}.png`;
+  const file = new File([blob], name, { type: 'image/png' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file] }); return 'shared'; } catch (e) {
       if (e && e.name === 'AbortError') return 'cancelled';
@@ -106,7 +118,7 @@ export async function shareReveal(r) {
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'mesajibirokusana.png';
+  a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   return 'downloaded';
