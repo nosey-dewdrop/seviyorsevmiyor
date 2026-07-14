@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>final · seviyorsevmiyor</title>
+<style>
+  /* FINAL KURGU (damla spec):
+     analiz ani: yorum ortada daktilo gibi akar.
+     son an: yorum saga kayar (Helvetica/Arial), solda printable oturur.
+     printable: terazi (seviyor/sevmiyor salinip hukme oturur) + istatistik barlari + kisa yorum.
+     fis yok. kart fis gorunumlu degil, sitenin kendi dili.
+     deniz degismedi, sabit 12 baloncuk. tire yok. */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#050506; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; padding:36px 40px 90px; overflow-x:hidden; }
+  .tag { position:fixed; top:10px; right:12px; font-size:10px; color:#3f3f46; z-index:5; }
+  .sea { position:fixed; inset:0; pointer-events:none; z-index:0; }
+  .sea img { position:absolute; width:105px; }
+  header { position:relative; z-index:1; display:flex; justify-content:space-between; align-items:baseline; margin-bottom:30px; }
+  h1 { color:#fafafa; font-size:20px; font-weight:400; letter-spacing:-.5px; }
+  .meta { font-size:11px; color:#71717a; }
+
+  .giris { position:relative; z-index:1; max-width:680px; margin:0 auto; }
+  textarea { width:100%; height:120px; background:rgba(5,5,6,.85); border:1px solid #27272a; color:#fafafa; font:inherit; font-size:13px; padding:14px; resize:none; border-radius:0; }
+  .go { margin-top:12px; background:#fafafa; color:#050506; border:0; font:inherit; font-size:13px; font-weight:700; padding:11px 24px; cursor:pointer; }
+  .go:active { transform:translateY(1px); }
+
+  /* --- analiz ani: ortada akan yorum --- */
+  .akis { position:relative; z-index:1; max-width:640px; margin:70px auto 0; display:none;
+    font-family:Helvetica,Arial,sans-serif; font-size:16px; line-height:2; color:#e4e4e7; min-height:200px; }
+  .akis.on { display:block; }
+  .akis .imlec { display:inline-block; width:9px; height:18px; background:#3ddc8a; vertical-align:-3px; animation:blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+
+  /* --- son an: solda printable, sagda yorum --- */
+  .sahne { position:relative; z-index:1; display:none; grid-template-columns:420px 1fr; gap:64px; max-width:1150px; margin:60px auto 0; align-items:start; }
+  .sahne.on { display:grid; animation:otur .6s ease both; }
+  @media (max-width:900px){ .sahne { grid-template-columns:1fr; } }
+  @keyframes otur { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+
+  /* printable: sitenin kendi dili. fis degil. */
+  .kart { background:#0b0b0c; border:1px solid #27272a; padding:26px 24px 24px; }
+  .kart .marka { font-size:11px; color:#71717a; display:flex; justify-content:space-between; margin-bottom:22px; }
+  .kart .hukum { color:#fafafa; font-size:21px; font-weight:700; line-height:1.35; margin-bottom:26px; }
+
+  .terazi { position:relative; height:150px; margin-bottom:8px; }
+  .terazi .mil { position:absolute; left:50%; top:0; width:2px; height:34px; background:#3f3f46; }
+  .terazi .kol { position:absolute; left:50%; top:34px; width:86%; height:2px; background:#71717a; transform:translateX(-50%) rotate(0deg); transform-origin:center; animation:salinim 3.2s ease-in-out both; }
+  @keyframes salinim {
+    0% { transform:translateX(-50%) rotate(0); } 18% { transform:translateX(-50%) rotate(-6deg); }
+    36% { transform:translateX(-50%) rotate(5deg); } 54% { transform:translateX(-50%) rotate(-4deg); }
+    72% { transform:translateX(-50%) rotate(6.5deg); } 100% { transform:translateX(-50%) rotate(8deg); }
+  }
+  .kefe { position:absolute; width:150px; font-size:10px; text-align:center; }
+  .kefe .ip { width:1px; height:34px; background:#3f3f46; margin:0 auto; }
+  .kefe .tabla { border-top:2px solid #71717a; padding-top:8px; line-height:1.7; }
+  .kefe.sen { left:1%; top:58px; color:#3ddc8a; }
+  .kefe.o { right:1%; top:30px; }
+  .terazi .soz { position:absolute; left:50%; top:64px; transform:translateX(-50%); font-size:11px; color:#71717a; animation:sozler 3.2s steps(1) both; }
+  @keyframes sozler { 0% { content:""; } }
+
+  .barlar { border-top:1px solid #27272a; padding-top:16px; margin-bottom:16px; }
+  .barlar .b-etiket { font-size:10px; margin-bottom:6px; display:flex; justify-content:space-between; }
+  .barlar .dizi { display:flex; align-items:flex-end; gap:2px; height:44px; margin-bottom:14px; }
+  .barlar .dizi i { flex:1; background:#3ddc8a; }
+  .barlar .dizi.o i { background:#3f3f46; }
+  .kart .kisa { font-family:Helvetica,Arial,sans-serif; font-size:12.5px; line-height:1.8; color:#a1a1aa; border-top:1px solid #27272a; padding-top:14px; }
+  .kart .dip { font-size:9.5px; color:#52525b; margin-top:14px; }
+  .indir { margin-top:14px; width:100%; background:#fafafa; color:#050506; border:0; font:inherit; font-size:12px; font-weight:700; padding:11px; cursor:pointer; }
+
+  /* sagda yorum: helvetica, duz insan yazisi */
+  .yorum { font-family:Helvetica,Arial,sans-serif; font-size:15.5px; line-height:2; color:#e4e4e7; max-width:560px; }
+  .yorum p { margin-bottom:18px; }
+  .yorum b { color:#fafafa; font-weight:700; }
+  .yorum .itiraz { font-size:12.5px; color:#71717a; }
+  .yorum .itiraz a { color:#3ddc8a; text-decoration:none; }
+</style>
+</head>
+<body>
+<span class="tag">final · seviyorsevmiyor</span>
+<div class="sea" aria-hidden="true">
+  <img src="../web/assets/bubbles/b00.png" style="top:5%;left:3%">
+  <img src="../web/assets/bubbles/b01.png" style="top:13%;left:88%">
+  <img src="../web/assets/bubbles/b02.png" style="top:27%;left:7%">
+  <img src="../web/assets/bubbles/b03.png" style="top:39%;left:92%">
+  <img src="../web/assets/bubbles/b04.png" style="top:54%;left:2%">
+  <img src="../web/assets/bubbles/b05.png" style="top:66%;left:88%">
+  <img src="../web/assets/bubbles/b00.png" style="top:80%;left:5%">
+  <img src="../web/assets/bubbles/b02.png" style="top:90%;left:78%">
+  <img src="../web/assets/bubbles/b03.png" style="top:7%;left:47%">
+  <img src="../web/assets/bubbles/b01.png" style="top:91%;left:38%">
+  <img src="../web/assets/bubbles/b04.png" style="top:45%;left:52%">
+  <img src="../web/assets/bubbles/b05.png" style="top:70%;left:47%">
+</div>
+<header>
+  <h1>seviyorsevmiyor</h1>
+  <p class="meta">sohbeti bırak, hükmü al. mesajlar cihazdan çıkmaz.</p>
+</header>
+
+<div class="giris" id="giris">
+  <textarea readonly>Ben: naber, bugün ne yaptın?
+O: iş güç işte
+Ben: ben bugün o kafeye gittim hani beraber gitmiştik ya, aklıma sen geldin
+O: hı
+Ben: bu hafta sonu müsait misin? şu sergiye gidelim mi demiştik
+O: bakarız
+Ben: geçen de öyle demiştin ama :( özledim seni ya
+O: yoğunum bu ara</textarea>
+  <button class="go" id="oku" type="button">bir okusana</button>
+</div>
+
+<div class="akis" id="akis"><span id="akisText"></span><span class="imlec"></span></div>
+
+<div class="sahne" id="sahne">
+  <div class="kart" id="kart">
+    <div class="marka"><span>seviyorsevmiyor</span><span>okuma 0268 · 14.07.2026</span></div>
+    <div class="hukum">flört var, ama tek taraflı.</div>
+    <div class="terazi">
+      <div class="mil"></div>
+      <div class="kol" id="kol"></div>
+      <div class="kefe sen" style="top:66px"><div class="ip"></div><div class="tabla">SEN<br>4 soru · 2 plan · "özledim"</div></div>
+      <div class="kefe o"><div class="ip"></div><div class="tabla">O<br>"bakarız" · "hı" · "ok"</div></div>
+      <div class="soz" id="soz">seviyor...</div>
+    </div>
+    <div class="barlar">
+      <div class="b-etiket"><span style="color:#3ddc8a">SEN · mesaj ritmi</span><span>7 ay</span></div>
+      <div class="dizi"><i style="height:46%"></i><i style="height:58%"></i><i style="height:52%"></i><i style="height:66%"></i><i style="height:60%"></i><i style="height:72%"></i><i style="height:64%"></i><i style="height:78%"></i><i style="height:70%"></i><i style="height:84%"></i><i style="height:76%"></i><i style="height:90%"></i></div>
+      <div class="b-etiket"><span>O · mesaj ritmi</span><span>soru 41'e 3</span></div>
+      <div class="dizi o"><i style="height:44%"></i><i style="height:38%"></i><i style="height:40%"></i><i style="height:30%"></i><i style="height:32%"></i><i style="height:24%"></i><i style="height:25%"></i><i style="height:18%"></i><i style="height:19%"></i><i style="height:12%"></i><i style="height:13%"></i><i style="height:7%"></i></div>
+    </div>
+    <p class="kisa">kefeye ağırlığı satırlar koydu. dört soruna sıfır soru döndü, iki planın iki kez ertelendi. bir sonraki taşı o koysun.</p>
+    <p class="dip">hüküm cihazda verildi · mesajlar kimseye gitmez · seviyorsevmiyor</p>
+    <button class="indir" type="button">kartı indir</button>
+  </div>
+  <div class="yorum" id="yorumHedef"></div>
+</div>
+
+<script>
+// koreografi: yaz ortada -> bitince yorum saga, printable sola.
+var YORUM = [
+  'once iyi haber: bu sohbette flört var. kötü haber: akış tek yönde.',
+  '<b>soru dengesi</b> en az yanıltan ölçü. yedi ayda senden 41 soru çıkmış, 3 soru dönmüş. merak tek taraflı.',
+  '<b>"bakarız"</b> iki kez geldi. ikisi de senin planına. bu bir desen, tesadüf değil.',
+  'en açık cümlen "özledim seni ya" idi. cevap "ok" oldu. hükmün en ağır kalemi bu satır.',
+  'cevaplar yedi ayda 9 kelimeden 1.6 kelimeye indi. soğuma eğrisi net.',
+  '<span class="itiraz">yanlış mı okudum? <a href="#">bence yanlış okudun</a> de, satırlarını göster.</span>'
+];
+var giris = document.getElementById('giris'), akis = document.getElementById('akis'),
+    akisText = document.getElementById('akisText'), sahne = document.getElementById('sahne'),
+    hedef = document.getElementById('yorumHedef'), soz = document.getElementById('soz');
+
+document.getElementById('oku').addEventListener('click', function () {
+  giris.style.display = 'none';
+  akis.classList.add('on');
+  var duz = YORUM.map(function (p) { return p.replace(/<[^>]+>/g, ''); }).join('\n\n');
+  var i = 0;
+  (function tik() {
+    if (i <= duz.length) {
+      akisText.textContent = duz.slice(0, i);
+      i += 2;
+      setTimeout(tik, 14);
+    } else {
+      setTimeout(yerles, 500);
+    }
+  })();
+});
+
+function yerles() {
+  akis.classList.remove('on');
+  hedef.innerHTML = YORUM.map(function (p) { return '<p>' + p + '</p>'; }).join('');
+  sahne.classList.add('on');
+  var sozler = ['seviyor...', 'sevmiyor...', 'seviyor...', 'sevmiyor...', 'seviyor, ama tek taraflı.'];
+  var k = 0;
+  var t = setInterval(function () {
+    soz.textContent = sozler[k];
+    if (++k >= sozler.length) clearInterval(t);
+  }, 640);
+}
+</script>
+</body>
+</html>
