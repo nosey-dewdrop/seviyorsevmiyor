@@ -135,24 +135,33 @@
     <div class="hukum">flört var, ama tek taraflı.</div>
 
     <svg class="terazi" viewBox="0 0 360 240" aria-hidden="true">
-      <!-- kaide + direk -->
-      <path d="M150 224 L210 224 L196 210 L164 210 Z" fill="#4a4a52"/>
-      <rect x="177" y="52" width="6" height="160" fill="#4a4a52"/>
-      <circle cx="180" cy="46" r="7" fill="#8a8a92"/>
+      <!-- kaide: yumusak podyum -->
+      <rect x="142" y="216" width="76" height="10" rx="5" fill="#4a4a52"/>
+      <rect x="158" y="204" width="44" height="12" rx="6" fill="#55555c"/>
+      <!-- direk: incelen govde + tepe suslemesi -->
+      <path d="M176 204 L177.5 60 L182.5 60 L184 204 Z" fill="#6a6a72"/>
+      <circle cx="180" cy="46" r="9" fill="none" stroke="#8a8a92" stroke-width="3"/>
+      <circle cx="180" cy="46" r="3" fill="#ff8a70"/>
       <!-- kol: sallanan grup -->
       <g class="t-kol">
-        <rect x="56" y="43" width="248" height="6" rx="3" fill="#8a8a92"/>
-        <!-- sol kefe (SEN): zincirler + canak -->
+        <path d="M58 46 L302 46" stroke="#8a8a92" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="58" cy="46" r="4" fill="#8a8a92"/>
+        <circle cx="302" cy="46" r="4" fill="#8a8a92"/>
+        <!-- sol kefe (SEN): uc zincir + zarif canak -->
         <g class="t-pan-l">
-          <line x1="60" y1="49" x2="38" y2="118" stroke="#6a6a72" stroke-width="2"/>
-          <line x1="60" y1="49" x2="82" y2="118" stroke="#6a6a72" stroke-width="2"/>
-          <path d="M28 118 L92 118 Q90 146 60 146 Q30 146 28 118 Z" fill="#ff8a70"/>
+          <line x1="58" y1="50" x2="30" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
+          <line x1="58" y1="50" x2="58" y2="112" stroke="#6a6a72" stroke-width="1.6"/>
+          <line x1="58" y1="50" x2="86" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
+          <ellipse cx="58" cy="117" rx="34" ry="5" fill="#ffb39e"/>
+          <path d="M24 117 Q26 148 58 148 Q90 148 92 117 Q75 124 58 124 Q41 124 24 117 Z" fill="#ff8a70"/>
         </g>
         <!-- sag kefe (O) -->
         <g class="t-pan-r">
-          <line x1="300" y1="49" x2="278" y2="118" stroke="#6a6a72" stroke-width="2"/>
-          <line x1="300" y1="49" x2="322" y2="118" stroke="#6a6a72" stroke-width="2"/>
-          <path d="M268 118 L332 118 Q330 146 300 146 Q270 146 268 118 Z" fill="#4a4a52"/>
+          <line x1="302" y1="50" x2="274" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
+          <line x1="302" y1="50" x2="302" y2="112" stroke="#6a6a72" stroke-width="1.6"/>
+          <line x1="302" y1="50" x2="330" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
+          <ellipse cx="302" cy="117" rx="34" ry="5" fill="#55555c"/>
+          <path d="M268 117 Q270 148 302 148 Q334 148 336 117 Q319 124 302 124 Q285 124 268 117 Z" fill="#4a4a52"/>
         </g>
       </g>
     </svg>
@@ -246,7 +255,7 @@ function yerles() {
   hedef.innerHTML = YORUM.map(function (p, ix) {
     var cls = GEREKCE[ix] ? ' class="satir" data-ix="' + ix + '"' : '';
     return '<p' + cls + '>' + p + '</p>' + (GEREKCE[ix] ?
-      '<div class="gerekce" id="g' + ix + '"><span class="g-b">NEDEN BÖYLE OKUDUM</span>' + GEREKCE[ix].n +
+      '<div class="gerekce" id="g' + ix + '"><span class="g-b">NEDEN BÖYLE OKUDUM?</span>' + GEREKCE[ix].n +
       '<span class="g-b">BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?</span>' + GEREKCE[ix].a +
       '<br><button class="bagis" type="button">hâlâ yanlışsa: bu satırları rızamla bağışla, model öğrensin</button></div>' : '');
   }).join('');
@@ -295,17 +304,21 @@ document.getElementById('indir').addEventListener('click', function () {
   x.beginPath(); x.arc(cx, ty, 11, 0, 7); x.fillStyle = '#8a8a92'; x.fill();
   var kolX = Math.cos(a) * 300, kolY = Math.sin(a) * 300;
   x.beginPath(); x.moveTo(cx - kolX, ty - kolY); x.lineTo(cx + kolX, ty + kolY); x.stroke();
-  var kefe = function (px, py, renk) {
-    x.strokeStyle = '#6a6a72'; x.lineWidth = 3;
-    x.beginPath(); x.moveTo(px, py); x.lineTo(px - 42, py + 120); x.stroke();
-    x.beginPath(); x.moveTo(px, py); x.lineTo(px + 42, py + 120); x.stroke();
+  var kefe = function (px, py, renk, agiz) {
+    x.strokeStyle = '#6a6a72'; x.lineWidth = 2.5;
+    [[-46, 0], [0, -6], [46, 0]].forEach(function (d) {
+      x.beginPath(); x.moveTo(px, py); x.lineTo(px + d[0], py + 122 + d[1]); x.stroke();
+    });
+    x.fillStyle = agiz;
+    x.beginPath(); x.ellipse(px, py + 122, 58, 9, 0, 0, 7); x.fill();
     x.fillStyle = renk;
-    x.beginPath(); x.moveTo(px - 60, py + 120); x.lineTo(px + 60, py + 120);
-    x.quadraticCurveTo(px + 56, py + 172, px, py + 172);
-    x.quadraticCurveTo(px - 56, py + 172, px - 60, py + 120); x.closePath(); x.fill();
+    x.beginPath(); x.moveTo(px - 58, py + 124);
+    x.quadraticCurveTo(px - 54, py + 176, px, py + 176);
+    x.quadraticCurveTo(px + 54, py + 176, px + 58, py + 124);
+    x.quadraticCurveTo(px, py + 140, px - 58, py + 124); x.closePath(); x.fill();
   };
-  kefe(cx - kolX, ty - kolY, '#ff8a70');
-  kefe(cx + kolX, ty + kolY, '#4a4a52');
+  kefe(cx - kolX, ty - kolY, '#ff8a70', '#ffb39e');
+  kefe(cx + kolX, ty + kolY, '#4a4a52', '#55555c');
   x.fillStyle = '#ff8a70'; x.font = '30' + mono;
   x.fillText('SEN: ' + V.senSoru + ' soru · başlatan sen', 130, ty + 420);
   x.fillStyle = '#8a8a92'; x.textAlign = 'right';
