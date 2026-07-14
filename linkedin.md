@@ -87,3 +87,18 @@ bu mimarinin üç getirisi oldu. bir: tutarlılık. aynı sohbete hep aynı kara
 isim de bu hafta değişti: whatdoyoumean gitti, mesajibirokusana geldi. türkçe bir ürünün ingilizce ismi ağızdan ağıza yayılamıyor; yeni isim zaten ürünü kullanırken kurduğun cümle. bir de hüküm dili netleşti: "kıvılcım var ama dosya kapanmadı" tarzı orta yol cümlelerini sildim. varsa var, yoksa yok. dürüstlük kanıt satırında yaşamaya devam ediyor, ama başlık artık taraf tutuyor.
 
 ders: yapay zekayı ürünün beyni yapmak kolay ve tembel bir karar. onu spiker yapmak, beyni kendinde tutmak daha çok iş; ama ürünü senin yapan da o iş.
+
+
+---
+
+## 6 — sınavı kendi sorularınla yapamazsın
+
+bu hafta ürünün motorunu büyütmem gerekiyordu ve elimde 268 örnek vardı. seviyorsevmiyor bir sohbeti okuyup "flört var mı" diye hüküm veriyor; hükmü veren şey tarayıcıda çalışan, benim eğittiğim küçük bir istatistik modeli. 268 örnek bir model için açlık sınırı: zor sette isabet %72.2 idi.
+
+klasik yol belli: aylarca kullanıcı bekle, veri birifsin. benim aylarım yok, 2 ağustos'ta lansman var. o yüzden öğretmen damıtması yaptım: claude'a 420 etiketli türkçe sohbet ürettirdim. kolay örnek istemedim; typo'lu, yarım cümleli, "sjsjs"li, gri vakalı istedim. flört gibi görünen arkadaşlık, kibarlığa sarılmış soğukluk, sakin cümleye gizlenmiş gerginlik. gerçek insanların dağınıklığını taklit etmeyen sentetik veri, cilalı bir yalan çünkü.
+
+asıl karar veri üretmek değildi. asıl karar şuydu: sentetik örnekler sadece eğitime girer, ölçüm setine asla. modelini kendi ürettiğin sorularla sınava sokarsan notun yükselir ama bilgin yükselmez; kağıt üstünde parlak, gerçekte kör bir model olur. ölçümü yine 54 gerçek örnekte yaptım. sonuç: %72.2'den %75.9'a. üç puan mütevazı duruyor; 54 soruluk sınavda iki soru daha demek ve daha önemlisi, yalansız bir sayı.
+
+bu düzenin güzel tarafı çark olması. kullanıcı hükme itiraz ettiğinde satırlarını rızasıyla bağışlayabiliyor; her bağış gerçek, etiketli veri. gerçek veri biriktikçe sentetiğin payı düşecek, model her turda biraz daha benim olacak. bugün büyük modeller öğretmen, benim motorum öğrenci; hedef, öğrencinin sınıfı geçip kürsüye oturması.
+
+ders: yapay zekayla veri üretmek artık kolay. zorlaşan şey dürüst kalmak. sayıyı yükseltmenin yüz yolu var, yükseldiğine kendini inandırmanın tek yolu var: sınav kağıdına elini sürmemek.

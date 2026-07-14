@@ -68,13 +68,13 @@ export function buildShareCard(r, st, okumaNo, senAgir) {
   x.fillText(`O: %${st.kuruOran} kuru cevap`, 950, ty + 420); x.textAlign = 'left';
 
   // barlar (hesaplanan kelime sayıları), değerler + eksen etiketleri
-  const CAP = 40;
-  const senDizi = st.senKelimeler.length > CAP ? st.senKelimeler.slice(-CAP) : st.senKelimeler;
-  const oDizi = st.oKelimeler.length > CAP ? st.oKelimeler.slice(-CAP) : st.oKelimeler;
+  // Damla 15 Tem: kırpma yok, tüm mesajlar çizilir (uzunda yoğunluk şeridi olur).
+  const senDizi = st.senKelimeler;
+  const oDizi = st.oKelimeler;
   const maks = Math.max(1, ...senDizi, ...oDizi);
-  const ciz = (dizi, y0, renk, capped) => {
+  const ciz = (dizi, y0, renk) => {
     const bw = 840 / Math.max(dizi.length, 1);
-    const gap = Math.min(12, bw * 0.25);
+    const gap = dizi.length > 120 ? 0 : Math.min(12, bw * 0.25);
     dizi.forEach((k, i) => {
       const h = Math.max(10, 130 * k / maks);
       x.fillStyle = renk; x.fillRect(130 + i * bw, y0 - h, bw - gap, h);
@@ -84,15 +84,15 @@ export function buildShareCard(r, st, okumaNo, senAgir) {
       }
     });
     x.fillStyle = '#8a8a92'; x.font = '20px Menlo, monospace';
-    x.fillText(capped ? `son ${CAP} mesaj` : 'ilk mesaj', 130, y0 + 30);
+    x.fillText('ilk mesaj', 130, y0 + 30);
     x.textAlign = 'right'; x.fillText('son mesaj', 970, y0 + 30); x.textAlign = 'left';
   };
   x.fillStyle = '#8a8a92'; x.font = '26' + mono;
   x.fillText('SEN · her mesajın boyu (y: kelime)', 130, 1180);
-  ciz(senDizi, 1340, '#ff8a70', st.senKelimeler.length > CAP);
+  ciz(senDizi, 1340, '#ff8a70');
   x.fillStyle = '#8a8a92'; x.font = '26' + mono;
   x.fillText('O · her mesajın boyu (y: kelime)', 130, 1400);
-  ciz(oDizi, 1560, '#4a4a52', st.oKelimeler.length > CAP);
+  ciz(oDizi, 1560, '#4a4a52');
 
   // ölçüm satırı
   x.fillStyle = '#e4e4e7'; x.font = '31' + helv;

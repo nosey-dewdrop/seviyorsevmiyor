@@ -3,8 +3,8 @@
 // oturur. Her yorum satırı tıklanabilir: altında "NEDEN BÖYLE OKUDUM?" + "BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?"
 // + rızalı bağış açılır. Karttaki her sayı gerçek sohbetten hesaplanır, elle sayı yazılmaz.
 
-import { ping, itirazGonder } from './api.js?v=21';
-import { deflectedPlans } from './balance.js?v=21';
+import { ping, itirazGonder } from './api.js?v=22';
+import { deflectedPlans } from './balance.js?v=22';
 
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -220,17 +220,16 @@ function buildKart(r, st, okumaNo, senAgir, onIndir) {
   et.appendChild(el('div', 'sag', `O · kefe ${senAgir ? 'hafif' : 'dolu'}<br>%${st.kuruOran} kuru cevap · ort ${st.oOrt} kelime`));
   kart.appendChild(et);
 
-  // barlar: mesaj başına kelime. çok uzun sohbette son 40 mesaj gösterilir (dürüst etiketle).
-  const CAP = 40;
-  const capla = (dizi) => (dizi.length > CAP ? dizi.slice(-CAP) : dizi);
-  const senDizi = capla(st.senKelimeler), oDizi = capla(st.oKelimeler);
+  // barlar: mesaj başına kelime. Damla 15 Tem: TAMAMI gösterilir, kırpma yok
+  // (analiz zaten hep tüm sohbette; uzun sohbette barlar inceldikçe yoğunluk şeridine döner).
+  const senDizi = st.senKelimeler, oDizi = st.oKelimeler;
   const maks = Math.max(1, ...senDizi, ...oDizi);
   const barlar = el('div', 'barlar');
   const bloklar = [
-    { dizi: senDizi, cls: '', etiket: `<span class="sen">SEN · her mesajın boyu</span><span>y: kelime</span>`,
-      sol: st.senKelimeler.length > CAP ? `son ${CAP} mesajın` : 'ilk mesajın', sag: 'son mesajın' },
-    { dizi: oDizi, cls: 'o', etiket: `<span>O · her mesajın boyu</span><span>soru ${st.senSoru}'e ${st.oSoru}</span>`,
-      sol: st.oKelimeler.length > CAP ? `son ${CAP} mesajı` : 'ilk mesajı', sag: 'son mesajı' },
+    { dizi: senDizi, cls: '', etiket: `<span class="sen">SEN · her mesajın boyu · ${senDizi.length} mesaj</span><span>y: kelime</span>`,
+      sol: 'ilk mesajın', sag: 'son mesajın' },
+    { dizi: oDizi, cls: 'o', etiket: `<span>O · her mesajın boyu · ${oDizi.length} mesaj</span><span>soru ${st.senSoru}'e ${st.oSoru}</span>`,
+      sol: 'ilk mesajı', sag: 'son mesajı' },
   ];
   for (const b of bloklar) {
     barlar.appendChild(el('div', 'b-etiket', b.etiket));
@@ -362,7 +361,7 @@ export async function playReveal(root, r, messages, me) {
     btn.textContent = 'hazırlanıyor...';
     ping('paylasim');
     try {
-      const { shareReveal } = await import('./share.js?v=21');
+      const { shareReveal } = await import('./share.js?v=22');
       const how = await shareReveal(r, st, okumaNo, senAgir);
       btn.textContent = how === 'downloaded' ? 'indirildi' : how === 'shared' ? 'paylaşıldı' : 'kartı indir';
     } catch { btn.textContent = 'olmadı, tekrar dene'; }

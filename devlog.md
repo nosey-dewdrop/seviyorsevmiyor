@@ -283,3 +283,22 @@ eskiden orta banda düşen sohbetlere "kıvılcım var ama net değil, dosya hen
 hook: koyu temada kusursuz görünen şey, beyaz temada rezalet çıktı.
 
 midjourney balonlarını siyah zeminden kaba bir eşikle ayırmıştım. koyu zeminde görünmüyordu; beyaz temada kenarlarda kirli saçaklar belirdi. iki katmanlı ders: önce temizliği doğru yap (gövde maskesi + kenar renginin geri çözülmesi; kirli piksel 54 binden 4 bine düştü), sonra yüzeyi azalt: light mode tamamen kalktı, site artık tek kimlikli. az mod, az yüzey, az utanç.
+
+
+## m22 — "gece yarısı ürünün adını değiştirdik: seviyorsevmiyor" (reel)
+
+hook: bir gecede isim, dünya ve motor değişti. hepsi tek kritik yüzünden.
+
+mockuplarda terazi sahnesini gösterdim: kefeler "seviyor... sevmiyor..." diye salınıp hükme oturuyor. damla'nın cevabı: "oha, terazi mekaniği iyi. hatta repo adı bu olsun." iki gün önce mesajibirokusana yapmıştık; bir mekanik, ismin kendisinden güçlü çıktı. isim artık ürünün en eski oyunundan geliyor: papatya falı. ders: isim toplantıda bulunmuyor, ürünün içinden fışkırıyor.
+
+## m23 — "10 mockup çizdim, hepsi çöpe gitti. iyi ki" (reel)
+
+hook: kullanıcıya 10 tasarım gösterdim, aldığım cevap: "hepsi birbirinin aynısı."
+
+fiş estetiğiyle başladım: receiptify tarzı termal fiş, kdv satırı, barkod. ilk tur kritik: orta yığın nefret, sağ sol boş. ikinci tur: para satırları alakasız, "yapıyosun" dili gevşek, fiş zaten receiptify'ın kimliği. üçüncü turda ürünün kendi dili çıktı: terazi + mesaj mesaj barlar + daktilo akışı. ders: referanstan başlarsın ama referansta kalırsan başkasının ürününü boyarsın.
+
+## m24 — "modelime 420 sohbet ürettirdim, isabet %72'den %76'ya çıktı" (reel)
+
+hook: eğitim verim yoktu. iki yapay zekaya birbirine yazdırdım.
+
+motorum 268 el emeği örnekle eğitilmişti, zor sette %72.2. bu gece claude'a 420 etiketli türkçe sohbet ürettirdim: flörtlü, arkadaşça, soğuk, gergin; typo'lu, "sjsjs"li, gri vakalı. tek kural: ölçüm setine sentetik giremez. aynı 54 gerçek örnekte yeniden ölçtüm: %75.9. üç puan az görünebilir; 54 örnekte iki soru daha doğru demek. sonraki tur: kullanıcı itirazlarından gelen gerçek bağışlar. ders: veri yoksa veri üret, ama sınavı asla kendi ürettiğin soruyla yapma.

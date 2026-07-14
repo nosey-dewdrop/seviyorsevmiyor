@@ -37,6 +37,19 @@ def load():
     return rows
 
 
+def load_synth():
+    # teacher-distilled synthetic rows: TRAIN ONLY, never in the held-out split
+    import glob
+    rows = []
+    for p in sorted(glob.glob(os.path.join(HERE, "synth_claude_*.jsonl"))):
+        with open(p, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if line:
+                    rows.append(json.loads(line))
+    return rows
+
+
 def build_vocab(docs):
     df = {}
     for d in docs:
@@ -86,9 +99,12 @@ def train(X, y, n_classes):
 
 def main():
     rows = load()
+    synth = load_synth()
+    n_real = len(rows)
+    rows = rows + synth
     docs = [r["text"] for r in rows]
     y = np.array([CLASSES.index(r["tone"]) for r in rows])
-    print(f"{len(rows)} labeled conversations, {dict(zip(*np.unique([r['tone'] for r in rows], return_counts=True)))}")
+    print(f"{n_real} real + {len(synth)} synth = {len(rows)} labeled conversations")
 
     vocab, idx, idf = build_vocab(docs)
     num_names = F.NUMERIC_NAMES
@@ -100,15 +116,16 @@ def main():
     Xnum = (Xnum_raw - mean) / std
     X = np.hstack([Xtok, Xnum])
 
-    # Stratified-ish held-out split (every 5th sample) for an honest accuracy read.
+    # Held-out split: every 5th of the REAL seed only. Synth rows are TRAIN ONLY,
+    # so the accuracy read stays honest (never graded on our own synthetic dialect).
     rng = np.random.default_rng(SEED)
-    order = rng.permutation(len(rows))
+    order = rng.permutation(n_real)
     test_idx = order[::5]
-    train_idx = np.array([i for i in order if i not in set(test_idx.tolist())])
+    train_idx = np.array([i for i in order if i not in set(test_idx.tolist())] + list(range(n_real, len(rows))))
     W, b = train(X[train_idx], y[train_idx], len(CLASSES))
     P = softmax(X[test_idx] @ W + b)
     acc = (P.argmax(axis=1) == y[test_idx]).mean()
-    print(f"held-out accuracy: {acc:.3f} on {len(test_idx)} samples (seed set, small on purpose)")
+    print(f"held-out accuracy: {acc:.3f} on {len(test_idx)} REAL samples (synth never tested on)")
 
     # Final model on ALL data for shipping.
     Wf, bf = train(X, y, len(CLASSES))
