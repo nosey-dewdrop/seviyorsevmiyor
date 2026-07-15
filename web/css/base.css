@@ -13,8 +13,8 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
-.wrap { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 56px 20px 90px; text-align: center; }
-@media (max-width: 700px) { .wrap { padding: 32px 14px 70px; } }
+.wrap { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 32px 20px 40px; text-align: center; }
+@media (max-width: 700px) { .wrap { padding: 20px 14px 32px; } }
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 2px; }
 
@@ -48,8 +48,8 @@ button { font-family: inherit; cursor: pointer; }
   .papatyalar span:nth-child(7), .papatyalar span:nth-child(8) { display: none; }
 }
 
-/* nasıl yapıldı — tıkla-aç, kutusuz, sola yaslı */
-.nasil { margin: 56px auto 0; max-width: 680px; text-align: left; }
+/* nasıl yapıldı — tıkla-aç, kutusuz, sola yaslı, sıkışık */
+.nasil { margin: 22px auto 0; max-width: 680px; text-align: left; }
 .nasil summary { font-family: var(--mono); font-size: 13.5px; color: var(--ink-2); cursor: pointer;
   list-style: none; display: inline-block; }
 .nasil summary::-webkit-details-marker { display: none; }
@@ -60,7 +60,7 @@ button { font-family: inherit; cursor: pointer; }
 .nasil p:last-child { margin-bottom: 0; }
 
 /* footer — sola yaslı, dar, dip dibe (Damla 15 Tem) */
-.site-foot { border-top: 1px solid var(--line); margin: 80px auto 0; max-width: 680px; padding: 16px 0 24px;
+.site-foot { border-top: 1px solid var(--line); margin: 28px auto 0; max-width: 680px; padding: 12px 0 20px;
   color: var(--ink-4); font-size: 0.72rem; line-height: 1.5; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; }
 .site-foot a { color: var(--ink-3); margin-right: 14px; }
 .site-foot a:hover { color: var(--ink-2); }
