@@ -13,6 +13,12 @@
   --line: #3a3a40;
   --line-2: #4a4a52;
 
+  /* terminal syntax renkleri (Damla: pembe mor turuncu mavi) — dracula paleti */
+  --t-pembe: #ff79c6;
+  --t-mor: #bd93f9;
+  --t-turuncu: #ffb86c;
+  --t-mavi: #8be9fd;
+
   /* status only — never on body text (flag chips) */
   --heat: #ff6b52;           /* red flag */
   --calm: #3ddc8a;           /* green flag / healthy */

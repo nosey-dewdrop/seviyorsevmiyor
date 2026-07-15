@@ -12,8 +12,12 @@ body {
   font-weight: 500;                 /* kalın gövde — terminal karakteri */
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  min-height: 100vh;
+  display: flex; flex-direction: column;   /* footer en alta yapışsın */
 }
-.wrap { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 32px 20px 40px; text-align: center; }
+.wrap { position: relative; z-index: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 32px 20px 40px; text-align: center;
+  flex: 1 0 auto; display: flex; flex-direction: column; }
+.site-foot { flex-shrink: 0; }
 @media (max-width: 700px) { .wrap { padding: 20px 14px 32px; } }
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 2px; }
@@ -59,13 +63,15 @@ button { font-family: inherit; cursor: pointer; }
 .nasil p { font-family: var(--mono); font-size: 13.5px; line-height: 1.75; color: var(--ink-2); margin-bottom: 14px; text-align: left; }
 .nasil p:last-child { margin-bottom: 0; }
 
-/* footer — en altta, sola yaslı, dip dibe, linkler yan yana (Damla 15 Tem) */
-.site-foot { border-top: 1px solid var(--line); margin: 28px auto 0; max-width: 680px; padding: 12px 0 18px;
-  color: var(--ink-4); font-size: 0.72rem; line-height: 1.5; display: block; text-align: left; }
-.site-foot .links { display: flex; gap: 16px; margin-bottom: 3px; }
-.site-foot .links a { color: var(--ink-2); }
-.site-foot span { display: block; }
-.site-foot .imza { color: var(--ink-3); margin-top: 2px; }
+/* footer — en altta, sola yaslı, DİP DİBE (satırlar bitişik, boşluk yok) */
+.site-foot { border-top: 1px solid var(--line); margin: 24px auto 0; max-width: 680px; padding: 10px 0 16px;
+  color: var(--ink-4); font-size: 0.72rem; line-height: 1.15; display: block; text-align: left; }
+.site-foot .links { display: flex; gap: 16px; margin: 0; }
+.site-foot .links a { color: var(--t-mavi); }
+.site-foot span { display: block; margin: 0; }
+.site-foot .imza { color: var(--ink-3); margin: 0; }
+.site-foot .imza a { color: var(--t-mor); }
+.site-foot .privacy-badge { margin-bottom: 3px; }
 .site-foot a { color: var(--ink-3); margin-right: 14px; }
 .site-foot a:hover { color: var(--ink-2); }
 .site-foot .disclaimer { flex-basis: auto; }
