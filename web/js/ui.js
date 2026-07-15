@@ -174,95 +174,48 @@ function buildParagraphs(r, st) {
   return P;
 }
 
-// ---- kart (sol sütun) ----
+// ---- kart (sol sütun) — SADE (Damla 15 Tem: terazi/kalp yok, flört skoru barı + istatistik grafiği) ----
 function buildKart(r, st, okumaNo, senAgir, onIndir) {
   const kart = el('div', 'kart');
   kart.appendChild(el('div', 'marka', `<span>seviyorsevmiyor</span><span>okuma ${okumaNo} · ${bugunTarih()}</span>`));
   kart.appendChild(el('div', 'hukum', esc(KARAR_TEXT[r.flort_sinyali.karar] || KARAR_TEXT.yok)));
 
-  // kalp puanı: flört skoru (0-100) 5 kalbe iner. dolu = beyaz, boş = sönük.
-  const dolu = Math.max(0, Math.min(5, Math.round((r.flort_sinyali.score || 0) / 20)));
-  kart.appendChild(el('div', 'kalpler',
-    `<span class="dolu">${'♥'.repeat(dolu)}</span><span class="bos">${'♥'.repeat(5 - dolu)}</span>` +
-    `<span class="kalp-not">${dolu}/5 · flört ${r.flort_sinyali.score}</span>`));
+  // flört skoru: yüzdelik bar (terazi/kalp yerine düz, okunur skor)
+  const skor = Math.max(0, Math.min(100, r.flort_sinyali.score || 0));
+  kart.appendChild(el('div', 'skor',
+    `<div class="skor-ust"><span>flört skoru</span><span class="skor-no">%${skor}</span></div>` +
+    `<div class="skor-bar"><i style="width:${skor}%"></i></div>`));
 
-  // terazi: mockup 21'in svg'si birebir. ağır kefe aşağı iner (sol = SEN).
-  const svgWrap = el('div');
-  svgWrap.innerHTML = `
-    <svg class="terazi${senAgir ? ' sol-agir' : ''}" viewBox="0 0 360 240" aria-hidden="true">
-      <rect x="142" y="216" width="76" height="10" rx="5" fill="#4a4a52"/>
-      <rect x="158" y="204" width="44" height="12" rx="6" fill="#55555c"/>
-      <path d="M176 204 L177.5 60 L182.5 60 L184 204 Z" fill="#6a6a72"/>
-      <circle cx="180" cy="46" r="9" fill="none" stroke="#8a8a92" stroke-width="3"/>
-      <circle cx="180" cy="46" r="3" fill="#fafafa"/>
-      <g class="t-kol">
-        <path d="M58 46 L302 46" stroke="#8a8a92" stroke-width="5" stroke-linecap="round"/>
-        <circle cx="58" cy="46" r="4" fill="#8a8a92"/>
-        <circle cx="302" cy="46" r="4" fill="#8a8a92"/>
-        <g class="t-pan-l">
-          <line x1="58" y1="50" x2="30" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
-          <line x1="58" y1="50" x2="58" y2="112" stroke="#6a6a72" stroke-width="1.6"/>
-          <line x1="58" y1="50" x2="86" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
-          <ellipse cx="58" cy="117" rx="34" ry="5" fill="#c8c8ce"/>
-          <path d="M24 117 Q26 148 58 148 Q90 148 92 117 Q75 124 58 124 Q41 124 24 117 Z" fill="#a1a1aa"/>
-        </g>
-        <g class="t-pan-r">
-          <line x1="302" y1="50" x2="274" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
-          <line x1="302" y1="50" x2="302" y2="112" stroke="#6a6a72" stroke-width="1.6"/>
-          <line x1="302" y1="50" x2="330" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
-          <ellipse cx="302" cy="117" rx="34" ry="5" fill="#55555c"/>
-          <path d="M268 117 Q270 148 302 148 Q334 148 336 117 Q319 124 302 124 Q285 124 268 117 Z" fill="#4a4a52"/>
-        </g>
-      </g>
-    </svg>`;
-  kart.appendChild(svgWrap.firstElementChild);
+  // istatistik satırları — sade, iki sütun
+  const kuruSatir = st.oN > 0 ? `<div><span>kuru cevap</span><b>%${st.kuruOran}</b></div>` : '';
+  kart.appendChild(el('div', 'stat',
+    `<div><span>başlatan</span><b>${st.baslatan}</b></div>` +
+    `<div><span>soru dengesi</span><b>${st.senSoru} · ${st.oSoru}</b></div>` +
+    kuruSatir +
+    `<div><span>çift mesaj</span><b>${st.cift}</b></div>` +
+    `<div><span>plan ertelemesi</span><b>${st.erteleme}</b></div>` +
+    `<div><span>ort. kelime</span><b>${st.senOrt} · ${st.oOrt}</b></div>`));
 
-  const soz = el('p', 't-soz', 'seviyor...');
-  kart.appendChild(soz);
-  const sozler = ['seviyor...', 'sevmiyor...', 'seviyor...', 'sevmiyor...', SOZ_FINAL[r.flort_sinyali.karar] || SOZ_FINAL.yok];
-  let k = 0;
-  const t = setInterval(() => { soz.textContent = sozler[k]; if (++k >= sozler.length) clearInterval(t); }, 640);
-
-  const et = el('div', 't-etiketler');
-  et.appendChild(el('div', 'sen', `SEN · kefe ${senAgir ? 'dolu' : 'hafif'}<br>${st.senSoru} soru · başlatan ${st.baslatan} · ort ${st.senOrt} kelime`));
-  et.appendChild(el('div', 'sag', `O · kefe ${senAgir ? 'hafif' : 'dolu'}<br>%${st.kuruOran} kuru cevap · ort ${st.oOrt} kelime`));
-  kart.appendChild(et);
-
-  // barlar: mesaj başına kelime. Damla 15 Tem: TAMAMI gösterilir, kırpma yok
-  // (analiz zaten hep tüm sohbette; uzun sohbette barlar inceldikçe yoğunluk şeridine döner).
+  // mesaj boyu grafiği — tek şerit, sen/o iç içe değil ayrık, kırpma yok
   const senDizi = st.senKelimeler, oDizi = st.oKelimeler;
   const maks = Math.max(1, ...senDizi, ...oDizi);
-  const barlar = el('div', 'barlar');
-  const bloklar = [
-    { dizi: senDizi, cls: '', etiket: `<span class="sen">SEN · her mesajın boyu · ${senDizi.length} mesaj</span><span>y: kelime</span>`,
-      sol: 'ilk mesajın', sag: 'son mesajın' },
-    { dizi: oDizi, cls: 'o', etiket: `<span>O · her mesajın boyu · ${oDizi.length} mesaj</span><span>soru ${st.senSoru}'e ${st.oSoru}</span>`,
-      sol: 'ilk mesajı', sag: 'son mesajı' },
-  ];
-  for (const b of bloklar) {
-    barlar.appendChild(el('div', 'b-etiket', b.etiket));
-    const dizi = el('div', `dizi ${b.cls}${b.dizi.length > 16 ? ' sik' : ''}`);
-    dizi.innerHTML = b.dizi.map((kk) =>
-      `<i style="height:${Math.max(4, Math.round(100 * kk / maks))}%" data-k="${kk}" title="${kk} kelime"></i>`).join('');
-    barlar.appendChild(dizi);
-    barlar.appendChild(el('div', 'eksen', `<span>${b.sol}</span><span>${b.sag}</span>`));
-  }
-  kart.appendChild(barlar);
+  const grafik = el('div', 'grafik');
+  const ciz = (dizi, cls, etiket) => {
+    grafik.appendChild(el('div', 'g-etiket', etiket));
+    const d = el('div', `g-dizi ${cls}`);
+    d.innerHTML = dizi.map((kk) => `<i style="height:${Math.max(6, Math.round(100 * kk / maks))}%"></i>`).join('');
+    grafik.appendChild(d);
+  };
+  ciz(senDizi, 'sen', `sen · ${senDizi.length} mesaj`);
+  if (oDizi.length) ciz(oDizi, 'o', `o · ${oDizi.length} mesaj`);
+  kart.appendChild(grafik);
 
-  const kuruSatir = st.oN > 0
-    ? `kuru cevap oranı: <b>%${st.kuruOran}</b> (${st.kuru}/${st.oN})<br>`
-    : '';
-  kart.appendChild(el('div', 'olcumler',
-    `konuşmayı başlatan: <b>${st.baslatan}</b><br>` +
-    `soru dengesi: <b>${st.senSoru} · ${st.oSoru}</b><br>` +
-    kuruSatir +
-    `çift mesaj: <b>sende ${st.cift}</b> · plan ertelemesi: <b>${st.erteleme}</b>`));
-
+  // kısa yorum kartın içinde (Damla: kart printable da yorumu versin)
   const kisaCumle = st.oN > 0
-    ? `kefeye ağırlığı satırlar koydu: ${st.senSoru} soruna ${st.oSoru} soru döndü, cevapların %${st.kuruOran}'i kuru. bir sonraki taşı ${senAgir ? 'o' : 'sen'} koysun.`
-    : `kefeye ağırlığı satırlar koydu: ${st.senSoru} soru sordun, karşı taraftan bu yazışmada dönüş yok. bir sonraki taşı o koysun.`;
+    ? `${st.senSoru} soruna ${st.oSoru} soru döndü, cevapların %${st.kuruOran}'i kuru. yükü taşıyan ${senAgir ? 'sensin' : 'karşı taraf'}.`
+    : `${st.senSoru} soru sordun, karşı taraftan bu yazışmada dönüş yok. yük tümüyle sende.`;
   kart.appendChild(el('p', 'kisa', kisaCumle));
-  kart.appendChild(el('p', 'dip', 'hüküm cihazda verildi · mesajlar kimseye gitmez · seviyorsevmiyor'));
+  kart.appendChild(el('p', 'dip', 'cihazda hesaplandı · mesajlar hiçbir yere gitmedi'));
 
   const indir = el('button', 'indir', 'kartı indir');
   indir.type = 'button';

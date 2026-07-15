@@ -101,61 +101,33 @@ textarea.paste:focus { outline: none; }
 .kart { background: var(--surface); border: 1px solid #000; border-radius: var(--r-card);
   padding: 26px 24px 24px; font-family: var(--mono); box-shadow: 0 2px 0 #000, 0 8px 30px rgba(0,0,0,0.5); }
 .kart .marka { font-size: 12.5px; color: var(--ink-3); display: flex; justify-content: space-between; margin-bottom: 20px; }
-.kart .hukum { color: var(--ink); font-size: 26px; font-weight: 700; line-height: 1.35; margin-bottom: 12px; font-family: var(--mono); }
-/* kalp puanı: kartın kahramanı — story'de göz buraya gider. kalp için sistem font fallback. */
-.kart .kalpler { font-family: "Arial Unicode MS", var(--mono), sans-serif; font-size: 26px; letter-spacing: 3px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-.kart .kalpler .dolu { color: var(--ink); }
-.kart .kalpler .bos { color: var(--line-2); }
-.kart .kalpler .kalp-not { font-size: 12px; letter-spacing: 0; color: var(--ink-3); }
+.kart .hukum { color: var(--ink); font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 16px; font-family: var(--mono); }
 
-/* terazi: gerçek terazi anatomisi svg'de. kol sallanır, kefeler karşı-dönüşle asılı kalır. */
-.terazi { margin: 4px auto 10px; display: block; width: 100%; max-width: 240px; }
-.t-kol { transform-origin: 180px 46px; animation: salinim 3.4s ease-in-out both; }
-.t-pan-l { transform-origin: 60px 46px; animation: karsi 3.4s ease-in-out both; }
-.t-pan-r { transform-origin: 300px 46px; animation: karsi 3.4s ease-in-out both; }
-/* ağır kefe aşağı iner: .sol-agir sınıfı son duruşu ayna çevirir */
-.terazi.sol-agir .t-kol { animation-name: salinimSol; }
-.terazi.sol-agir .t-pan-l, .terazi.sol-agir .t-pan-r { animation-name: karsiSol; }
-@keyframes salinim {
-  0% { transform: rotate(0); } 18% { transform: rotate(-7deg); } 36% { transform: rotate(6deg); }
-  54% { transform: rotate(-5deg); } 72% { transform: rotate(7deg); } 100% { transform: rotate(9deg); }
-}
-@keyframes karsi {
-  0% { transform: rotate(0); } 18% { transform: rotate(7deg); } 36% { transform: rotate(-6deg); }
-  54% { transform: rotate(5deg); } 72% { transform: rotate(-7deg); } 100% { transform: rotate(-9deg); }
-}
-@keyframes salinimSol {
-  0% { transform: rotate(0); } 18% { transform: rotate(7deg); } 36% { transform: rotate(-6deg); }
-  54% { transform: rotate(5deg); } 72% { transform: rotate(-7deg); } 100% { transform: rotate(-9deg); }
-}
-@keyframes karsiSol {
-  0% { transform: rotate(0); } 18% { transform: rotate(-7deg); } 36% { transform: rotate(6deg); }
-  54% { transform: rotate(-5deg); } 72% { transform: rotate(7deg); } 100% { transform: rotate(9deg); }
-}
-.t-soz { text-align: center; font-size: 12px; color: var(--ink-3); margin-bottom: 16px; }
-.t-etiketler { display: flex; justify-content: space-between; font-size: 12px; line-height: 1.7; margin-bottom: 16px; color: var(--ink-3); }
-.t-etiketler .sen { color: var(--accent); }
-.t-etiketler div { max-width: 48%; }
-.t-etiketler .sag { text-align: right; }
+/* flört skoru barı — sade, terazi/kalp yok */
+.kart .skor { margin-bottom: 18px; }
+.kart .skor-ust { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3); margin-bottom: 5px; }
+.kart .skor-no { color: var(--ink); font-weight: 700; }
+.kart .skor-bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.kart .skor-bar i { display: block; height: 100%; background: var(--ink); }
 
-/* barlar: mesaj başına kelime, değerler üstte, eksen altta */
-.barlar { border-top: 1px solid var(--line); padding-top: 16px; margin-bottom: 14px; }
-.barlar .b-etiket { font-size: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; color: var(--ink-3); }
-.barlar .b-etiket .sen { color: var(--accent); }
-.barlar .dizi { display: flex; align-items: flex-end; gap: 3px; height: 56px; }
-.barlar .dizi i { flex: 1; background: var(--accent); min-height: 2px; border-radius: 4px 4px 0 0; position: relative; }
-.barlar .dizi i::after { content: attr(data-k); position: absolute; top: -16px; left: 0; right: 0;
-  text-align: center; font-size: 9px; color: var(--ink-3); }
-.barlar .dizi.o i { background: var(--line-2); }
-.barlar .dizi.sik i::after { content: none; }   /* çok mesajda değerler üst üste biner, gizle */
-.barlar .eksen { display: flex; justify-content: space-between; font-size: 9px; color: var(--ink-3); margin: 4px 0 14px; }
+/* istatistik satırları — iki sütun grid, sade */
+.kart .stat { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; font-size: 11.5px;
+  border-top: 1px solid var(--line); padding-top: 12px; margin-bottom: 14px; }
+.kart .stat > div { display: flex; justify-content: space-between; }
+.kart .stat span { color: var(--ink-3); }
+.kart .stat b { color: var(--ink); font-weight: 700; }
 
-.olcumler { font-size: 12.5px; line-height: 2.1; border-top: 1px solid var(--line); padding-top: 12px;
-  margin-bottom: 14px; color: var(--ink-2); }
-.olcumler b { color: var(--ink); font-weight: 700; }
-.kart .kisa { font-family: var(--mono); font-size: 14px; line-height: 1.65; color: var(--ink-2);
-  border-top: 1px solid var(--line); padding-top: 14px; }
-.kart .dip { font-size: 9.5px; color: var(--ink-3); margin-top: 14px; }
+/* mesaj boyu grafiği — düz bar şeridi, değer etiketi yok (sade) */
+.kart .grafik { border-top: 1px solid var(--line); padding-top: 12px; margin-bottom: 14px; }
+.kart .g-etiket { font-size: 10.5px; color: var(--ink-3); margin: 6px 0 4px; }
+.kart .g-dizi { display: flex; align-items: flex-end; gap: 2px; height: 34px; }
+.kart .g-dizi i { flex: 1; min-height: 2px; border-radius: 2px 2px 0 0; }
+.kart .g-dizi.sen i { background: var(--ink-2); }
+.kart .g-dizi.o i { background: var(--line-2); }
+
+.kart .kisa { font-family: var(--mono); font-size: 12px; line-height: 1.55; color: var(--ink-2);
+  border-top: 1px solid var(--line); padding-top: 12px; }
+.kart .dip { font-size: 9.5px; color: var(--ink-4); margin-top: 12px; }
 .indir { margin-top: 14px; width: 100%; background: var(--ink); color: var(--bg); border: 0;
   border-radius: 9px; font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 11px; cursor: pointer; }
 .indir:disabled { opacity: 0.5; cursor: default; }
