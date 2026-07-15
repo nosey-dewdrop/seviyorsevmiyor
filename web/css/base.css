@@ -12,8 +12,13 @@ body {
   font-weight: 500;                 /* kalın gövde — terminal karakteri */
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  min-height: 100vh;
 }
-.wrap { position: relative; z-index: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 32px 20px 24px; text-align: center; }
+.wrap { position: relative; z-index: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 32px 20px 24px; text-align: center;
+  min-height: 100vh; display: flex; flex-direction: column; }
+/* alt grup (quota + nasıl) sayfa dibine iner, üstte boşluk kalır */
+.altgrup { margin-top: auto; }
+.altgrup .quota { text-align: left; }
 @media (max-width: 700px) { .wrap { padding: 20px 14px 32px; } }
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 2px; }
@@ -48,9 +53,9 @@ button { font-family: inherit; cursor: pointer; }
   .papatyalar span:nth-child(7), .papatyalar span:nth-child(8) { display: none; }
 }
 
-/* nasıl yapıldı — tıkla-aç, SAĞA align, footer'a yakın */
-.nasil { margin: 6px auto 0; max-width: 680px; text-align: right; }
-.nasil summary { font-family: var(--mono); font-size: 13.5px; color: var(--ink-2); cursor: pointer;
+/* nasıl yapıldı — tıkla-aç, SOLA align, quota ile aynı boy */
+.nasil { margin: 2px auto 0; max-width: 680px; text-align: left; }
+.nasil summary { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-3); cursor: pointer;
   list-style: none; display: inline-block; }
 .nasil summary::-webkit-details-marker { display: none; }
 .nasil summary::before { content: "* "; color: var(--ink-3); }
