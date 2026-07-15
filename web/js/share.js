@@ -81,23 +81,25 @@ export function buildShareCard(r, st, okumaNo, senAgir) {
   hy += 140;
   if (oDizi.length) { ciz(oDizi, hy, '#4a4a52', `o · ${oDizi.length} mesaj`); hy += 140; }
 
-  // kısa yorum + dip
+  // kısa yorum
   x.fillStyle = '#a1a1aa'; x.font = '25' + mono;
   const yorum = st.oN > 0
     ? `${st.senSoru} soruna ${st.oSoru} soru döndü, %${st.kuruOran} kuru.`
     : `${st.senSoru} soru sordun, dönüş yok.`;
-  x.fillText(yorum, 130, hy); hy += 44;
-  x.fillStyle = '#8a8a92'; x.font = '24' + mono;
-  x.fillText('cihazda hesaplandı · mesajlar hiçbir yere gitmedi', 130, 1700);
+  x.fillText(yorum, 130, hy); hy += 60;
 
+  // dip + viral çağrı — hy'ye bağlı (uzun sohbette çakışmaz), en az 1660'tan başlar
+  let dy = Math.max(1660, hy);
+  x.fillStyle = '#8a8a92'; x.font = '24' + mono;
+  x.fillText('cihazda hesaplandı · mesajlar hiçbir yere gitmedi', 130, dy); dy += 56;
   // viral çağrı: story'de bu kartı gören biri nereye geleceğini bilsin (link tıklanamaz, adres yazılı).
-  // NOT: gerçek canlı adres github.io. Damla özel domain (seviyorsevmiyor.*) bağlarsa burayı güncelle.
+  // NOT: gerçek canlı adres github.io. Damla özel domain bağlarsa burayı güncelle.
   x.fillStyle = '#fafafa'; x.font = '700 32' + mono;
-  x.fillText('sen de dene →', 130, 1772);
+  x.fillText('sen de dene →', 130, dy); dy += 46;
   x.fillStyle = '#fafafa'; x.font = '30' + mono;
-  x.fillText('nosey-dewdrop.github.io/seviyorsevmiyor', 130, 1818);
+  x.fillText('nosey-dewdrop.github.io/seviyorsevmiyor', 130, dy); dy += 40;
   x.fillStyle = '#55555c'; x.font = '20' + mono;
-  x.fillText('otomatik tahmin, kesin yargı değil · eğlence amaçlı', 130, 1862);
+  x.fillText('otomatik tahmin, kesin yargı değil · eğlence amaçlı', 130, dy);
 
   return c;
 }
