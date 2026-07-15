@@ -326,3 +326,19 @@ giriş ekranı üç kutuydu: yapıştır, ekran görüntüsü, whatsapp. kutular
 hook: bir ürünü viral yapan şey genelde tek bir görsel.
 
 sonuç kartım vardı: terazi, barlar, sayılar. doğru ama paylaşılası değildi, göz nereye baksın belli değildi. flört skorunu beş kalbe indirdim: dolu kalp beyaz, boş kalp sönük. ♥♥♥♡♡ gibi. sonra onu kartın en büyük şeyi yaptım, hükümle aynı boyda kaybolmasın diye. çünkü biri sonucu instagram story'sine atacaksa, oraya bir sayı değil bir his gitmeli. indirilen story kartına da aynı kalpleri çizdirdim. ders: paylaşılabilirlik bir özellik değil, bir tasarım kararı.
+
+---
+
+## m28 — "onayladığım kalbi de sildim: terazi de kalp de gitti" (reel)
+
+hook: dün "kalp koydum" dedim, bugün onu da sildim. çünkü metafor benim sesim değildi.
+
+karta bir terazi koymuştum, sallanan. sonra kalp puanı. ikisi de tatlıydı ama süstü; ölçtüğüm şey terazi değil, sayılar. metafordan bıktım. hepsini sildim, yerine düz bir şey koydum: bir yüzde barı — "flört skoru %24" — ve altına ham istatistik ızgarası, bir de mesaj boylarının küçük bir grafiği. terminal gibi. süs yok, sadece veri. bir kez daha öğrendim: kendi koyduğun süsü silmek, koymaktan daha çok cesaret ister. ürün ısınmaya değil, doğru olmaya çalışıyor.
+
+---
+
+## m29 — "modelim 'eşit' dedi ama sohbet bariz tek taraflıydı, düzelttim" (reel)
+
+hook: kullanıcı ne hissediyorsa motor onu görmüyorsa, motor yanlıştır.
+
+test ettim: bir taraf paragraf paragraf yalvarıyor, diğeri "hı", "bakarız", "yoğunum". motorum "denge eşit" dedi. çünkü mesaj SAYISINI sayıyordum, ikisi de 3 mesaj atmıştı. ama biri kalbini döküyor, diğeri tek heceyle geçiştiriyor — bu eşit değil. skoru mesaj uzunluğuna ve duygu yüküne duyarlı hale getirdim. şimdi "konuşmayı taşıyan sensin, diğeri sadece orada" diyor. sonra dengeli bir sohbetle tekrar test ettim, hâlâ "eşit" diyor — yani agresifleştirmedim, doğrulttum. ders: motorun dürüstlüğü, kullanıcının aynada gördüğüyle aynı şeyi söylemesidir.
