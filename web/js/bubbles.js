@@ -12,7 +12,7 @@ if (cvs) {
   const COLORS = ['#F7B8C4', '#F6A99A', '#F4D06F', '#9BD8A0', '#A6C8F0', '#C9B8E8', '#F2A6C2', '#8FE0C6'];
   // Damla's hand-generated textured ivory bubble sprites
   const sprites = Array.from({ length: 14 }, (_, i) => {
-    const im = new Image(); im.src = `./assets/bubbles/b${String(i).padStart(2, '0')}.png?v=49`; return im;
+    const im = new Image(); im.src = `./assets/bubbles/b${String(i).padStart(2, '0')}.png?v=50`; return im;
   });
   let W = 0, H = 0, DPR = 1;
   let bubbles = [];

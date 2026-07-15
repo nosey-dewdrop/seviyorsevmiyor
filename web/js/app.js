@@ -1,13 +1,13 @@
 // Flow: input → parse → who-is-me → on-device engine (verdict + counts = the law) →
 // optional Groq/Llama spiker (fresh wording + gözden kaçanlar, consent-gated) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
-import { loadModel, scoreConversation } from './model.js?v=49';
-import { parseChat, toDoc } from './parse.js?v=49';
-import { buildReveal } from './reveal.js?v=49';
-import { playReveal } from './ui.js?v=49';
-import { spikerRead, ping } from './api.js?v=49';
-import { ocrToText } from './ocr.js?v=49';
-import { readWhatsApp } from './wa.js?v=49';
+import { loadModel, scoreConversation } from './model.js?v=50';
+import { parseChat, toDoc } from './parse.js?v=50';
+import { buildReveal } from './reveal.js?v=50';
+import { playReveal } from './ui.js?v=50';
+import { spikerRead, ping } from './api.js?v=50';
+import { ocrToText } from './ocr.js?v=50';
+import { readWhatsApp } from './wa.js?v=50';
 
 const $ = (id) => document.getElementById(id);
 const pasteBox = $('pasteBox');
@@ -190,6 +190,10 @@ resetBtn.addEventListener('click', () => {
   document.getElementById('giris').scrollIntoView({ behavior: 'smooth', block: 'start' });
   pasteBox.focus();
 });
+
+// isme tıklayınca developer flört tavsiyeleri açılır/kapanır
+const brandBtn = $('brandBtn'), devNotu = $('devNotu');
+if (brandBtn && devNotu) brandBtn.addEventListener('click', () => devNotu.classList.toggle('hidden'));
 
 // theme toggle removed 13 Tem gece (Damla: "light mode kaldıralım") — the site is dark only.
 

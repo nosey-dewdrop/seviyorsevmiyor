@@ -13,13 +13,13 @@
   letter-spacing: 6px; user-select: none; padding: 12px 0; }
 .kaynak {
   display: block; text-align: left; background: none;
-  border: 0; border-left: 2px solid transparent; border-radius: 0;
-  padding: 2px 0 2px 12px; cursor: pointer; width: 100%;
+  border: 0; border-radius: 0; padding: 2px 0; cursor: pointer; width: 100%;
 }
 .kaynak .k-ad { display: block; font-family: var(--mono); color: var(--ink-3); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
 .kaynak:hover .k-ad { color: var(--ink-2); }
-.kaynak.active { border-left-color: var(--line-2); }
-.kaynak.active .k-ad { color: var(--ink-2); }
+/* aktif: başlık PARLAK BEYAZ, çizgi YOK, başında * (Damla) */
+.kaynak.active .k-ad { color: #ffffff; }
+.kaynak.active .k-ad::before { content: "* "; color: #ffffff; }
 /* açıklama + tuş sadece SEÇİLİ kaynakta görünür (sol listede) */
 .kaynak .k-kisa, .kaynak .k-tus { display: none; }
 .kaynak.active .k-kisa { display: block; font-family: var(--mono); font-weight: 500; font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
@@ -62,7 +62,7 @@ textarea.paste:focus { outline: none; }
 .consent input { margin-top: 3px; flex: none; accent-color: var(--ink); }
 
 /* ---- buttons ---- */
-.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 28px; justify-content: center; }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 14px; justify-content: flex-start; }
 /* terminal komut butonu: [ alt-metni oku ] — dolu kutu değil, çıplak bracket */
 .btn { background: none; color: var(--ink); border: 0; border-radius: 0;
   padding: 10px 8px; font-size: 0.98rem; font-weight: 700; font-family: var(--mono);
@@ -74,8 +74,8 @@ textarea.paste:focus { outline: none; }
 .btn:disabled { opacity: 0.4; cursor: default; }
 .btn.ghost { color: var(--ink-2); }
 .btn.small { font-size: 0.85rem; }
-.quota { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-3); margin-top: 12px; }
-.privacy-badge { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px;
+.quota { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-3); margin-top: 6px; text-align: left; }
+.privacy-badge { display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px; margin-top: 4px;
   font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0; color: var(--ink-3); }
 .privacy-badge:hover { color: var(--ink); text-decoration: none; }
 .privacy-badge .lock { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
