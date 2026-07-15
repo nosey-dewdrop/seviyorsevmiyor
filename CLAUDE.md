@@ -1,6 +1,21 @@
 # seviyorsevmiyor (renamed from mesajibirokusana, 15 Tem 00:xx — Damla: terazi mekanigi + "repo adi bu olsun")
 
-## STATUS 2026-07-15 SABAH (v66, CANLI: nosey-dewdrop.github.io/seviyorsevmiyor) — GERÇEK SİTEDE ÇALIŞMA
+## WORKER TARAFI (15 Tem worker rename oturumu) — TEK DEPLOY DAMLA'DA
+- WORKER RENAME BİTTİ: yeni worker `seviyorsevmiyor-api` deploy'lu, GROQ_API_KEY taze (eski key ekranda göründüğü
+  için rotate edildi), config.js yeni URL'yi gösteriyor. Canlı end-to-end spiker testi geçti: 200 + source:groq.
+- SPIKER KANIT-UYDURMA FIX (commit'li, HENÜZ DEPLOY EDİLMEDİ): worker.js validateSpiker artık gozden_kacanlar
+  "kanit"ini sohbette gerçekten geçen alıntıya kilitliyor (quoteIsInDoc + normForMatch); uydurma alıntı → gözlem
+  düşer. node --check temiz. DAMLA YAPACAK: `cd backend && npx wrangler deploy`, sonra uydurma-kanıtlı payload'la
+  gözlemin düştüğü doğrulanmalı. Eski `mesajibirokusana-api` worker'ı Cloudflare'de duruyor, istersen sil.
+
+## NEREDE KALDIK (v70, CANLI: nosey-dewdrop.github.io/seviyorsevmiyor)
+Ürün canlıda çalışıyor: giriş (iki sütun sol seçenek/sağ kutu), analiz, SADE kart (skor barı+istatistik+grafik),
+theyseeyourphotos tonlu yorum. Motor parse+balance Node-kanıtlı. Deploy: git subtree split --prefix web -b t &&
+git push -f origin t:gh-pages && git branch -D t. HER bump'ta TÜM js v'sini zorla (for f in web/js/*.js; sed
+?v=[0-9]+ → yeni), yoksa eski kod cache'te donuyor (v61 bug'ı böyleydi). Localhost YOK, her değişiklik push+canlı.
+SONRAKİ: Damla ile birlikte 5 madde (aşağıda ⚠️) — flört tavsiyesi metni, og.png export, Llama mimari kararı.
+
+## STATUS 2026-07-15 SABAH (v70, CANLI) — GERÇEK SİTEDE ÇALIŞMA
 Damla uyanıkken canlıda (gh-pages) iterasyon + sonra uyudu, "müşteri gözüyle durma, işe yarar ürün ver" dedi.
 KURAL DEĞİŞTİ: artık LOCALHOST YOK, her değişiklik gh-pages'e push edilip canlıda görülüyor.
 Deploy: git subtree split --prefix web -b t && git push -f origin t:gh-pages && git branch -D t.
