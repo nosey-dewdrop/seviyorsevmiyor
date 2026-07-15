@@ -52,15 +52,15 @@ button { font-family: inherit; cursor: pointer; }
   .papatyalar span:nth-child(7), .papatyalar span:nth-child(8) { display: none; }
 }
 
-/* nasıl yapıldı — tıkla-aç, ortada, dip dibe */
-.nasil { margin: 8px auto 0; max-width: 680px; text-align: center; }
+/* nasıl yapıldı — tıkla-aç, SAĞA align, dip dibe */
+.nasil { margin: 8px auto 0; max-width: 680px; text-align: right; }
 .nasil summary { font-family: var(--mono); font-size: 13.5px; color: var(--ink-2); cursor: pointer;
   list-style: none; display: inline-block; }
 .nasil summary::-webkit-details-marker { display: none; }
 .nasil summary::before { content: "* "; color: var(--ink-3); }
 .nasil summary:hover { color: var(--ink); text-decoration: underline; }
 .nasil[open] summary { margin-bottom: 8px; color: var(--ink); }
-.nasil p { font-family: var(--mono); font-size: 13.5px; line-height: 1.55; color: var(--ink-2); margin-bottom: 7px; text-align: left; }
+.nasil p { font-family: var(--mono); font-size: 13.5px; line-height: 1.55; color: var(--ink-2); margin-bottom: 7px; text-align: right; }
 .nasil p:last-child { margin-bottom: 0; }
 
 /* footer — en altta, sola yaslı, DİP DİBE (satırlar bitişik, boşluk yok) */
