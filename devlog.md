@@ -302,3 +302,27 @@ fiş estetiğiyle başladım: receiptify tarzı termal fiş, kdv satırı, barko
 hook: eğitim verim yoktu. iki yapay zekaya birbirine yazdırdım.
 
 motorum 268 el emeği örnekle eğitilmişti, zor sette %72.2. bu gece claude'a 420 etiketli türkçe sohbet ürettirdim: flörtlü, arkadaşça, soğuk, gergin; typo'lu, "sjsjs"li, gri vakalı. tek kural: ölçüm setine sentetik giremez. aynı 54 gerçek örnekte yeniden ölçtüm: %75.9. üç puan az görünebilir; 54 örnekte iki soru daha doğru demek. sonraki tur: kullanıcı itirazlarından gelen gerçek bağışlar. ders: veri yoksa veri üret, ama sınavı asla kendi ürettiğin soruyla yapma.
+
+---
+
+## m25 — "onayladığım rengi tek gecede sildim" (reel)
+
+hook: gece boyu şeftali rengini seçtim, sabaha kalmadan hepsini sildim.
+
+mockup'ta bir mercan-şeftali accent vardı, onayladım. ama canlıda görünce içim rahat etmedi: "slopware duruyor" dedim. her yapay-zeka-sitesinin o pastel vurgusu. sildim. yeşil denedim, mavi denedim, onlar da olmadı. sonunda dedim ki: terminal gibi olsun. antrasit, beyaz, başka renk yok. vurgu renkle değil kalınlıkla ve boşlukla. ders: onayladığın şeyi bile canlıda hisset, mockup yalan söyleyebilir.
+
+---
+
+## m26 — "sitedeki her kutuyu sildim, yerine üç eğik çizgi koydum" (reel)
+
+hook: bir arayüzü daha az çizerek daha çok "benim" yaptım.
+
+giriş ekranı üç kutuydu: yapıştır, ekran görüntüsü, whatsapp. kutular bana ödünç alınmış duruyordu, benim değildi. hepsinin çerçevesini sildim. yerine kodun içindeki gibi bir yorum satırı koydum: kaynakların arasına eğik çizgiler. font'u da monospace'e çektim, ama ince olanı değil, kalın terminal fontu. sonra fark ettim kutuları silmek yetmiyor, tıklayınca açılan bir akordeon kurdum: başlık hep duruyor, dokununca altında alanı açılıyor. daha az kutu, daha çok karakter. ders: bir şeyi silmek çoğu zaman eklemekten daha çok tasarımdır.
+
+---
+
+## m27 — "sonuca kalp puanı koydum, çünkü story'ye o gidiyor" (reel)
+
+hook: bir ürünü viral yapan şey genelde tek bir görsel.
+
+sonuç kartım vardı: terazi, barlar, sayılar. doğru ama paylaşılası değildi, göz nereye baksın belli değildi. flört skorunu beş kalbe indirdim: dolu kalp beyaz, boş kalp sönük. ♥♥♥♡♡ gibi. sonra onu kartın en büyük şeyi yaptım, hükümle aynı boyda kaybolmasın diye. çünkü biri sonucu instagram story'sine atacaksa, oraya bir sayı değil bir his gitmeli. indirilen story kartına da aynı kalpleri çizdirdim. ders: paylaşılabilirlik bir özellik değil, bir tasarım kararı.

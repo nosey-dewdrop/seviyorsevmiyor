@@ -1,7 +1,7 @@
 // Spiker client. Sends the ENGINE's verdict + counts (the law) plus the chat text to the
 // Worker; gets fresh wording and evidence-quoted "gözden kaçanlar" back. Any failure returns
 // null — the on-device template lines are always the floor, the product never breaks offline.
-import { API_BASE } from './config.js?v=23';
+import { API_BASE } from './config.js?v=48';
 
 // Content-free counter ping: event name only, fire-and-forget, never blocks the UI.
 export function ping(olay) {

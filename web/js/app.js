@@ -1,15 +1,13 @@
 // Flow: input → parse → who-is-me → on-device engine (verdict + counts = the law) →
 // optional Groq/Llama spiker (fresh wording + gözden kaçanlar, consent-gated) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
-import { loadModel, scoreConversation } from './model.js?v=23';
-import { parseChat, toDoc } from './parse.js?v=23';
-import { buildReveal } from './reveal.js?v=23';
-import { playReveal } from './ui.js?v=23';
-import { spikerRead, ping } from './api.js?v=23';
-import { ocrToText } from './ocr.js?v=23';
-import { readWhatsApp } from './wa.js?v=23';
-
-const ONBOARD_KEY = 'wdym.onboarded.v1';
+import { loadModel, scoreConversation } from './model.js?v=48';
+import { parseChat, toDoc } from './parse.js?v=48';
+import { buildReveal } from './reveal.js?v=48';
+import { playReveal } from './ui.js?v=48';
+import { spikerRead, ping } from './api.js?v=48';
+import { ocrToText } from './ocr.js?v=48';
+import { readWhatsApp } from './wa.js?v=48';
 
 const $ = (id) => document.getElementById(id);
 const pasteBox = $('pasteBox');
@@ -26,18 +24,12 @@ const cloudConsentBox = $('cloudConsentBox');
 let parsed = null;   // { messages, speakers, me, ambiguous }
 let lastReveal = null;
 
-// ---- tabs ----
-document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
-  document.querySelectorAll('.tab').forEach((x) => x.classList.remove('active'));
-  t.classList.add('active');
-  ['paste', 'shot', 'wa'].forEach((k) => $(`pane-${k}`).classList.toggle('hidden', k !== t.dataset.tab));
-}));
-
-// ---- screenshot (OCR) + WhatsApp file inputs feed the same paste flow ----
+// ---- iki sütun: solda seçenek tıkla → sağda o kutu açılır ----
 function activateTab(name) {
   document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x.dataset.tab === name));
   ['paste', 'shot', 'wa'].forEach((k) => $(`pane-${k}`).classList.toggle('hidden', k !== name));
 }
+document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => activateTab(t.dataset.tab)));
 function ingestText(text) {
   pasteBox.value = (text || '').trim();
   activateTab('paste');
@@ -51,14 +43,14 @@ $('shotInput').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   shotZone.classList.add('hot');
-  shotStatus.textContent = 'Ekran görüntüsü okunuyor…';
+  shotStatus.textContent = 'ekran görüntüsü okunuyor…';
   try {
-    const text = await ocrToText(file, (p) => { shotStatus.textContent = `Okunuyor… %${Math.round(p * 100)}`; });
-    if (!text) throw new Error('Metin çıkmadı');
+    const text = await ocrToText(file, (p) => { shotStatus.textContent = `okunuyor… %${Math.round(p * 100)}`; });
+    if (!text) throw new Error('metin çıkmadı');
     ingestText(text);
-    shotStatus.textContent = 'Okundu, aşağıda düzenleyebilirsin.';
+    shotStatus.textContent = 'okundu, aşağıda düzenleyebilirsin.';
   } catch (err) {
-    shotStatus.textContent = 'Okunamadı, başka bir görsel dene ya da metni yapıştır.';
+    shotStatus.textContent = 'okunamadı, başka bir görsel dene ya da metni yapıştır.';
   } finally {
     shotZone.classList.remove('hot');
     e.target.value = '';
@@ -70,31 +62,18 @@ const waStatus = waZone.querySelector('.dz-title');
 $('waInput').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  waStatus.textContent = 'Dosya okunuyor…';
+  waStatus.textContent = 'dosya okunuyor…';
   try {
     const text = await readWhatsApp(file);
-    if (!text || !text.trim()) throw new Error('Dosya boş görünüyor');
+    if (!text || !text.trim()) throw new Error('dosya boş görünüyor');
     ingestText(text);
-    waStatus.textContent = 'Okundu, aşağıda düzenleyebilirsin.';
+    waStatus.textContent = 'okundu, aşağıda düzenleyebilirsin.';
   } catch (err) {
-    waStatus.textContent = err.message || 'Dosya okunamadı';
+    waStatus.textContent = err.message || 'dosya okunamadı';
   } finally {
     e.target.value = '';
   }
 });
-
-// ---- demo chat: a stranger should feel the product in five seconds ----
-const DEMO_CHAT = `Ben: naber, bugün ne yaptın?
-O: iş güç işte
-Ben: ben bugün o kafeye gittim hani beraber gitmiştik ya, aklıma sen geldin
-O: hı
-Ben: bu hafta sonu müsait misin? şu sergiye gidelim mi demiştik
-O: bakarız
-Ben: geçen de öyle demiştin ama :( özledim seni ya
-O: yoğunum bu ara
-Ben: tamam, haber ver o zaman?
-O: ok`;
-$('demoBtn').addEventListener('click', () => { ingestText(DEMO_CHAT); });
 
 // ---- parse as the user types ----
 pasteBox.addEventListener('input', refreshParse);
@@ -161,7 +140,7 @@ function mergeSpiker(r, sp) {
 goBtn.addEventListener('click', async () => {
   if (!parsed) return;
   goBtn.disabled = true;
-  goBtn.textContent = 'Okunuyor…';
+  goBtn.textContent = 'okunuyor…';
   try {
     await loadModel();
     const doc = toDoc(parsed.messages);
@@ -169,20 +148,26 @@ goBtn.addEventListener('click', async () => {
     const r = buildReveal({ toneResult, messages: parsed.messages, me: parsed.me });
     ping('analiz');
     if (consentBox.checked && cloudConsentBox.checked) {
-      goBtn.textContent = 'Spiker yazıyor…';
+      goBtn.textContent = 'spiker yazıyor…';
       const sp = await spikerRead(spikerFacts(r), spikerDoc(parsed.messages, parsed.me));
       if (sp) { mergeSpiker(r, sp); ping('spiker'); }
     }
     attachHistory(r, parsed);
     lastReveal = r;
+    // sonuç ekranı temiz: kaynak seçimi + yazma alanını gizle, ama reset butonu görünür kalsın
+    document.querySelector('.ikili').classList.add('hidden');
+    whois.classList.add('hidden');
+    consent.classList.add('hidden');
+    cloudConsent.classList.add('hidden');
+    goBtn.classList.add('hidden');
     playReveal(reveal, r, parsed.messages, parsed.me);
     resetBtn.classList.remove('hidden');
     reveal.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (e) {
-    reveal.innerHTML = '<div class="unsure">Bir şey ters gitti. Sayfayı yenileyip tekrar dener misin?</div>';
+    reveal.innerHTML = '<div class="unsure">bir şey ters gitti. sayfayı yenileyip tekrar dener misin?</div>';
   } finally {
     goBtn.disabled = false;
-    goBtn.textContent = 'Alt-metni oku';
+    goBtn.textContent = 'alt-metni oku';
   }
 });
 
@@ -191,24 +176,26 @@ resetBtn.addEventListener('click', () => {
   parsed = null;
   lastReveal = null;
   reveal.innerHTML = '';
+  // formu geri getir: kaynak seçimi + buton görünür, akordeon başa (yapıştır)
+  document.querySelector('.ikili').classList.remove('hidden');
+  activateTab('paste');
   whois.classList.add('hidden');
   consent.classList.add('hidden');
   consentBox.checked = false;
   cloudConsent.classList.add('hidden');
   cloudConsentBox.checked = false;
+  goBtn.classList.remove('hidden');
   resetBtn.classList.add('hidden');
   goBtn.disabled = true;
+  document.getElementById('giris').scrollIntoView({ behavior: 'smooth', block: 'start' });
   pasteBox.focus();
 });
 
-// ---- onboarding ----
-if (!localStorage.getItem(ONBOARD_KEY)) $('onboard').classList.remove('hidden');
-$('onboardClose').addEventListener('click', () => {
-  $('onboard').classList.add('hidden');
-  try { localStorage.setItem(ONBOARD_KEY, '1'); } catch {}
-});
-
 // theme toggle removed 13 Tem gece (Damla: "light mode kaldıralım") — the site is dark only.
+
+// model.json (245KB) sayfa boşta iken arka planda yüklensin: kullanıcı "oku"ya basınca hazır,
+// beklemez. loadModel kendi içinde tekrarı önler (bir kez fetch). idle yoksa gecikmeli fallback.
+(window.requestIdleCallback || ((f) => setTimeout(f, 1200)))(() => { loadModel().catch(() => {}); });
 
 // ---- kayıt defteri: on-device return loop. Keyed by the OTHER person's real name (skipped
 // for anonymous "İlk kişi/İkinci kişi" parses); stores verdict + score only, never the chat.
@@ -220,6 +207,7 @@ function attachHistory(r, p) {
   const key = name.toLocaleLowerCase('tr');
   let hist = {};
   try { hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}'); } catch {}
+  if (!hist || typeof hist !== 'object' || Array.isArray(hist)) hist = {};  // bozuk localStorage koruması
   const prev = hist[key];
   if (prev && typeof prev.score === 'number') {
     r.kayit = { name, prevScore: prev.score, prevKarar: prev.karar, prevTs: prev.ts, score: r.flort_sinyali.score };

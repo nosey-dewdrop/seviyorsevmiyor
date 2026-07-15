@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>23 aoc · seviyorsevmiyor</title>
+<style>
+  /* ADVENT OF CODE vibe (Damla 15 Tem: "aoc cok tatli, onun gibi olsun").
+     siyah zemin, monospace, sonuk gri govde, PARLAK YESIL tiklanabilirler + hover beyaz,
+     altin * yildizlar. sifir cizgi/kutu/border. bolumler sadece boslukla ayrilir. */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#0f0f23; color:#cccccc;
+    font-family:"Source Code Pro","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px; line-height:1.5; min-height:100vh; padding:0;
+  }
+  a, .link { color:#00cc00; text-decoration:none; cursor:pointer; }
+  a:hover, .link:hover { color:#ffffff; }
+  .star { color:#ffff66; }             /* altin yildiz */
+  b, strong { color:#ffffff; font-weight:normal; }
+
+  .wrap { max-width:900px; margin:0 auto; padding:24px 16px 80px; }
+
+  /* baslik: aoc'deki gibi mono, yildizla cevrili, govde tonunda */
+  h1 { font-size:14px; font-weight:normal; color:#00cc00; margin-bottom:2px; }
+  h1 a { color:#00cc00; }
+  h1 a:hover { color:#ffffff; }
+  .slogan { color:#888888; margin-bottom:28px; }
+  .slogan .star { }
+
+  /* kaynak kapilari: KUTU YOK. aoc menu satiri gibi: [ yildiz baslik ] aciklama, alt alta. */
+  .kaynaklar { margin-bottom:26px; }
+  .kaynak { margin-bottom:14px; cursor:pointer; }
+  .kaynak .k-ad { color:#00cc00; }
+  .kaynak:hover .k-ad { color:#ffffff; }
+  .kaynak.active .k-ad { color:#ffffff; }
+  .kaynak .k-kisa { color:#888888; }
+  .kaynak .k-tus { color:#555566; }
+
+  /* textarea: cerceve yok, zemin biraz acik (aoc kod kutusu grisi) */
+  .paste {
+    width:100%; min-height:170px; margin:18px 0 8px;
+    background:#10101c; border:0; color:#cccccc;
+    font-family:inherit; font-size:14px; line-height:1.6; padding:12px; resize:vertical;
+  }
+  .paste:focus { outline:none; background:#15152a; }
+  .paste::placeholder { color:#555566; }
+  .hint { color:#888888; margin-bottom:22px; }
+
+  .go { color:#00cc00; cursor:pointer; }
+  .go:hover { color:#ffffff; }
+  .go::before { content:"[ "; } .go::after { content:" ]"; }
+
+  .quota { color:#888888; margin-top:22px; }
+  .badge { color:#888888; margin-top:8px; }
+  .badge .star { }
+
+  .nasil { margin-top:52px; max-width:640px; }
+  .nasil h2 { font-size:14px; font-weight:normal; color:#00cc00; margin-bottom:12px; }
+  .nasil h2::before { content:"* "; color:#ffff66; }
+  .nasil p { color:#999999; line-height:1.7; margin-bottom:14px; }
+  .nasil b { color:#ffffff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><a href="#">seviyorsevmiyor</a></h1>
+  <div class="slogan">orada ne demek istediğini mi merak ediyorsun? yorumlayalım <span class="star">:D</span></div>
+
+  <div class="kaynaklar">
+    <div class="kaynak active">
+      <span class="star">*</span> <span class="k-ad">yapıştır</span> <span class="k-tus">(ctrl+v)</span>
+      <div class="k-kisa">sohbeti kopyala, buraya bırak. uygulama fark etmez, düz metin yeter.</div>
+    </div>
+    <div class="kaynak">
+      <span class="star">*</span> <span class="k-ad">ekran görüntüsü</span> <span class="k-tus">(png · jpg)</span>
+      <div class="k-kisa">ekran fotoğrafını at</div>
+    </div>
+    <div class="kaynak">
+      <span class="star">*</span> <span class="k-ad">whatsapp arşivi</span> <span class="k-tus">(.zip)</span>
+      <div class="k-kisa">whatsapp'tan sohbeti dışarı aktar ve zip dosyasını buraya koy. (llama yerine kendi dil modelimizle de yorumlanabilir, sen seç!)</div>
+    </div>
+  </div>
+
+  <textarea class="paste" placeholder="Sohbeti buraya yapıştır.&#10;&#10;Ör:&#10;Ayşe: bugün seni düşündüm&#10;Mehmet: aa öyle mi&#10;Ayşe: gülüşün aklımdaydı"></textarea>
+  <div class="hint">isimli ya da düz, fark etmez.</div>
+
+  <span class="go">Alt-metni oku</span>
+
+  <div class="quota">Ücretsiz. Sınır yok, hesap yok. Hüküm cihazında verilir; spiker istersen bulutta.</div>
+  <div class="badge"><span class="star">*</span> analiz cihazında yapılır, mesajların çıkmaz</div>
+
+  <section class="nasil">
+    <h2>nasıl çalışıyor?</h2>
+    <p>iki model kullandım. önce kendi eğittiğim küçük bir dil modeli sohbetin istatistiğini çıkarıyor: kim başlatmış, kim daha çok yazmış, sorular dengeli mi, kaç kuru cevap var. bu hep <b>senin cihazında</b> oluyor, mesajın hiçbir yere gitmiyor.</p>
+    <p>sonra bu istatistiği llama'ya yorumlatıyorum. yani yorumu yazan llama, ama okuduğu şey mesajların değil, çıkan sayılar. hüküm ve sayılar zaten hep sende kalıyor.</p>
+    <p>küçük modeli ellerce sohbetle kendim eğittim, hâlâ eğitiyorum. istersen sen de "yanlış okudun" deyip sohbetini bağışlayabilirsin, model onunla büyüyor. bağışlamazsan hiçbir şey saklanmıyor.</p>
+  </section>
+</div>
+</body>
+</html>

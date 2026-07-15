@@ -1,31 +1,38 @@
 /* ============ v21: mockups/21-final.html dünyası ============
    giriş: üç kaynak kapısı · analiz anı: ortada daktilo · son an: solda kart, sağda yorum */
 
-/* ---- üç kaynak kapısı ---- */
-.giris { max-width: 1000px; margin: 40px auto 0; }
-.kaynaklar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-@media (max-width: 760px) { .kaynaklar { grid-template-columns: 1fr; } }
+/* ---- tek ortalı sütun: her şey aynı 520px ekseninde (Damla 15 Tem: "tam uyum") ---- */
+.giris { max-width: 680px; margin: 0 auto; }
+/* iki sütun: SOLDA seçenekler, SAĞDA tıklanan kutu (Damla 15 Tem) */
+.ikili { display: grid; grid-template-columns: 220px 1fr; gap: 40px; align-items: start; text-align: left; }
+@media (max-width: 680px) { .ikili { grid-template-columns: 1fr; gap: 24px; } }
+.kaynaklar { display: flex; flex-direction: column; align-items: stretch; gap: 22px; }
+.kutu .pane.hidden { display: none; }
+.kutu .pane { width: 100%; padding: 0; }
+.kaynaklar .ayrac { color: var(--line-2); font-family: var(--mono); font-size: 15px;
+  letter-spacing: 6px; user-select: none; padding: 12px 0; }
 .kaynak {
-  display: block; text-align: left; background: var(--surface);
-  border: 1px dashed var(--line-2); border-radius: var(--r-box);
-  padding: 26px 22px 24px; cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  display: block; text-align: left; background: none;
+  border: 0; border-left: 2px solid transparent; border-radius: 0;
+  padding: 2px 0 2px 12px; cursor: pointer; width: 100%;
 }
-.kaynak:hover { border-color: var(--ink); background: var(--surface-2); }
-.kaynak.active { border-style: solid; border-color: var(--accent); }
-.kaynak .k-ad { display: block; font-family: var(--mono); color: var(--ink); font-size: 15px; font-weight: 700; margin-bottom: 8px; }
-.kaynak .k-kisa { display: block; font-family: var(--sans); font-size: 13.5px; line-height: 1.7; color: var(--ink-2); }
-.kaynak .k-tus { display: inline-block; margin-top: 12px; font-family: var(--mono); font-size: 11px; color: var(--ink-3);
-  border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; }
+.kaynak .k-ad { display: block; font-family: var(--mono); color: var(--ink-3); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.kaynak:hover .k-ad { color: var(--ink); }
+.kaynak.active { border-left-color: var(--ink); }
+.kaynak.active .k-ad { color: var(--ink); }
+/* açıklama + tuş sadece SEÇİLİ kaynakta görünür (sol listede) */
+.kaynak .k-kisa, .kaynak .k-tus { display: none; }
+.kaynak.active .k-kisa { display: block; font-family: var(--mono); font-weight: 500; font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+.kaynak.active .k-tus { display: inline-block; margin-top: 6px; font-family: var(--mono); font-weight: 500; font-size: 11px; color: var(--ink-3); }
 .demo { margin-top: 18px; text-align: center; font-size: 13px; color: var(--ink-2); }
 .linklike { background: none; border: 0; color: var(--accent); font: inherit; font-size: 13px;
   cursor: pointer; text-decoration: underline; padding: 0; }
 
 /* ---- panes ---- */
-.pane { padding: 18px 0 0; }
-.composer { border: 1px solid var(--line-2); border-radius: var(--r-card); background: var(--surface);
-  transition: border-color 0.2s, box-shadow 0.2s; }
-.composer:focus-within { border-color: var(--accent); box-shadow: var(--shadow); }
+.pane { padding: 34px 0 0; }
+.composer { border: 0; border-bottom: 1px solid var(--line); background: none; transition: border-color 0.2s; text-align: left; }
+.composer:focus-within { border-bottom-color: var(--ink); }
+.paste-hint { text-align: center; }
 textarea.paste {
   width: 100%; min-height: 176px; resize: vertical; padding: 16px; display: block;
   border: none; background: none; font-family: var(--sans);
@@ -35,62 +42,73 @@ textarea.paste:focus { outline: none; }
 .paste-hint { margin-top: 10px; font-size: 0.86rem; }
 
 .dropzone { display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center;
-  border: 1px dashed var(--line-2); border-radius: var(--r-card); padding: 40px 20px;
-  background: var(--surface); cursor: pointer; transition: border-color 0.2s, background 0.2s; }
-.dropzone:hover { border-color: var(--ink); background: var(--surface-2); }
-.dropzone.hot { border-color: var(--accent); }
+  border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 14px 2px;
+  background: none; cursor: pointer; transition: border-color 0.2s; }
+.dropzone:hover { border-bottom-color: var(--ink); }
+.dropzone.hot { border-bottom-color: var(--ink); }
 .dz-title { color: var(--ink); font-weight: 700; }
 .dz-sub { color: var(--ink-3); font-size: 0.86rem; }
 
-/* ---- who-is-me + consent ---- */
-.whois { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-ui);
-  background: var(--surface); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+/* ---- who-is-me + consent: kutu YOK, sütun içinde ortalı ---- */
+.whois { margin-top: 22px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
 .whois-q { font-size: 0.95rem; color: var(--ink); font-weight: 700; }
 .whois .seg { display: inline-flex; gap: 6px; }
-.whois .seg button { background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--r-small);
+.whois .seg button { background: none; border: 1px solid var(--line-2); border-radius: var(--r-small);
   padding: 6px 15px; font-size: 0.9rem; color: var(--ink-2); transition: all 0.18s; }
-.whois .seg button.on { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+.whois .seg button.on { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 700; }
 
-.consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 16px; font-size: 0.85rem;
-  color: var(--ink-2); line-height: 1.5; cursor: pointer; }
-.consent input { margin-top: 3px; flex: none; accent-color: var(--accent); }
+.consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 16px; font-size: 0.82rem;
+  color: var(--ink-2); line-height: 1.5; cursor: pointer; text-align: left; }
+.consent input { margin-top: 3px; flex: none; accent-color: var(--ink); }
 
 /* ---- buttons ---- */
-.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 20px; }
-.btn { background: var(--ink); color: var(--bg); border: 1px solid var(--ink); border-radius: var(--r-small);
-  padding: 12px 24px; font-size: 0.95rem; font-weight: 700; transition: transform 0.15s, opacity 0.2s; }
-.btn:hover:not(:disabled) { transform: translateY(-1px); }
-.btn:active:not(:disabled) { transform: translateY(0) scale(0.99); }
-.btn:disabled { opacity: 0.35; cursor: default; }
-.btn.ghost { background: none; color: var(--ink); border-color: var(--line-2); }
-.btn.small { padding: 8px 16px; font-size: 0.85rem; }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 28px; justify-content: center; }
+/* terminal komut butonu: [ alt-metni oku ] — dolu kutu değil, çıplak bracket */
+.btn { background: none; color: var(--ink); border: 0; border-radius: 0;
+  padding: 10px 8px; font-size: 0.98rem; font-weight: 700; font-family: var(--mono);
+  transition: opacity 0.2s, color 0.15s; cursor: pointer; }
+.btn::before { content: "[ "; color: var(--ink-3); }
+.btn::after { content: " ]"; color: var(--ink-3); }
+.btn:hover:not(:disabled) { color: #fff; }
+.btn:hover:not(:disabled)::before, .btn:hover:not(:disabled)::after { color: var(--ink); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn.ghost { color: var(--ink-2); }
+.btn.small { font-size: 0.85rem; }
 .quota { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-3); margin-top: 12px; }
-.privacy-badge { display: inline-flex; align-items: center; gap: 7px; margin-top: 18px;
-  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.07em; color: var(--ink-3); }
+.privacy-badge { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px;
+  font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0; color: var(--ink-3); }
 .privacy-badge:hover { color: var(--ink); text-decoration: none; }
 .privacy-badge .lock { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
 
 /* ---- analiz anı: ortada daktilo ---- */
-.akis { max-width: 640px; margin: 70px auto 0; display: none;
-  font-family: var(--sans); font-size: 19px; line-height: 1.65; color: #e4e4e7;
-  min-height: 200px; white-space: pre-wrap; }
+.akis { max-width: 600px; margin: 64px auto 0; display: none;
+  font-family: var(--mono); font-size: 18px; line-height: 1.7; color: var(--ink);
+  min-height: 90px; white-space: pre-wrap; text-align: center; }
 .akis.on { display: block; }
+.akis-atla { display: block; margin-top: 22px; font-size: 11px; color: var(--ink-3); letter-spacing: 0.05em; }
+.akis-atla::before { content: "* "; }
 .akis .imlec { display: inline-block; width: 9px; height: 18px; background: var(--accent);
   vertical-align: -3px; animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* ---- son an: solda kart, sağda yorum ---- */
-.sahne { display: none; grid-template-columns: 430px 1fr; gap: 64px; max-width: 1150px;
-  margin: 60px auto 0; align-items: start; }
+/* ---- son an: solda kart, sağda yorum. reveal içi SOLA hizalı (wrap center'ı ezer) ---- */
+.reveal { text-align: left; }
+.sahne { display: none; grid-template-columns: 420px 1fr; gap: 56px; max-width: 980px;
+  margin: 56px auto 0; align-items: start; text-align: left; }
 .sahne.on { display: grid; animation: otur 0.6s ease both; }
-@media (max-width: 900px) { .sahne { grid-template-columns: 1fr; gap: 40px; } }
+@media (max-width: 900px) { .sahne { grid-template-columns: 1fr; gap: 36px; max-width: 520px; } }
 @keyframes otur { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
 /* ---- printable kart ---- */
 .kart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
   padding: 26px 24px 24px; font-family: var(--mono); }
 .kart .marka { font-size: 12.5px; color: var(--ink-3); display: flex; justify-content: space-between; margin-bottom: 20px; }
-.kart .hukum { color: var(--ink); font-size: 26px; font-weight: 700; line-height: 1.35; margin-bottom: 20px; font-family: var(--mono); }
+.kart .hukum { color: var(--ink); font-size: 26px; font-weight: 700; line-height: 1.35; margin-bottom: 12px; font-family: var(--mono); }
+/* kalp puanı: kartın kahramanı — story'de göz buraya gider. kalp için sistem font fallback. */
+.kart .kalpler { font-family: "Arial Unicode MS", var(--mono), sans-serif; font-size: 32px; letter-spacing: 4px; margin-bottom: 20px; display: flex; align-items: baseline; }
+.kart .kalpler .dolu { color: var(--ink); }
+.kart .kalpler .bos { color: var(--line); }
+.kart .kalpler .kalp-not { font-size: 12px; letter-spacing: 0; color: var(--ink-3); margin-left: 12px; align-self: center; }
 
 /* terazi: gerçek terazi anatomisi svg'de. kol sallanır, kefeler karşı-dönüşle asılı kalır. */
 .terazi { margin: 0 auto 14px; display: block; width: 100%; max-width: 360px; }
@@ -137,7 +155,7 @@ textarea.paste:focus { outline: none; }
 .olcumler { font-size: 12.5px; line-height: 2.1; border-top: 1px solid var(--line); padding-top: 12px;
   margin-bottom: 14px; color: var(--ink-2); }
 .olcumler b { color: var(--ink); font-weight: 700; }
-.kart .kisa { font-family: var(--sans); font-size: 15px; line-height: 1.6; color: #b6b6bd;
+.kart .kisa { font-family: var(--mono); font-size: 14px; line-height: 1.65; color: var(--ink-2);
   border-top: 1px solid var(--line); padding-top: 14px; }
 .kart .dip { font-size: 9.5px; color: var(--ink-3); margin-top: 14px; }
 .indir { margin-top: 14px; width: 100%; background: var(--ink); color: var(--bg); border: 0;
@@ -162,8 +180,8 @@ textarea.paste:focus { outline: none; }
 .gerekce { display: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-ui);
   padding: 16px 18px; margin: -6px 0 20px; font-size: 14px; line-height: 1.65; color: #b6b6bd; }
 .gerekce.on { display: block; }
-.gerekce .g-b { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; color: var(--ink-3);
-  display: block; margin: 8px 0 4px; }
+.gerekce .g-b { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0; color: var(--ink-3);
+  display: block; margin: 10px 0 4px; font-weight: 700; }
 .gerekce .g-b:first-child { margin-top: 0; }
 .gerekce .bagis { margin-top: 12px; background: none; border: 1px solid var(--accent); border-radius: var(--r-small);
   color: var(--accent); font: inherit; font-size: 12px; padding: 7px 12px; cursor: pointer; }

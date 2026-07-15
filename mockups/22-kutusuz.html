@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>22 kutusuz · seviyorsevmiyor</title>
+<style>
+  /* WEB 1.0 KUTUSUZ deneme (Damla 15 Tem: "cok fazla kutu border var, kutusuz").
+     kaynak kapilari border'siz duz metin sutunlari. textarea cerceve yok, sadece alt cizgi.
+     bolumler bosluk + tek yatay cizgi ile ayrilir. renk yok (mercan kalkti). */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#1a1a1e; color:#a1a1aa; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; min-height:100vh; padding:36px 40px 90px; }
+  @media (max-width:700px){ body { padding:24px 14px 70px; } }
+  .wrap { max-width:1000px; margin:0 auto; }
+
+  header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:44px; gap:12px; flex-wrap:wrap; }
+  h1 { color:#fafafa; font-size:20px; font-weight:400; letter-spacing:-.5px; }
+  .slogan { font-size:11px; color:#8a8a92; }
+
+  /* kaynak kapilari: KUTU YOK. sadece baslik + aciklama + tus, yan yana 3 sutun. */
+  .kaynaklar { display:grid; grid-template-columns:repeat(3,1fr); gap:40px; margin-bottom:48px; }
+  @media (max-width:760px){ .kaynaklar { grid-template-columns:1fr; gap:26px; } }
+  .kaynak { cursor:pointer; padding-top:14px; border-top:1px solid #3a3a40; transition:border-color .15s; }
+  .kaynak.active { border-top-color:#fafafa; }
+  .kaynak:hover { border-top-color:#8a8a92; }
+  .k-ad { color:#fafafa; font-size:15px; font-weight:700; margin-bottom:8px; }
+  .k-kisa { font-family:Helvetica,Arial,sans-serif; font-size:13.5px; line-height:1.7; color:#a1a1aa; }
+  .k-tus { display:inline-block; margin-top:10px; font-size:11px; color:#8a8a92; }
+
+  /* textarea: CERCEVE YOK, sadece altinda tek cizgi (kagida yazi yazar gibi). */
+  .paste { width:100%; min-height:200px; background:none; border:0; border-bottom:1px solid #3a3a40;
+    color:#e4e4e7; font-family:Helvetica,Arial,sans-serif; font-size:16px; line-height:1.7;
+    padding:4px 2px 14px; resize:vertical; }
+  .paste:focus { outline:none; border-bottom-color:#fafafa; }
+  .paste::placeholder { color:#55555c; }
+  .hint { font-size:12px; color:#8a8a92; margin-top:12px; }
+
+  .go { margin-top:28px; background:#fafafa; color:#1a1a1e; border:0; border-radius:9px;
+    font:inherit; font-size:13px; font-weight:700; padding:12px 22px; cursor:pointer; }
+  .quota { font-size:12px; color:#8a8a92; margin-top:22px; }
+  .badge { display:inline-block; font-size:11px; color:#8a8a92; margin-top:14px; letter-spacing:.5px; }
+
+  .nasil { border-top:1px solid #3a3a40; margin-top:72px; padding-top:26px; max-width:640px; }
+  .nasil h2 { font-size:14px; font-weight:400; color:#a1a1aa; margin-bottom:14px; }
+  .nasil p { font-family:Helvetica,Arial,sans-serif; font-size:15px; line-height:1.7; color:#a1a1aa; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>seviyorsevmiyor</h1>
+    <span class="slogan">orada ne demek istediğini mi merak ediyorsun? yorumlayalım :D</span>
+  </header>
+
+  <nav class="kaynaklar">
+    <div class="kaynak active">
+      <div class="k-ad">yapıştır</div>
+      <div class="k-kisa">sohbeti kopyala, buraya bırak. uygulama fark etmez, düz metin yeter.</div>
+      <div class="k-tus">ctrl + v</div>
+    </div>
+    <div class="kaynak">
+      <div class="k-ad">ekran görüntüsü</div>
+      <div class="k-kisa">ekran fotoğrafını at</div>
+      <div class="k-tus">png · jpg</div>
+    </div>
+    <div class="kaynak">
+      <div class="k-ad">whatsapp arşivi</div>
+      <div class="k-kisa">whatsapp'tan sohbeti dışarı aktar ve zip dosyasını buraya koy. (llama yerine kendi dil modelimizle de yorumlanabilir, sen seç!)</div>
+      <div class="k-tus">.zip</div>
+    </div>
+  </nav>
+
+  <textarea class="paste" placeholder="Sohbeti buraya yapıştır.&#10;&#10;Ör:&#10;Ayşe: bugün seni düşündüm&#10;Mehmet: aa öyle mi&#10;Ayşe: gülüşün aklımdaydı"></textarea>
+  <p class="hint">isimli ya da düz, fark etmez.</p>
+
+  <button class="go">Alt-metni oku</button>
+  <div class="quota">Ücretsiz. Sınır yok, hesap yok. Hüküm cihazında verilir; spiker istersen bulutta.</div>
+  <div class="badge">● ANALİZ CİHAZINDA YAPILIR, MESAJLARIN ÇIKMAZ</div>
+
+  <section class="nasil">
+    <h2>nasıl çalışıyor?</h2>
+    <p>iki model kullandım. önce kendi eğittiğim küçük bir dil modeli sohbetin istatistiğini çıkarıyor: kim başlatmış, kim daha çok yazmış, sorular dengeli mi, kaç kuru cevap var. bu hep senin cihazında oluyor, mesajın hiçbir yere gitmiyor.</p>
+    <p>sonra bu istatistiği llama'ya yorumlatıyorum. yani yorumu yazan llama, ama okuduğu şey mesajların değil, çıkan sayılar. hüküm ve sayılar zaten hep sende kalıyor.</p>
+    <p>küçük modeli ellerce sohbetle kendim eğittim, hâlâ eğitiyorum. istersen sen de "yanlış okudun" deyip sohbetini bağışlayabilirsin, model onunla büyüyor. bağışlamazsan hiçbir şey saklanmıyor.</p>
+  </section>
+</div>
+</body>
+</html>

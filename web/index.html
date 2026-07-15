@@ -4,79 +4,90 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>seviyorsevmiyor · flört var mı, yok mu?</title>
-<meta name="description" content="Bir sohbeti bırak: flört var mı, yok mu? Kim daha çok istiyor? Red flag var mı? Net cevap, kanıtıyla. Hüküm cihazında verilir, mesajların telefonundan çıkmaz." />
-<meta name="theme-color" content="#1a1a1e" />
-<link rel="icon" href="./favicon.svg?v=23" type="image/svg+xml" />
-<link rel="apple-touch-icon" href="./favicon.svg?v=23" />
+<meta name="description" content="O sohbeti bırak: flört var mı, yok mu? Kim daha çok istiyor, kim kırıntı atıyor? Net cevap, kalp puanıyla. Hüküm cihazında, mesajların çıkmaz." />
+<meta name="theme-color" content="#1a1a1a" />
+<link rel="icon" href="./favicon.svg?v=37" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="./favicon.svg?v=37" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://nosey-dewdrop.github.io/seviyorsevmiyor/" />
 <meta property="og:title" content="seviyorsevmiyor · flört var mı, yok mu?" />
-<meta property="og:description" content="Bir sohbeti bırak: flört var mı, yok mu? Kim daha çok istiyor? Red flag var mı? Net cevap, kanıtıyla. Hüküm cihazında verilir." />
-<meta property="og:image" content="https://nosey-dewdrop.github.io/seviyorsevmiyor/og.png?v=23" />
+<meta property="og:description" content="O sohbeti bırak: flört var mı, yok mu? Kim daha çok istiyor, kim kırıntı atıyor? Net cevap, kalp puanıyla. Hüküm cihazında, mesajların çıkmaz." />
+<meta property="og:image" content="https://nosey-dewdrop.github.io/seviyorsevmiyor/og.png?v=32" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="seviyorsevmiyor · flört var mı, yok mu?" />
-<meta name="twitter:description" content="Bir sohbetin altındaki alt-metni oku. Net cevap, kanıtıyla." />
-<meta name="twitter:image" content="https://nosey-dewdrop.github.io/seviyorsevmiyor/og.png?v=23" />
-<link rel="stylesheet" href="./css/tokens.css?v=23" />
-<link rel="stylesheet" href="./css/base.css?v=23" />
-<link rel="stylesheet" href="./css/components.css?v=23" />
+<meta name="twitter:description" content="O sohbeti bırak: flört var mı, yok mu? Net cevap, kalp puanıyla. Hüküm cihazında, mesajların çıkmaz." />
+<meta name="twitter:image" content="https://nosey-dewdrop.github.io/seviyorsevmiyor/og.png?v=32" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" />
+<link rel="stylesheet" href="./css/tokens.css?v=48" />
+<link rel="stylesheet" href="./css/base.css?v=48" />
+<link rel="stylesheet" href="./css/components.css?v=48" />
 </head>
 <body>
-<canvas id="bubbleSea" class="bubble-sea" aria-hidden="true"></canvas>
+<div class="papatyalar" aria-hidden="true">
+  <span style="top:8%;left:4%">*</span>
+  <span style="top:22%;left:92%">*</span>
+  <span style="top:44%;left:2%">*</span>
+  <span style="top:58%;left:95%">*</span>
+  <span style="top:74%;left:6%">*</span>
+  <span style="top:88%;left:90%">*</span>
+  <span style="top:14%;left:70%">*</span>
+  <span style="top:82%;left:40%">*</span>
+</div>
 <div class="wrap">
   <header class="site-head">
     <span class="brand">seviyorsevmiyor</span>
-    <p class="meta">sohbeti bırak, hükmü al. mesajlar cihazdan çıkmaz.</p>
+    <p class="meta">orada ne demek istediğini mi merak ediyorsun? yorumlayalım :D</p>
   </header>
 
   <div class="giris" id="giris">
-    <nav class="kaynaklar" aria-label="kaynak seç">
-      <button class="tab kaynak active" type="button" data-tab="paste">
-        <span class="k-ad">yapıştır</span>
-        <span class="k-kisa">sohbeti kopyala, buraya bırak. uygulama fark etmez, düz metin yeter.</span>
-        <span class="k-tus">ctrl + v</span>
-      </button>
-      <button class="tab kaynak" type="button" data-tab="shot">
-        <span class="k-ad">ekran görüntüsü</span>
-        <span class="k-kisa">konuşmanın ekran görüntüsünü sürükle. yazıyı cihazında ben okurum.</span>
-        <span class="k-tus">png · jpg</span>
-      </button>
-      <button class="tab kaynak" type="button" data-tab="wa">
-        <span class="k-ad">whatsapp arşivi</span>
-        <span class="k-kisa">sohbeti dışa aktar, zip'i olduğu gibi bırak. bin mesajsa bin mesaj.</span>
-        <span class="k-tus">.zip</span>
-      </button>
-    </nav>
-    <p class="demo">elinde sohbet yok mu? <button class="linklike" id="demoBtn" type="button">örneği izle</button></p>
+    <div class="ikili">
+      <nav class="kaynaklar" aria-label="kaynak seç">
+        <button class="tab kaynak active" type="button" data-tab="paste">
+          <span class="k-ad">yapıştır</span>
+          <span class="k-kisa">sohbeti kopyala, buraya bırak. uygulama fark etmez, düz metin yeter.</span>
+          <span class="k-tus">ctrl + v</span>
+        </button>
+        <button class="tab kaynak" type="button" data-tab="shot">
+          <span class="k-ad">ekran görüntüsü</span>
+          <span class="k-kisa">ekran fotoğrafını at</span>
+          <span class="k-tus">png · jpg</span>
+        </button>
+        <button class="tab kaynak" type="button" data-tab="wa">
+          <span class="k-ad">whatsapp arşivi</span>
+          <span class="k-kisa">whatsapp'tan sohbeti dışarı aktar ve zip dosyasını buraya koy. (llama yerine kendi dil modelimizle de yorumlanabilir, sen seç!)</span>
+          <span class="k-tus">.zip</span>
+        </button>
+      </nav>
 
-    <div class="pane" id="pane-paste">
-      <div class="composer">
-        <textarea class="paste" id="pasteBox" placeholder="Sohbeti buraya yapıştır.&#10;&#10;Ör:&#10;Ayşe: bugün seni düşündüm&#10;Mehmet: aa öyle mi&#10;Ayşe: gülüşün aklımdaydı"></textarea>
+      <div class="kutu">
+        <div class="pane" id="pane-paste">
+          <div class="composer">
+            <textarea class="paste" id="pasteBox" placeholder="sohbeti buraya yapıştır"></textarea>
+          </div>
+          <p class="paste-hint muted">isimli ya da düz, fark etmez.</p>
+        </div>
+        <div class="pane hidden" id="pane-shot">
+          <label class="dropzone" id="shotZone">
+            <input type="file" id="shotInput" accept="image/*" hidden />
+            <span class="dz-title">ekran fotoğrafını seç</span>
+          </label>
+        </div>
+        <div class="pane hidden" id="pane-wa">
+          <label class="dropzone" id="waZone">
+            <input type="file" id="waInput" accept=".txt,.zip" hidden />
+            <span class="dz-title">zip'i ya da .txt'yi seç</span>
+          </label>
+          <p class="paste-hint muted">whatsapp → sohbet → dışa aktar → medyasız</p>
+        </div>
       </div>
-      <p class="paste-hint muted">İsimli (Ayşe: ...) ya da düz satırlar olabilir. WhatsApp kopyala-yapıştır da çalışır.</p>
-    </div>
-
-    <div class="pane hidden" id="pane-shot">
-      <label class="dropzone" id="shotZone">
-        <input type="file" id="shotInput" accept="image/*" hidden />
-        <span class="dz-title">Bir sohbet ekran görüntüsü seç</span>
-        <span class="dz-sub">Metin cihazında okunur (OCR), görsel yüklenmez.</span>
-      </label>
-      <p class="paste-hint muted">Sol/sağ baloncuk konumundan kimin yazdığını tahmin eder; sonucu düzeltebilirsin.</p>
-    </div>
-    <div class="pane hidden" id="pane-wa">
-      <label class="dropzone" id="waZone">
-        <input type="file" id="waInput" accept=".txt,.zip" hidden />
-        <span class="dz-title">WhatsApp dışa aktarımını seç (.txt / .zip)</span>
-        <span class="dz-sub">Tarayıcında açılır, yüklenmez.</span>
-      </label>
-      <p class="paste-hint muted">WhatsApp'ta sohbet → ⋮ → Dışa aktar → medyasız. Dosya cihazında çözülür.</p>
     </div>
 
     <div class="whois hidden" id="whois">
-      <span class="whois-q">Bu sohbette sen kimsin?</span>
+      <span class="whois-q">bu sohbette sen kimsin?</span>
       <span class="seg" id="meSeg"></span>
     </div>
 
@@ -91,37 +102,31 @@
     </label>
 
     <div class="row">
-      <button class="btn" id="goBtn" disabled>Alt-metni oku</button>
-      <button class="btn ghost small hidden" id="resetBtn">Yeni sohbet</button>
+      <button class="btn" id="goBtn" disabled>alt-metni oku</button>
+      <button class="btn ghost small hidden" id="resetBtn">yeni sohbet</button>
     </div>
-    <div class="quota">Ücretsiz. Sınır yok, hesap yok. Hüküm cihazında verilir; spiker istersen bulutta.</div>
-    <a class="privacy-badge" href="./gizlilik.html"><span class="lock"></span> ANALİZ CİHAZINDA YAPILIR, MESAJLARIN ÇIKMAZ</a>
+    <div class="quota">ücretsiz, sınırsız, hesapsız. hüküm cihazında; spiker istersen bulutta.</div>
+    <a class="privacy-badge" href="./gizlilik.html"><span class="lock"></span> analiz cihazında yapılır, mesajların çıkmaz</a>
   </div>
 
   <section class="reveal" id="reveal"></section>
 
+  <details class="nasil">
+    <summary>bu nasıl yapıldı ve verilerin nasıl korunuyor?</summary>
+    <p>iki model kullandım. önce kendi eğittiğim küçük bir dil modeli sohbetin istatistiğini çıkarıyor: kim başlatmış, kim daha çok yazmış, sorular dengeli mi, kaç kuru cevap var. bu hep senin cihazında oluyor, mesajın hiçbir yere gitmiyor.</p>
+    <p>sonra bu istatistiği llama'ya yorumlatıyorum. yani yorumu yazan llama, ama okuduğu şey mesajların değil, çıkan sayılar. hüküm ve sayılar zaten hep sende kalıyor.</p>
+    <p>küçük modeli ellerce sohbetle kendim eğittim, hâlâ eğitiyorum. istersen sen de "yanlış okudun" deyip sohbetini bağışlayabilirsin, model onunla büyüyor. bağışlamazsan hiçbir şey saklanmıyor.</p>
+  </details>
+
   <footer class="site-foot">
-    <a href="./gizlilik.html">Gizlilik</a>
-    <a href="./kosullar.html">Koşullar</a>
-    <span class="disclaimer">Bu okuma otomatik bir tahmindir; kesin bir yargı ya da tavsiye değildir, eğlence amaçlıdır.</span>
-    <span>Hüküm ve sayılar cihazında. Canlı spiker yorumu sadece senin onayınla bulutta.</span>
-    <span>v23 · yeni worker · 15 Tem</span>
+    <a href="./gizlilik.html">gizlilik</a>
+    <a href="./kosullar.html">koşullar</a>
+    <span class="disclaimer">bu okuma otomatik bir tahmindir; kesin bir yargı ya da tavsiye değildir, eğlence amaçlıdır.</span>
+    <span>hüküm ve sayılar cihazında. canlı spiker yorumu sadece senin onayınla bulutta.</span>
+    <span>v48 · 15 Tem</span>
   </footer>
 </div>
 
-<div class="overlay hidden" id="onboard">
-  <div class="sheet">
-    <div class="ob-thread">
-      <div class="app">selam kanka. ben sohbetlerin altında ne yattığını okuyorum.</div>
-      <div class="app">bir konuşma bırak, gerisi bende. isimli isimsiz fark etmez.</div>
-      <div class="app">Kendi istatistik modelim <b>senin cihazında</b> çalışır. Hükmü o verir, mesajların telefonundan çıkmaz.</div>
-      <div class="app">istersen yorumları canlı spiker (llama) yazar. onay senin, içerik saklanmaz.</div>
-    </div>
-    <button class="btn" id="onboardClose">Başla</button>
-  </div>
-</div>
-
-<script src="./js/bubbles.js?v=23" defer></script>
-<script type="module" src="./js/app.js?v=23"></script>
+<script type="module" src="./js/app.js?v=48"></script>
 </body>
 </html>

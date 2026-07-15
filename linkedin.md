@@ -102,3 +102,17 @@ asıl karar veri üretmek değildi. asıl karar şuydu: sentetik örnekler sadec
 bu düzenin güzel tarafı çark olması. kullanıcı hükme itiraz ettiğinde satırlarını rızasıyla bağışlayabiliyor; her bağış gerçek, etiketli veri. gerçek veri biriktikçe sentetiğin payı düşecek, model her turda biraz daha benim olacak. bugün büyük modeller öğretmen, benim motorum öğrenci; hedef, öğrencinin sınıfı geçip kürsüye oturması.
 
 ders: yapay zekayla veri üretmek artık kolay. zorlaşan şey dürüst kalmak. sayıyı yükseltmenin yüz yolu var, yükseldiğine kendini inandırmanın tek yolu var: sınav kağıdına elini sürmemek.
+
+---
+
+## 7 — kendi onayladığın rengi silebilmek
+
+gece boyu seviyorsevmiyor'un arayüzünü tasarladık. mockup'ta bir şeftali-mercan vurgu rengi vardı, onu ben seçmiştim, ben onaylamıştım. ama ertesi gün canlıda görünce içim rahat etmedi. tek kelimeyle tarif ettim: slopware. bugün her yapay zeka sitesinin üstünde o aynı pastel vurgu var, o aynı yuvarlak kart, o aynı "üretildim" kokusu. kendi ürünüm de o kalabalığa karışmıştı.
+
+sildim. sadece rengi değil, arkasındaki refleksi. yeşil denedim, mavi denedim; onlar da başka bir şablonun parçasıydı. sonunda renk aramayı bıraktım. dedim ki bu bir terminal olsun: antrasit, beyaz, başka hiçbir şey. vurguyu renk değil, kalınlık ve boşluk versin. sonra giriş ekranındaki kutuları da sildim, yerlerine kodun içindeki gibi eğik çizgiler koydum. bir arayüzü daha az çizerek daha çok kendime ait yaptım.
+
+burada asıl zorlanılan şey estetik değildi, sahiplenmeydi. kendi verdiğin bir kararı geri almak, başkasının kararını eleştirmekten daha zor; çünkü onu savunmak egonu savunmak gibi hissettiriyor. oysa onayladığın bir şey bile canlıda yanlış hissettiriyorsa, seni bağlayan şey o onay değil, o his olmalı. mockup yalan söyleyebilir; kullanıcının gözüne çarpan gerçek ekran söyleyemez.
+
+bir de şunu öğrendim: bu ürün bir mühendislik gösterisi değil, bir duygu. birine "sana flört ediyor mu" sorusunu soğuk bir dashboard'la cevaplayamazsın. o yüzden sonuca bir kalp puanı koydum, çünkü instagram story'sine bir sayı değil bir his gidiyor. paylaşılabilirlik sonradan eklenen bir özellik değil, en baştan bir tasarım kararı.
+
+ders: bir şeyi silmek çoğu zaman eklemekten daha çok tasarımdır. ve kendi onayını geri alabilmek, bir ürünü senin yapan şeyin ta kendisi.

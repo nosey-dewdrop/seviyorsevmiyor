@@ -21,7 +21,7 @@ export function buildShareCard(r, st, okumaNo, senAgir) {
   const c = document.createElement('canvas');
   c.width = 1080; c.height = 1920;
   const x = c.getContext('2d');
-  const mono = 'px "SF Mono", Menlo, monospace', helv = 'px Helvetica, Arial';
+  const mono = 'px "JetBrains Mono", "SF Mono", Menlo, monospace';
 
   x.fillStyle = '#1a1a1e'; x.fillRect(0, 0, 1080, 1920);
 
@@ -37,13 +37,25 @@ export function buildShareCard(r, st, okumaNo, senAgir) {
     x.fillText(line, 130, hy); hy += 82;
   }
 
+  // kalp puanı: flört skoru 5 kalbe iner (web kartıyla aynı) — story'de göz yakalar.
+  // kalp için sistem sans fallback: mono kalbi (U+2665) desteklemese bile garanti çizilir.
+  const kalpFont = 'px "Arial Unicode MS", "Helvetica Neue", Arial, sans-serif';
+  const dolu = Math.max(0, Math.min(5, Math.round((r.flort_sinyali.score || 0) / 20)));
+  x.font = '54' + kalpFont; hy += 6;
+  x.fillStyle = '#fafafa'; x.fillText('♥'.repeat(dolu), 130, hy);
+  const doluW = x.measureText('♥'.repeat(dolu)).width;
+  x.fillStyle = '#4a4a52'; x.fillText('♥'.repeat(5 - dolu), 130 + doluW, hy);
+  x.fillStyle = '#8a8a92'; x.font = '28' + mono;
+  x.fillText(`${dolu}/5`, 130 + x.measureText('♥♥♥♥♥').width + 24, hy);
+  hy += 40;
+
   // terazi: kaide, direk, eğik kol, zincirler, kefeler. ağır kefe aşağıda (sol = SEN).
   const cx = 540, ty = 560, a = (senAgir ? -9 : 9) * Math.PI / 180;
   x.strokeStyle = '#8a8a92'; x.fillStyle = '#4a4a52'; x.lineWidth = 6;
   x.beginPath(); x.moveTo(cx - 60, ty + 330); x.lineTo(cx + 60, ty + 330); x.lineTo(cx + 40, ty + 306); x.lineTo(cx - 40, ty + 306); x.closePath(); x.fill();
   x.fillRect(cx - 5, ty, 10, 310);
   x.beginPath(); x.arc(cx, ty, 11, 0, 7); x.fillStyle = '#8a8a92'; x.fill();
-  x.beginPath(); x.arc(cx, ty, 4, 0, 7); x.fillStyle = '#ff8a70'; x.fill();
+  x.beginPath(); x.arc(cx, ty, 4, 0, 7); x.fillStyle = '#fafafa'; x.fill();
   const kolX = Math.cos(a) * 300, kolY = Math.sin(a) * 300;
   x.strokeStyle = '#8a8a92';
   x.beginPath(); x.moveTo(cx - kolX, ty - kolY); x.lineTo(cx + kolX, ty + kolY); x.stroke();
@@ -60,9 +72,9 @@ export function buildShareCard(r, st, okumaNo, senAgir) {
     x.quadraticCurveTo(px + 54, py + 176, px + 58, py + 124);
     x.quadraticCurveTo(px, py + 140, px - 58, py + 124); x.closePath(); x.fill();
   };
-  kefe(cx - kolX, ty - kolY, '#ff8a70', '#ffb39e');
+  kefe(cx - kolX, ty - kolY, '#a1a1aa', '#c8c8ce');
   kefe(cx + kolX, ty + kolY, '#4a4a52', '#55555c');
-  x.fillStyle = '#ff8a70'; x.font = '30' + mono;
+  x.fillStyle = '#fafafa'; x.font = '30' + mono;
   x.fillText(`SEN: ${st.senSoru} soru · başlatan ${st.baslatan}`, 130, ty + 420);
   x.fillStyle = '#8a8a92'; x.textAlign = 'right';
   x.fillText(`O: %${st.kuruOran} kuru cevap`, 950, ty + 420); x.textAlign = 'left';
@@ -89,18 +101,26 @@ export function buildShareCard(r, st, okumaNo, senAgir) {
   };
   x.fillStyle = '#8a8a92'; x.font = '26' + mono;
   x.fillText('SEN · her mesajın boyu (y: kelime)', 130, 1180);
-  ciz(senDizi, 1340, '#ff8a70');
+  ciz(senDizi, 1340, '#a1a1aa');
   x.fillStyle = '#8a8a92'; x.font = '26' + mono;
   x.fillText('O · her mesajın boyu (y: kelime)', 130, 1400);
   ciz(oDizi, 1560, '#4a4a52');
 
-  // ölçüm satırı
-  x.fillStyle = '#e4e4e7'; x.font = '31' + helv;
-  x.fillText(`soru ${st.senSoru} · ${st.oSoru}    kuru cevap %${st.kuruOran}    çift mesaj ${st.cift}    erteleme ${st.erteleme}`, 130, 1640);
+  // ölçüm satırı — mono (kart terminal dili). O-yok sohbette kuru cevap satırı anlamsız, atla.
+  x.fillStyle = '#e4e4e7'; x.font = '30' + mono;
+  const kuruK = st.oN > 0 ? `    kuru cevap %${st.kuruOran}` : '';
+  x.fillText(`soru ${st.senSoru} · ${st.oSoru}${kuruK}    çift ${st.cift}    erteleme ${st.erteleme}`, 130, 1640);
   x.fillStyle = '#8a8a92'; x.font = '24' + mono;
-  x.fillText('hüküm cihazda verildi · mesajlar kimseye gitmez', 130, 1706);
-  x.fillStyle = '#55555c'; x.font = '22' + mono;
-  x.fillText('seviyorsevmiyor · otomatik tahmin, yargı değil', 130, 1756);
+  x.fillText('hüküm cihazda verildi · mesajlar kimseye gitmez', 130, 1700);
+
+  // viral çağrı: story'de bu kartı gören biri nereye geleceğini bilsin (link tıklanamaz, adres yazılı).
+  // NOT: gerçek canlı adres github.io. Damla özel domain (seviyorsevmiyor.*) bağlarsa burayı güncelle.
+  x.fillStyle = '#fafafa'; x.font = '700 32' + mono;
+  x.fillText('sen de dene →', 130, 1772);
+  x.fillStyle = '#fafafa'; x.font = '30' + mono;
+  x.fillText('nosey-dewdrop.github.io/seviyorsevmiyor', 130, 1818);
+  x.fillStyle = '#55555c'; x.font = '20' + mono;
+  x.fillText('otomatik tahmin, kesin yargı değil · eğlence amaçlı', 130, 1862);
 
   return c;
 }

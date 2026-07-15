@@ -1,11 +1,11 @@
 :root {
   /* dark only — Damla 13 Tem gece: light mode kalktı.
-     15 Tem: mockups/21-final.html dünyası — bg #1a1a1e, yüzey #232327, vurgu şeftali. */
+     15 Tem gece: mercan accent KALKTI (Damla: slopware duruyor) — nötr, vurgu bold+boşluk. */
   --bg: #1a1a1e;
   --surface: #232327;
   --surface-2: #28282d;
-  --accent: #ff8a70;         /* şeftali-mercan — 15 Tem Damla seçimi, marka vurgusu */
-  --accent-soft: #ffb39e;
+  --accent: #fafafa;         /* nötr — renk yok; vurgu beyaz + bold + boşluk */
+  --accent-soft: #c8c8ce;
   --ink: #fafafa;
   --ink-2: #a1a1aa;
   --ink-3: #8a8a92;
@@ -27,8 +27,8 @@
   --page: 1150px;
   --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 30px rgba(0,0,0,0.35);
 
-  /* commentary speaks Helvetica; chrome/metrics speak mono (mockup 21) */
-  --sans: Helvetica, Arial, "Helvetica Neue", sans-serif;
-  --disp: Helvetica, Arial, "Helvetica Neue", sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* 15 Tem gece: JetBrains Mono — kalın gövdeli gerçek terminal fontu (Damla: "ince duruyor") */
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: var(--mono);
+  --disp: var(--mono);
 }

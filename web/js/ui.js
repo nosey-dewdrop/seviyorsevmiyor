@@ -3,8 +3,8 @@
 // oturur. Her yorum satırı tıklanabilir: altında "NEDEN BÖYLE OKUDUM?" + "BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?"
 // + rızalı bağış açılır. Karttaki her sayı gerçek sohbetten hesaplanır, elle sayı yazılmaz.
 
-import { ping, itirazGonder } from './api.js?v=23';
-import { deflectedPlans } from './balance.js?v=23';
+import { ping, itirazGonder } from './api.js?v=48';
+import { deflectedPlans } from './balance.js?v=48';
 
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -100,13 +100,15 @@ function buildParagraphs(r, st) {
     },
   });
 
-  P.push({
-    html: `<b>kuru cevap:</b> onun ${st.oN} mesajından ${st.kuru} tanesi iki kelime ya da altında. oran %${st.kuruOran}. buna internet "dry texting" diyor.`,
-    g: {
-      neden: `eşik 2 kelime. sayım mesaj mesaj yapıldı: ${st.kuru}/${st.oN}, oran %${st.kuruOran} oradan geldi.`,
-      alt: 'yoğun bir dönemde herkes kısalır. ama cevapların yarıdan çoğu kuruysa buna dönem değil desen denir.',
-    },
-  });
+  if (st.oN > 0) {
+    P.push({
+      html: `<b>kuru cevap:</b> onun ${st.oN} mesajından ${st.kuru} tanesi iki kelime ya da altında. oran %${st.kuruOran}. buna internet "dry texting" diyor.`,
+      g: {
+        neden: `eşik 2 kelime. sayım mesaj mesaj yapıldı: ${st.kuru}/${st.oN}, oran %${st.kuruOran} oradan geldi.`,
+        alt: 'yoğun bir dönemde herkes kısalır. ama cevapların yarıdan çoğu kuruysa buna dönem değil desen denir.',
+      },
+    });
+  }
 
   if (st.erteleme > 0) {
     P.push({
@@ -178,6 +180,12 @@ function buildKart(r, st, okumaNo, senAgir, onIndir) {
   kart.appendChild(el('div', 'marka', `<span>seviyorsevmiyor</span><span>okuma ${okumaNo} · ${bugunTarih()}</span>`));
   kart.appendChild(el('div', 'hukum', esc(KARAR_TEXT[r.flort_sinyali.karar] || KARAR_TEXT.yok)));
 
+  // kalp puanı: flört skoru (0-100) 5 kalbe iner. dolu = beyaz, boş = sönük.
+  const dolu = Math.max(0, Math.min(5, Math.round((r.flort_sinyali.score || 0) / 20)));
+  kart.appendChild(el('div', 'kalpler',
+    `<span class="dolu">${'♥'.repeat(dolu)}</span><span class="bos">${'♥'.repeat(5 - dolu)}</span>` +
+    `<span class="kalp-not">${dolu}/5 · flört ${r.flort_sinyali.score}</span>`));
+
   // terazi: mockup 21'in svg'si birebir. ağır kefe aşağı iner (sol = SEN).
   const svgWrap = el('div');
   svgWrap.innerHTML = `
@@ -186,7 +194,7 @@ function buildKart(r, st, okumaNo, senAgir, onIndir) {
       <rect x="158" y="204" width="44" height="12" rx="6" fill="#55555c"/>
       <path d="M176 204 L177.5 60 L182.5 60 L184 204 Z" fill="#6a6a72"/>
       <circle cx="180" cy="46" r="9" fill="none" stroke="#8a8a92" stroke-width="3"/>
-      <circle cx="180" cy="46" r="3" fill="#ff8a70"/>
+      <circle cx="180" cy="46" r="3" fill="#fafafa"/>
       <g class="t-kol">
         <path d="M58 46 L302 46" stroke="#8a8a92" stroke-width="5" stroke-linecap="round"/>
         <circle cx="58" cy="46" r="4" fill="#8a8a92"/>
@@ -195,8 +203,8 @@ function buildKart(r, st, okumaNo, senAgir, onIndir) {
           <line x1="58" y1="50" x2="30" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
           <line x1="58" y1="50" x2="58" y2="112" stroke="#6a6a72" stroke-width="1.6"/>
           <line x1="58" y1="50" x2="86" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
-          <ellipse cx="58" cy="117" rx="34" ry="5" fill="#ffb39e"/>
-          <path d="M24 117 Q26 148 58 148 Q90 148 92 117 Q75 124 58 124 Q41 124 24 117 Z" fill="#ff8a70"/>
+          <ellipse cx="58" cy="117" rx="34" ry="5" fill="#c8c8ce"/>
+          <path d="M24 117 Q26 148 58 148 Q90 148 92 117 Q75 124 58 124 Q41 124 24 117 Z" fill="#a1a1aa"/>
         </g>
         <g class="t-pan-r">
           <line x1="302" y1="50" x2="274" y2="116" stroke="#6a6a72" stroke-width="1.6"/>
@@ -241,14 +249,19 @@ function buildKart(r, st, okumaNo, senAgir, onIndir) {
   }
   kart.appendChild(barlar);
 
+  const kuruSatir = st.oN > 0
+    ? `kuru cevap oranı: <b>%${st.kuruOran}</b> (${st.kuru}/${st.oN})<br>`
+    : '';
   kart.appendChild(el('div', 'olcumler',
     `konuşmayı başlatan: <b>${st.baslatan}</b><br>` +
     `soru dengesi: <b>${st.senSoru} · ${st.oSoru}</b><br>` +
-    `kuru cevap oranı: <b>%${st.kuruOran}</b> (${st.kuru}/${st.oN})<br>` +
+    kuruSatir +
     `çift mesaj: <b>sende ${st.cift}</b> · plan ertelemesi: <b>${st.erteleme}</b>`));
 
-  kart.appendChild(el('p', 'kisa',
-    `kefeye ağırlığı satırlar koydu: ${st.senSoru} soruna ${st.oSoru} soru döndü, cevapların %${st.kuruOran}'i kuru. bir sonraki taşı ${senAgir ? 'o' : 'sen'} koysun.`));
+  const kisaCumle = st.oN > 0
+    ? `kefeye ağırlığı satırlar koydu: ${st.senSoru} soruna ${st.oSoru} soru döndü, cevapların %${st.kuruOran}'i kuru. bir sonraki taşı ${senAgir ? 'o' : 'sen'} koysun.`
+    : `kefeye ağırlığı satırlar koydu: ${st.senSoru} soru sordun, karşı taraftan bu yazışmada dönüş yok. bir sonraki taşı o koysun.`;
+  kart.appendChild(el('p', 'kisa', kisaCumle));
   kart.appendChild(el('p', 'dip', 'hüküm cihazda verildi · mesajlar kimseye gitmez · seviyorsevmiyor'));
 
   const indir = el('button', 'indir', 'kartı indir');
@@ -261,11 +274,11 @@ function buildKart(r, st, okumaNo, senAgir, onIndir) {
 // ---- itiraz kutusu ----
 function gerekceBox(g, doc, r) {
   const box = el('div', 'gerekce');
-  box.appendChild(el('span', 'g-b', 'NEDEN BÖYLE OKUDUM?'));
+  box.appendChild(el('span', 'g-b', 'neden böyle okudum?'));
   box.appendChild(document.createTextNode(g.neden));
-  box.appendChild(el('span', 'g-b', 'BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?'));
+  box.appendChild(el('span', 'g-b', 'başka türlüsü mümkün mü?'));
   box.appendChild(document.createTextNode(g.alt));
-  const bagis = el('button', 'bagis', 'hâlâ yanlışsa: bu sohbeti rızamla bağışla, model öğrensin');
+  const bagis = el('button', 'bagis', 'bu sohbeti bağışla, modeli birlikte eğitelim');
   bagis.type = 'button';
   bagis.addEventListener('click', async () => {
     ping('itiraz');
@@ -296,15 +309,20 @@ export async function playReveal(root, r, messages, me) {
   const senAgir = myShare >= 0.5;
   const doc = messages.map((m) => `${m.speaker === me ? 'SEN' : 'O'}: ${m.text}`).join('\n');
 
-  // 1) daktilo: yorum ortada, harf harf, şeftali imleç. dokununca atlanır.
+  // 1) daktilo: yorum ortada, harf harf, beyaz imleç. dokununca atlanır.
   const akis = el('div', 'akis on');
   const akisText = el('span');
   akis.appendChild(akisText);
   akis.appendChild(el('span', 'imlec'));
+  const atla = el('span', 'akis-atla', 'dokun, geç');
+  akis.appendChild(atla);
   root.appendChild(akis);
 
-  const duz = paragraflar.map((p) => p.html.replace(/<[^>]+>/g, '')
-    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')).join('\n\n');
+  // daktilo SADECE ilk paragrafı (hüküm anı) yazar — kısa, dramatik kanca. gerisi sağ sütunda oturur.
+  // uzun sohbette tüm paragrafları yazmak 14sn+ sürüyordu, akıcılığı öldürüyordu.
+  const strip = (h) => h.replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+  const duz = strip(paragraflar[0].html);
   let skip = REDUCED;
   const onSkip = () => { skip = true; };
   akis.addEventListener('click', onSkip);
@@ -333,7 +351,7 @@ export async function playReveal(root, r, messages, me) {
 
   // genel itiraz satırı
   const hint = el('p', 'itiraz',
-    'yanlış mı okudum? herhangi bir satıra dokun, nedenimi göstereyim. hâlâ yanlışsa son satırın altındaki bağış düğmesi senin.');
+    'katılmıyor musun? bir satıra dokun, neden öyle okuduğumu göstereyim.');
   yorum.appendChild(hint);
 
   // nasıl okudum: sayılan kanıt, tire yok
@@ -361,7 +379,7 @@ export async function playReveal(root, r, messages, me) {
     btn.textContent = 'hazırlanıyor...';
     ping('paylasim');
     try {
-      const { shareReveal } = await import('./share.js?v=23');
+      const { shareReveal } = await import('./share.js?v=48');
       const how = await shareReveal(r, st, okumaNo, senAgir);
       btn.textContent = how === 'downloaded' ? 'indirildi' : how === 'shared' ? 'paylaşıldı' : 'kartı indir';
     } catch { btn.textContent = 'olmadı, tekrar dene'; }

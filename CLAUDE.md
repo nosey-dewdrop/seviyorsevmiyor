@@ -1,5 +1,54 @@
 # seviyorsevmiyor (renamed from mesajibirokusana, 15 Tem 00:xx — Damla: terazi mekanigi + "repo adi bu olsun")
 
+## STATUS 2026-07-15 GECE REDESIGN (v45, Damla uyurken yap→denetle→düzelt döngüsü, 20 tur)
+Damla "gece 9'a kadar denetle, his tutsun, viral+z-kuşağı, engineering değil DUYGU" dedi. Mockup-21 mercan
+dünyası TERK EDİLDİ, yeni yön TERMINAL: antrasit+beyaz, monospace, kutusuz. Yapılanlar:
+- MERCAN #ff8a70 TAMAMEN KALKTI (Damla: "slopware duruyor"). --accent nötr beyaz. tokens+ui.js+share.js+
+  favicon.svg+og.svg hepsi temiz. Yeşil/mavi de reddedildi ("terminal gibi antrasit beyaz").
+- FONT: JetBrains Mono (Google Fonts, wght 400/500/700, display=swap). --sans=--mono (HER YER mono, Damla:
+  "monospace geç"). body font-weight 500 sabit, başlık/marka/hüküm 700 — "kimi kalın kimi ince" kaosu bitti.
+- GİRİŞ: kutu/border YOK. Kaynaklar (yapıştır/ekran/whatsapp) AKORDEON: başlıklar hep görünür, tıklananın
+  ALTINDA pane açılır, aralarda "/ / /" ayraç. Her şey tek 520px ortalı sütun. Onboarding + "örneği izle"
+  demo SİLİNDİ (Damla kararı). Bubble sea (balonlar) KAPATILDI. Kenarlarda kocaman sönük "*" papatyalar.
+- METİNLER Damla sesiyle yeniden yazıldı (slogan "orada ne demek istediğini mi merak ediyorsun? yorumlayalım
+  :D", kaynak açıklamaları kısaltıldı, tüm UX metni küçük-harf terminal dili). KVKK/consent metinlerine
+  DOKUNULMADI (yasal). Ana buton "[ alt-metni oku ]" bracket'lı terminal komutu.
+- KART: kalp puanı EKLENDİ (flört skoru 0-100 → ♥♥♥♥♥ 5 kalp, dolu beyaz/boş sönük). Kartın KAHRAMANI
+  (32px). Hem web kartında hem indirilen 1080x1920 PNG'de. Terazi/barlar/istatistik/PNG indirme SAĞLAM.
+- "bu nasıl yapıldı ve verilerin nasıl korunuyor?" tıkla-aç link EKLENDİ — Damla sesiyle 2-model mimarisi
+  anlatımı (küçük model istatistik çıkarır cihazda, llama sadece istatistiği yorumlar).
+- EDGE-CASE: O-yok/tek-taraflı sohbette kuru cevap "0/0" his-kırılması kapatıldı (kart+reveal koşullu).
+  division-by-zero korumaları doğrulandı. reduced-motion tüm animasyonu kesiyor, focus-visible var (a11y).
+- OG/meta/twitter description viral+z-kuşağı diline çekildi ("kim kırıntı atıyor", "kalp puanıyla"). og.svg
+  markaya uygun (nokta yok, mercan yok, mono, kalp). theme-color #1a1a1a.
+- T12-20 EK CİLA: reveal iki-sütun hizalama; daktilo artık SADECE ilk paragrafı (hüküm) yazar +
+  "dokun, geç" (uzun sohbette 14sn bekleme bitti); reset formu gizler/geri getirir + akordeon başa;
+  kayıt defteri "ısınmış/soğumuş" retention doğrulandı; kart tamamen mono + kalp render sistem-font
+  fallback (tofu riski yok); edge-case O-yok sohbette kuru cevap satırı koşullu (kart+reveal); a11y
+  (reduced-motion tüm animasyonu keser, focus-visible); mobil papatya küçültüldü/sönükleşti; ölü
+  bubbles.js+canvas KALDIRILDI; model.json idle-prefetch + in-flight guard (beklemesiz); GÜVENLİK PASI
+  temiz (XSS: tüm kullanıcı/Llama içeriği esc'li, gerekçe kutusu createTextNode; consent çift-onay
+  gate; localStorage bozuk-veri koruması); VİRAL: story kartına "sen de dene → github.io/..." çağrısı
+  eklendi (paylaşımı gören yeni kullanıcı gelebilsin). belgeler+içerik: devlog 3 reels, linkedin 1 essay.
+- T21 PARSE DOĞRULAMA (Node testi 8/8 geçti): isimli düz, WhatsApp iOS/Android timestamp temizleme,
+  düz-satır→alternating+ambiguous, tek satır, boş satır atlama, URL bölünmemesi — HEPSİ DOĞRU. Motor
+  girdi-anlama katmanı sağlam, gerçek bug yok. GÖZLEM (kod değil): grup sohbetinde 3. kişinin mesajı
+  SESSİZCE atılıyor (app ikili-sohbet için; grup nadir). İstenirse "N mesaj atlandı" uyarısı eklenebilir.
+- DEPLOY EDİLMEDİ (localhost:8766'da v46 doğrulandı, henüz gh-pages push YOK — Damla onaylayınca).
+
+## ⚠️ DAMLA SABAH YAPACAK / KARAR VERECEK
+- **og.png BLOKÖR**: yeni og.svg PNG değil. Sosyal medya og:image=PNG çeker. rsvg/cairosvg/ImageMagick yok
+  + headless Chrome yasak → PNG'yi Damla üretmeli (og.svg'yi tarayıcıda 1200x630 export ya da Figma).
+- **LLAMA MİMARİ ÇELİŞKİSİ (önemli)**: Damla "mesajlar Llama'ya ASLA gitmez, sadece istatistik gider" dedi
+  AMA kod (backend/worker.js) hâlâ ham `doc` metnini Llama'ya gönderiyor, gizlilik.html de "gidiyor" diyor.
+  Damla "bilmediğimden söylememişim" dedi, düzeltme kararı ONA ait — henüz DEĞİŞTİRİLMEDİ. Karar: doc'u
+  çıkar sadece facts gönder mi (kanıt/alıntı özelliği düşer) yoksa kalsın mı? El âlemin mesajı riski açık.
+- viral için hafif "örnek dene" (demo geri) düşünülebilir mi — Damla kararı.
+- **DOMAIN**: paylaşım kartında (share.js) + og:url'de canlı adres `nosey-dewdrop.github.io/seviyorsevmiyor`
+  yazılı (uzun/çirkin, viral için ideal değil). Damla kısa özel domain/subdomain bağlarsa share.js'teki
+  "sen de dene →" URL'i + index.html og:url güncellenmeli. Kısa domain story-viral için değerli.
+- deploy: onaylanınca gh-pages subtree push + worker zaten canlı (v23'ten).
+
 STATUS 2026-07-15 early: REPO RENAMED (github nosey-dewdrop/seviyorsevmiyor, local folder renamed).
 REDESIGN LOCKED via mockups/21-final.html (Damla approved piece by piece through the night):
 - entry: THREE SOURCE DOORS side by side (ctrl+v paste / screenshot png-jpg / whatsapp .zip) + "ornegi izle" demo link. no lone textarea.
