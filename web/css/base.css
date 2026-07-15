@@ -43,7 +43,11 @@ button { font-family: inherit; cursor: pointer; }
 }
 .brand { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink);
   background: none; border: 0; padding: 0; cursor: pointer; }
+/* tıklanabilir olduğu belli olsun: yanında yanıp sönen terminal imleci */
+.brand::after { content: "_"; color: var(--ink-3); animation: brandBlink 1.2s steps(1) infinite; margin-left: 1px; }
 .brand:hover { color: #fff; }
+.brand:hover::after { color: #fff; }
+@keyframes brandBlink { 50% { opacity: 0; } }
 .site-head .meta { font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); margin: 0; }
 /* isme tıklayınca açılan developer flört tavsiyeleri */
 .dev-notu { margin-top: 10px; max-width: 480px; text-align: center; font-family: var(--mono); }
