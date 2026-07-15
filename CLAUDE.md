@@ -19,9 +19,22 @@ Deploy: git subtree split --prefix web -b t && git push -f origin t:gh-pages && 
 - KRİTİK BUG (düzeltildi): JS import'ları ?v=61'de DONMUŞTU (sed sadece son v'yi yakalıyordu, share.js dinamik
   import dahil) → yeni kod canlıya yansımıyordu. ÇÖZÜM: her bump'ta `for f in web/js/*.js; do sed -i '' -E
   's/\\?v=[0-9]+/?v=YENİ/g' "$f"; done` — TÜM v'leri zorla. Bunu her deploy'da yap yoksa eski kod kalır.
-- AÇIK (müşteri gözü, Damla uyanınca): kart+yorum bazı istatistiği tekrar ediyor (grafik vs anlatı); Damla'nın
-  flört tavsiyesi placeholder'ı boş (o yazacak); og.png hâlâ eski (terazi+kalp, PNG üretici yok+headless yasak);
-  Llama'ya ham metin gidiyor (Damla mimari kararı bekliyor). Motor (parse+balance) Node-kanıtlı sağlam.
+- v67 MÜŞTERİ HİSSİ FIX: balance motoru artık mesaj UZUNLUĞU+duygu asimetrisini sayıyor → bariz tek-taraflı
+  sohbet "eşit" değil "sen uzanıyorsun" diyor (regresyon 3/3 Node-kanıtlı, dengeli hâlâ even). En değerli düzeltme.
+- v62-70 canlı: sonuç ekranı sayfa genişliği, kart SADE (terazi/kalp yok), ton theyseeyourphotos, cache bug,
+  brand tıklanabilir ipucu (_), ölü kod temizliği, indirilen kart taşma fix. devlog m28-m29 eklendi.
+
+## ⚠️ SABAH DAMLA İLE BİRLİKTE (benim tek başıma karar veremeyeceğim, onun sesi/gözü gerek)
+1. FLÖRT TAVSİYESİ İÇERİĞİ: brand'e (isme) tıkla → "aşk bir veri analizidir" + BOŞ placeholder. Damla kendi
+   flört tavsiyelerini yazacak (index.html .dev-notu içi).
+2. og.png: yeni sade kart tasarımıyla güncel değil (hâlâ terazi+kalp). PNG üretici yok + headless yasak →
+   Damla og.svg'yi 1200x630 export etmeli. og.svg de sade karta göre güncellenebilir.
+3. LLAMA MİMARİ: ham sohbet metni hâlâ Llama'ya gidiyor (gizlilik.html dürüstçe böyle diyor, yasal temiz).
+   Damla "gitmesin, sadece istatistik" istemişti — worker.js doc'u çıkar kararı ONUN.
+4. KART-YORUM TEKRARI: sonuçta kart (grafik) + sağ yorum (anlatı) bazı sayıyı tekrar ediyor. Bilinçli bıraktım
+   (görsel vs okuma), ama Damla "fazla" derse yorumu daha çok subtext yaparım.
+5. İLK-3-SANİYE: slogan merak uyandırıyor ama ne yaptığı ilk bakışta net değil; demo Damla kararıyla silindi.
+   viral için hafif "örnek dene" düşünülebilir.
 
 
 ## STATUS 2026-07-15 GECE REDESIGN (v45, Damla uyurken yap→denetle→düzelt döngüsü, 20 tur)
