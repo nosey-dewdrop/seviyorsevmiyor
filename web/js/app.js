@@ -1,13 +1,13 @@
 // Flow: input → parse → who-is-me → on-device engine (verdict + counts = the law) →
 // optional Groq/Llama spiker (fresh wording + gözden kaçanlar, consent-gated) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
-import { loadModel, scoreConversation } from './model.js?v=61';
-import { parseChat, toDoc } from './parse.js?v=61';
-import { buildReveal } from './reveal.js?v=61';
-import { playReveal } from './ui.js?v=61';
-import { spikerRead, ping } from './api.js?v=61';
-import { ocrToText } from './ocr.js?v=61';
-import { readWhatsApp } from './wa.js?v=61';
+import { loadModel, scoreConversation } from './model.js?v=62';
+import { parseChat, toDoc } from './parse.js?v=62';
+import { buildReveal } from './reveal.js?v=62';
+import { playReveal } from './ui.js?v=62';
+import { spikerRead, ping } from './api.js?v=62';
+import { ocrToText } from './ocr.js?v=62';
+import { readWhatsApp } from './wa.js?v=62';
 
 const $ = (id) => document.getElementById(id);
 const pasteBox = $('pasteBox');
@@ -178,6 +178,7 @@ resetBtn.addEventListener('click', () => {
   lastReveal = null;
   reveal.innerHTML = '';
   // formu geri getir: kaynak seçimi + buton görünür, akordeon başa (yapıştır)
+  document.body.classList.remove('sonuc');
   document.querySelector('.ikili').classList.remove('hidden');
   activateTab('paste');
   whois.classList.add('hidden');
