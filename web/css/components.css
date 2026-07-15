@@ -69,8 +69,7 @@ textarea.paste:focus { outline: none; }
   transition: opacity 0.2s; cursor: pointer; }
 .btn::before { content: "[ "; color: #ffffff; }
 .btn::after { content: " ]"; color: #ffffff; }
-.btn:hover:not(:disabled) { color: #fff !important; }
-.btn:disabled { opacity: 0.4; cursor: default; }
+.btn:disabled { opacity: 1; cursor: default; }
 .btn.ghost { color: var(--ink-2); }
 .btn.small { font-size: 0.85rem; }
 .quota { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-3); margin-top: 6px; text-align: left; }

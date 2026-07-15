@@ -13,11 +13,12 @@
   --line: #3a3a40;
   --line-2: #4a4a52;
 
-  /* terminal syntax renkleri (Damla: pembe mor turuncu mavi) — dracula paleti */
-  --t-pembe: #ff79c6;
-  --t-mor: #bd93f9;
-  --t-turuncu: #ffb86c;
-  --t-mavi: #8be9fd;
+  /* GERÇEK terminal (ANSI) renkleri — saf, parlak, cıvık değil */
+  --t-pembe: #ff5fd7;   /* bright magenta */
+  --t-mor: #af5fff;     /* bright purple */
+  --t-turuncu: #ff8700; /* bright orange */
+  --t-mavi: #00afff;    /* bright blue */
+  --t-yesil: #5fff5f;   /* bright green */
 
   /* status only — never on body text (flag chips) */
   --heat: #ff6b52;           /* red flag */

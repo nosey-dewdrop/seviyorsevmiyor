@@ -4,8 +4,8 @@
 // The model PROPOSES the tone; counted signals can VETO it (red flags, one-sidedness) — the
 // deterministic layer is the honest part, so on a clear conflict it wins and we say why.
 
-import { flirtSignal, flirtSides, interestBalance, flags as computeFlags } from './balance.js?v=55';
-import { lowerTr } from './features.js?v=55';
+import { flirtSignal, flirtSides, interestBalance, flags as computeFlags } from './balance.js?v=56';
+import { lowerTr } from './features.js?v=56';
 
 const TONE_TR = {
   flirty: 'flört havası',

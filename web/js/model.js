@@ -2,12 +2,12 @@
 // exported by train/train.py) and scores a conversation entirely in the browser — no network,
 // data never leaves the device. Mirrors the Python TF-IDF + softmax math exactly.
 
-import { ngrams, numericVector, NUMERIC_NAMES } from './features.js?v=55';
+import { ngrams, numericVector, NUMERIC_NAMES } from './features.js?v=56';
 
 let MODEL = null;
 let LOADING = null;   // in-flight guard: idle-prefetch + tıklama aynı anda tek fetch yapsın
 
-export async function loadModel(url = './data/model.json?v=55') {
+export async function loadModel(url = './data/model.json?v=56') {
   if (MODEL) return MODEL;
   if (LOADING) return LOADING;
   LOADING = fetch(url).then((res) => res.json()).then((m) => { MODEL = m; return m; });
