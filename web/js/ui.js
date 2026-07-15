@@ -3,8 +3,8 @@
 // oturur. Her yorum satırı tıklanabilir: altında "NEDEN BÖYLE OKUDUM?" + "BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?"
 // + rızalı bağış açılır. Karttaki her sayı gerçek sohbetten hesaplanır, elle sayı yazılmaz.
 
-import { ping, itirazGonder } from './api.js?v=61';
-import { deflectedPlans } from './balance.js?v=61';
+import { ping, itirazGonder } from './api.js?v=66';
+import { deflectedPlans } from './balance.js?v=66';
 
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -332,7 +332,7 @@ export async function playReveal(root, r, messages, me) {
     btn.textContent = 'hazırlanıyor...';
     ping('paylasim');
     try {
-      const { shareReveal } = await import('./share.js?v=65');
+      const { shareReveal } = await import('./share.js?v=66');
       const how = await shareReveal(r, st, okumaNo, senAgir);
       btn.textContent = how === 'downloaded' ? 'indirildi' : how === 'shared' ? 'paylaşıldı' : 'kartı indir';
     } catch { btn.textContent = 'olmadı, tekrar dene'; }

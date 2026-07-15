@@ -4,8 +4,8 @@
 // The model PROPOSES the tone; counted signals can VETO it (red flags, one-sidedness) — the
 // deterministic layer is the honest part, so on a clear conflict it wins and we say why.
 
-import { flirtSignal, flirtSides, interestBalance, flags as computeFlags } from './balance.js?v=61';
-import { lowerTr } from './features.js?v=61';
+import { flirtSignal, flirtSides, interestBalance, flags as computeFlags } from './balance.js?v=66';
+import { lowerTr } from './features.js?v=66';
 
 const TONE_TR = {
   flirty: 'flört havası',
@@ -34,10 +34,10 @@ function verdict(toneResult, { redKinds, oneSided }) {
   let why = null;
   if (redKinds >= 2 && (key === 'flirty' || key === 'friendly')) {
     key = 'tense';
-    why = `Kelimelerde sıcaklık olabilir ama sayılanlar başka söylüyor: ${redKinds} ayrı red flag türü geçiyor.`;
+    why = `kelimelerde sıcaklık olabilir ama sayılanlar başka söylüyor: ${redKinds} ayrı red flag türü geçiyor.`;
   } else if (oneSided && (key === 'flirty' || key === 'friendly')) {
     key = 'onesided';
-    why = 'Yakınlık dili neredeyse tek taraftan geliyor; karşılık kısa ve erteleyici.';
+    why = 'yakınlık dili neredeyse tek taraftan geliyor; karşılık kısa ve erteleyici.';
   }
   return { key, cssKey: key === 'onesided' ? 'cold' : key, label: TONE_TR[key], line: TONE_LINE[key], why };
 }
@@ -51,7 +51,7 @@ function balanceLine(bal) {
   if (my.msgs !== their.msgs) bits.push(`mesaj sende ${my.msgs}, onda ${their.msgs}`);
   if (my.questions !== their.questions) bits.push(`soru sende ${my.questions}, onda ${their.questions}`);
   if (my.doubles >= 2 || their.doubles >= 2) bits.push(`üst üste yazma sende ${my.doubles}, onda ${their.doubles}`);
-  const ev = bits.length ? ` Sayım: ${bits.join('; ')}.` : '';
+  const ev = bits.length ? ` sayım: ${bits.join('; ')}.` : '';
   if (bal.leans === 'even') {
     return `denge eşit. kimse kimsenin peşinde değil, ikisi de aynı mesafede duruyor.${ev}`;
   }
@@ -64,21 +64,21 @@ function balanceLine(bal) {
 }
 
 const FLAG_TR = {
-  controlling: ['Kontrol dili', 'Konum/telefon/nerede sorguları geçiyor. Bu, güvenden çok denetim işareti olabilir.'],
-  contempt: ['Küçümseme', '"abartıyorsun / saçmalama / takıntı" gibi ifadeler var. Gottman bunu ilişkilerde en zehirli sinyal sayar.'],
-  accusation: ['Suçlama', 'Sürekli "hep sen / senin yüzünden" ekseni. Sorumluluk tek tarafa yıkılıyor.'],
-  stonewall: ['Duvar örme', '"boşver / neyse / fark etmez" ile konu kapatılıyor. Taraflardan biri geri çekiliyor.'],
-  lovebomb: ['Hızlı yoğunluk', 'Daha ilk mesajlarda çok yoğun sevgi dili var. Bazen içten, bazen love-bombing olabilir.'],
-  appreciation: ['Teşekkür/takdir', 'Karşılıklı minnet ve nezaket geçiyor. Sağlıklı bir işaret.'],
-  care: ['Kollama', 'Birbirinin halini soran, merak eden bir dil var. İyi.'],
-  plans: ['Plan yapma', 'Somut buluşma/plan cümleleri var. İlgi lafta kalmıyor, harekete geçiyor.'],
+  controlling: ['kontrol dili', 'konum, telefon, "neredeydin" sorguları geçiyor. güvenden çok denetim işareti.'],
+  contempt: ['küçümseme', '"abartıyorsun / saçmalama / takıntı" gibi ifadeler var. ilişkilerde en zehirli sinyallerden.'],
+  accusation: ['suçlama', 'sürekli "hep sen / senin yüzünden" ekseni. sorumluluk tek tarafa yıkılıyor.'],
+  stonewall: ['duvar örme', '"boşver / neyse / fark etmez" ile konu kapatılıyor. bir taraf geri çekiliyor.'],
+  lovebomb: ['hızlı yoğunluk', 'daha ilk mesajlarda yoğun sevgi dili. bazen içten, bazen love-bombing.'],
+  appreciation: ['teşekkür / takdir', 'karşılıklı minnet ve nezaket geçiyor. sağlıklı bir işaret.'],
+  care: ['kollama', 'birbirinin halini soran, merak eden bir dil var. iyi.'],
+  plans: ['plan yapma', 'somut buluşma cümleleri var. ilgi lafta kalmıyor, harekete geçiyor.'],
 };
 
 // "What did they mean" patterns, highest priority first. One reading per kind, max 4 total,
 // scanned over the WHOLE conversation (not just the opening lines).
 const READ_PATTERNS = [
   { kind: 'interrogate', pri: 7, re: /(neredeydin|nerdeydin|kiminleydin|kiminle|isim ver|hesap ver|konumunu|telefonunu)/,
-    read: 'Bu bir merak sorusu değil, sorgu. Cevap değil kontrol arıyor.' },
+    read: 'bu bir merak sorusu değil, sorgu. cevap değil, kontrol arıyor.' },
   { kind: 'defer', pri: 6, re: /(bakarız|göreceğiz|belki sonra|sonra konuşuruz|artık bakarız)/,
     read: '"bakarız" bir kapıyı kapatmanın en kibar yolu. hayır demeden hayır demek.' },
   { kind: 'reach', pri: 6, re: /(özledim|aklımdasın|aklımdaydı|seni düşündüm|rüyama|rüyamda)/,
@@ -125,7 +125,7 @@ function messageReadings(messages) {
 function closingLine(toneKey, bal, flagList) {
   const redKinds = new Set(flagList.filter((f) => f.type === 'red').map((f) => f.kind)).size;
   if (redKinds >= 2 || (redKinds >= 1 && toneKey === 'tense')) {
-    return 'Bu konuşma seni iyi hissettiriyor mu? Cevabı zorlanıyorsan, cevabın kendisi bu.';
+    return 'bu konuşma seni iyi hissettiriyor mu? cevabı zorlanıyorsan, cevabın kendisi orada.';
   }
   if (toneKey === 'onesided') {
     return bal.leans === bal.me
