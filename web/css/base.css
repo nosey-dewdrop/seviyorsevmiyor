@@ -66,12 +66,14 @@ button { font-family: inherit; cursor: pointer; }
 /* footer — en altta, sola yaslı, DİP DİBE (satırlar bitişik, boşluk yok) */
 .site-foot { border-top: 1px solid var(--line); margin: 24px auto 0; max-width: 680px; padding: 10px 0 16px;
   color: var(--ink-4); font-size: 0.72rem; line-height: 1.15; display: block; text-align: left; }
-.site-foot .links { display: flex; gap: 16px; margin: 0; }
-.site-foot .links a { color: var(--t-mavi); }
+.site-foot .links { display: flex; gap: 10px; margin: 0; flex-wrap: wrap; align-items: baseline; }
+.site-foot .links .l-giz { color: var(--t-turuncu); }
+.site-foot .links .l-kos { color: var(--t-mavi); }
+.site-foot .links .badge-inline { color: var(--t-pembe); }
+.site-foot .links .sep { color: var(--ink-4); }
 .site-foot span { display: block; margin: 0; }
 .site-foot .imza { color: var(--ink-3); margin: 0; }
 .site-foot .imza a { color: var(--t-mor); }
-.site-foot .privacy-badge { margin-bottom: 3px; }
 .site-foot a { color: var(--ink-3); margin-right: 14px; }
 .site-foot a:hover { color: var(--ink-2); }
 .site-foot .disclaimer { flex-basis: auto; }

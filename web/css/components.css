@@ -17,9 +17,9 @@
 }
 .kaynak .k-ad { display: block; font-family: var(--mono); color: var(--ink-3); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
 .kaynak:hover .k-ad { color: var(--ink-2); }
-/* aktif: başlık PEMBE, başında mor * (terminal syntax) */
-.kaynak.active .k-ad { color: var(--t-pembe); }
-.kaynak.active .k-ad::before { content: "* "; color: var(--t-mor); }
+/* aktif: başlık BEYAZ, başında beyaz * (Damla: seçilen beyaz olacak) */
+.kaynak.active .k-ad { color: #ffffff; }
+.kaynak.active .k-ad::before { content: "* "; color: #ffffff; }
 /* açıklama + tuş sadece SEÇİLİ kaynakta görünür (sol listede) */
 .kaynak .k-kisa, .kaynak .k-tus { display: none; }
 .kaynak.active .k-kisa { display: block; font-family: var(--mono); font-weight: 500; font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
@@ -67,8 +67,8 @@ textarea.paste:focus { outline: none; }
 .btn { background: none; color: #ffffff !important; border: 0; border-radius: 0;
   padding: 10px 8px; font-size: 1.05rem; font-weight: 700; font-family: var(--mono);
   transition: opacity 0.2s; cursor: pointer; }
-.btn::before { content: "[ "; color: var(--t-turuncu); }
-.btn::after { content: " ]"; color: var(--t-turuncu); }
+.btn::before { content: "[ "; color: #ffffff; }
+.btn::after { content: " ]"; color: #ffffff; }
 .btn:hover:not(:disabled) { color: #fff !important; }
 .btn:disabled { opacity: 0.4; cursor: default; }
 .btn.ghost { color: var(--ink-2); }
