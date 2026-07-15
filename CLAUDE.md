@@ -1,5 +1,29 @@
 # seviyorsevmiyor (renamed from mesajibirokusana, 15 Tem 00:xx — Damla: terazi mekanigi + "repo adi bu olsun")
 
+## STATUS 2026-07-15 SABAH (v66, CANLI: nosey-dewdrop.github.io/seviyorsevmiyor) — GERÇEK SİTEDE ÇALIŞMA
+Damla uyanıkken canlıda (gh-pages) iterasyon + sonra uyudu, "müşteri gözüyle durma, işe yarar ürün ver" dedi.
+KURAL DEĞİŞTİ: artık LOCALHOST YOK, her değişiklik gh-pages'e push edilip canlıda görülüyor.
+Deploy: git subtree split --prefix web -b t && git push -f origin t:gh-pages && git branch -D t.
+- GİRİŞ: iki sütun (solda yapıştır/ekran/whatsapp seçenek listesi, sağda tıklanan kutu). akordeon DEĞİL.
+  Seçili öğe BEYAZ + başında "*", çizgi yok. Placeholder boş. İsme (brand) tıkla → developer flört tavsiyeleri
+  açılır ("aşk bir veri analizidir" + Damla dolduracak placeholder).
+- RENKLER: gövde+seçili BEYAZ/nötr. Sadece FOOTER'da ANSI terminal renkleri: gizlilik turuncu, koşullar mavi,
+  "analiz cihazında yapılır" pembe/magenta, @nosey-dewdrop mor (github'a link). --link mercanı da kalktı.
+- KART SADE (Damla: terazi+kalp metaforundan bıktım): flört skoru YÜZDE BARI + istatistik grid (2 sütun) +
+  mesaj boyu bar grafiği + kısa yorum kartın içinde. Terazi/kalp/sallanan söz SİLİNDİ. Kenar koyu+gölgeli.
+  Hem web kartı hem indirilen 1080x1920 PNG aynı sade dil.
+- YORUM DİLİ = theyseeyourphotos tonu (Damla: "ikimizin konuşması gibi değil, theyseeyourphotos gibi"):
+  mesafeli, gözlemci, biraz ürkütücü üçüncü göz. "kanka" YOK, karşı tarafı okur, kısa soğuk cümleler.
+  reveal.js TONE_LINE/FLAG_TR/READ_PATTERNS/kapanış + worker.js SPIKER_SYSTEM promptu hepsi çevrildi. Küçük harf.
+- SONUÇ EKRANI: body.sonuc → wrap 1100px (sayfa genişliği), giriş 680px dar. reset body.sonuc kaldırır.
+- KRİTİK BUG (düzeltildi): JS import'ları ?v=61'de DONMUŞTU (sed sadece son v'yi yakalıyordu, share.js dinamik
+  import dahil) → yeni kod canlıya yansımıyordu. ÇÖZÜM: her bump'ta `for f in web/js/*.js; do sed -i '' -E
+  's/\\?v=[0-9]+/?v=YENİ/g' "$f"; done` — TÜM v'leri zorla. Bunu her deploy'da yap yoksa eski kod kalır.
+- AÇIK (müşteri gözü, Damla uyanınca): kart+yorum bazı istatistiği tekrar ediyor (grafik vs anlatı); Damla'nın
+  flört tavsiyesi placeholder'ı boş (o yazacak); og.png hâlâ eski (terazi+kalp, PNG üretici yok+headless yasak);
+  Llama'ya ham metin gidiyor (Damla mimari kararı bekliyor). Motor (parse+balance) Node-kanıtlı sağlam.
+
+
 ## STATUS 2026-07-15 GECE REDESIGN (v45, Damla uyurken yap→denetle→düzelt döngüsü, 20 tur)
 Damla "gece 9'a kadar denetle, his tutsun, viral+z-kuşağı, engineering değil DUYGU" dedi. Mockup-21 mercan
 dünyası TERK EDİLDİ, yeni yön TERMINAL: antrasit+beyaz, monospace, kutusuz. Yapılanlar:
