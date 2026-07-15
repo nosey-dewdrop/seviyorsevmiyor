@@ -1,13 +1,13 @@
 // Flow: input → parse → who-is-me → on-device engine (verdict + counts = the law) →
 // optional Groq/Llama spiker (fresh wording + gözden kaçanlar, consent-gated) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
-import { loadModel, scoreConversation } from './model.js?v=60';
-import { parseChat, toDoc } from './parse.js?v=60';
-import { buildReveal } from './reveal.js?v=60';
-import { playReveal } from './ui.js?v=60';
-import { spikerRead, ping } from './api.js?v=60';
-import { ocrToText } from './ocr.js?v=60';
-import { readWhatsApp } from './wa.js?v=60';
+import { loadModel, scoreConversation } from './model.js?v=61';
+import { parseChat, toDoc } from './parse.js?v=61';
+import { buildReveal } from './reveal.js?v=61';
+import { playReveal } from './ui.js?v=61';
+import { spikerRead, ping } from './api.js?v=61';
+import { ocrToText } from './ocr.js?v=61';
+import { readWhatsApp } from './wa.js?v=61';
 
 const $ = (id) => document.getElementById(id);
 const pasteBox = $('pasteBox');
@@ -160,6 +160,7 @@ goBtn.addEventListener('click', async () => {
     consent.classList.add('hidden');
     cloudConsent.classList.add('hidden');
     goBtn.classList.add('hidden');
+    document.body.classList.add('sonuc');   // sonuç ekranı sayfa genişliğini alsın
     playReveal(reveal, r, parsed.messages, parsed.me);
     resetBtn.classList.remove('hidden');
     reveal.scrollIntoView({ behavior: 'smooth', block: 'start' });

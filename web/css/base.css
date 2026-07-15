@@ -16,6 +16,8 @@ body {
 }
 .wrap { position: relative; z-index: 1; max-width: 680px; width: 100%; margin: 0 auto; padding: 32px 20px 24px; text-align: left;
   min-height: 100vh; display: flex; flex-direction: column; }
+/* sonuç ekranı sayfa genişliğini alsın, ortada sıkışmasın */
+body.sonuc .wrap { max-width: 1100px; }
 /* başlık ortada kalır, gerisi hep aynı sol kenardan */
 .site-head { text-align: center; }
 /* her blok tam genişlik, tek sol kenar */
