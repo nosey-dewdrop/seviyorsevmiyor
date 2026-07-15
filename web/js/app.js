@@ -1,13 +1,13 @@
 // Flow: input → parse → who-is-me → on-device engine (verdict + counts = the law) →
 // optional Groq/Llama spiker (fresh wording + gözden kaçanlar, consent-gated) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
-import { loadModel, scoreConversation } from './model.js?v=54';
-import { parseChat, toDoc } from './parse.js?v=54';
-import { buildReveal } from './reveal.js?v=54';
-import { playReveal } from './ui.js?v=54';
-import { spikerRead, ping } from './api.js?v=54';
-import { ocrToText } from './ocr.js?v=54';
-import { readWhatsApp } from './wa.js?v=54';
+import { loadModel, scoreConversation } from './model.js?v=55';
+import { parseChat, toDoc } from './parse.js?v=55';
+import { buildReveal } from './reveal.js?v=55';
+import { playReveal } from './ui.js?v=55';
+import { spikerRead, ping } from './api.js?v=55';
+import { ocrToText } from './ocr.js?v=55';
+import { readWhatsApp } from './wa.js?v=55';
 
 const $ = (id) => document.getElementById(id);
 const pasteBox = $('pasteBox');
