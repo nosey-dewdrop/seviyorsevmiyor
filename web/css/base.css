@@ -59,9 +59,13 @@ button { font-family: inherit; cursor: pointer; }
 .nasil p { font-family: var(--mono); font-size: 13.5px; line-height: 1.75; color: var(--ink-2); margin-bottom: 14px; text-align: left; }
 .nasil p:last-child { margin-bottom: 0; }
 
-/* footer — sola yaslı, dar, dip dibe (Damla 15 Tem) */
-.site-foot { border-top: 1px solid var(--line); margin: 28px auto 0; max-width: 680px; padding: 12px 0 20px;
-  color: var(--ink-4); font-size: 0.72rem; line-height: 1.5; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; }
+/* footer — en altta, sola yaslı, dip dibe, linkler yan yana (Damla 15 Tem) */
+.site-foot { border-top: 1px solid var(--line); margin: 28px auto 0; max-width: 680px; padding: 12px 0 18px;
+  color: var(--ink-4); font-size: 0.72rem; line-height: 1.5; display: block; text-align: left; }
+.site-foot .links { display: flex; gap: 16px; margin-bottom: 3px; }
+.site-foot .links a { color: var(--ink-2); }
+.site-foot span { display: block; }
+.site-foot .imza { color: var(--ink-3); margin-top: 2px; }
 .site-foot a { color: var(--ink-3); margin-right: 14px; }
 .site-foot a:hover { color: var(--ink-2); }
 .site-foot .disclaimer { flex-basis: auto; }
