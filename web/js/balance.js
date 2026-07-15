@@ -2,7 +2,7 @@
 // this is the honest statistics part the plan insists on. No fabrication: every number here
 // comes from a countable signal in the conversation.
 
-import { lowerTr } from './features.js?v=66';
+import { lowerTr } from './features.js?v=67';
 
 const ENDEAR = ['canım', 'canim', 'aşkım', 'askim', 'sevgilim', 'hayatım', 'hayatim',
   'bir tanem', 'birtanem', 'tatlım', 'tatlim', 'bebeğim', 'bebegim', 'bir taneciğim'];
@@ -101,7 +101,10 @@ export function interestBalance(messages, me) {
     if (sp === prev) s[sp].doubles += 1;
     prev = sp;
   }
-  const score = (x) => x.chars * 0.02 + x.msgs + x.doubles * 3 + x.questions * 1.5 + x.endear * 2;
+  // "uzanan taraf" skoru: sadece mesaj SAYISI değil, mesaj UZUNLUĞU ve duygu yükü de sayılır.
+  // biri paragraf yazarken diğeri "hı/bakarız" diyorsa mesaj sayısı eşit olsa bile denge eşit DEĞİL.
+  // ort. mesaj uzunluğu (chars/msgs) asimetrisi bariz tek-taraflılığı yakalar (müşteri hissi 15 Tem).
+  const score = (x) => x.chars * 0.05 + x.msgs * 0.6 + x.doubles * 3 + x.questions * 2 + x.endear * 3;
   const sa = score(s.A);
   const sb = score(s.B);
   const total = sa + sb || 1;
@@ -109,7 +112,7 @@ export function interestBalance(messages, me) {
   const initiator = messages.length ? messages[0].speaker : null;
   return {
     aShare,
-    leans: aShare > 0.62 ? 'A' : aShare < 0.38 ? 'B' : 'even',
+    leans: aShare > 0.60 ? 'A' : aShare < 0.40 ? 'B' : 'even',
     initiator,
     me,
     detail: s,
