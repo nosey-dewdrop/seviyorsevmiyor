@@ -78,6 +78,53 @@ tense/red-flag screens stay serious). Content system: linkedin.md (4 essays 300-
 4. Seed 268 still small; grow toward 1000 + weekly retrain ritual.
 5. More MJ bubble sprites whenever Damla generates them (drop into web/assets/bubbles/).
 
+## SLOP-KURTARMA HAMLELERİ (2026-07-15)
+Diagnosis: the engine is genuinely good (own on-device cascade, honest interest-balance, verified
+parse) but the EXPERIENCE ends flat. The result screen is informative, not shareable — the verdict is a
+plain sentence, the share card is a stat dump, and there is no curiosity gap, no comparison, and no
+reason for a viewer to become the next user. Viral text-analyzers (Lucen, red-flag AI, Mosaic, and the
+theyseeyourphotos trend) don't win on smarter analysis; they win on a screenshot-worthy payoff dropped at
+the exact emotional peak, plus a loop that turns each shared card into a new visitor. These are low-effort,
+high-impact, shareable, on-device (KVKK-safe) micro-moves. Chat text never leaves the device except the
+already-consented Llama path; none of these add new data collection.
+
+1. **Curiosity-gap "reveal" card (screenshot-bait verdict)** — S/M.
+   The verdict + flört score ship UNDER a blur/mosaic overlay on both the web card and the 1080x1920 PNG,
+   with a "dokun, öğren" hint; tap (or a second tap-to-download) removes it. Why viral: a shared card that
+   still hides the answer forces the viewer to come to the site to get their own — the single strongest
+   screenshot-bait pattern (curiosity gap at the emotional high). Moderation: none — the hidden text is our
+   own engine output, not user content. KVKK: nothing new leaves the device; blur is a pure canvas layer.
+
+2. **One eerie observer line instead of a stat row (theyseeyourphotos energy)** — S.
+   Add ONE cold, specific, computed-from-stats sentence as the card's hero subline (e.g. "sen 7 soru sordun,
+   3 döndü. gerisini sen doldur."). It's already in the tone; we just promote one line above the number grid
+   so the card reads like a person watching, not a dashboard. Why viral: theyseeyourphotos went viral on the
+   unsettling personal readout, not the data. Moderation: template-generated from engine numbers (LAW), so
+   no hallucination risk; never quotes the chat. KVKK: computed on-device, no text shipped.
+
+3. **Shareable archetype label (persona from existing stats)** — S.
+   Derive a single gen-z persona tag from stats we ALREADY compute — "kuru cevap kralı" (high dry-reply %),
+   "gece yazarı" (needs timestamps), "breadcrumb'çı" (high plan-deferral), "çift mesajcı", "dengeli" — and
+   print it big on the card. Why viral: identity labels are the most tagged/re-shared quiz output ("Am I Unc",
+   personality-type cards); people share a label they ARE far more than a raw score. Moderation: fixed label
+   set chosen by deterministic thresholds, no free text. KVKK: zero new data; pure client compute.
+
+4. **"gönder, ne diyeceğine bak" dare loop** — S.
+   A one-line CTA on the card back / result footer daring the user to screenshot and send the card to the
+   person it's about ("bu kartı ona at, cevabını izle"). Why viral: the theyseeyourphotos/quiz loop grows
+   because the share IS the challenge; sending it to the crush both spreads the card and creates a real
+   social moment. Moderation: static copy, none needed. KVKK: no data; it's an invitation, not a transfer.
+
+5. **Rarity / percentile vanity line (local counter, no server profiling)** — S/M.
+   Using the on-device okuma counter + a small local histogram of past scores (localStorage only), show a
+   soft rarity line: "bu skor senin okumalarının en yükseği" or a coarse bucket ("nadir: %90+ çıktı"). Why
+   viral: percentile/rarity is a proven vanity+curiosity trigger (HQ-style, "top N%"). Moderation: none.
+   KVKK: histogram is local-only, never uploaded — keep it strictly client-side to stay profiling-free.
+
+Sequencing: 1 and 3 are the highest leverage (curiosity gap + identity label) and both are pure canvas/copy
+edits with no engine or backend change — do these first. 2 and 4 are copy-only. 5 needs a tiny localStorage
+histogram. None require AI moderation and none change the privacy posture.
+
 ## Revenue model
 None by direction (2026-07-13): free idea-tool, audience first. Money is not a current goal for
 nosey-dewdrop products; nothing here is gated.

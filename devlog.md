@@ -424,3 +424,39 @@ hook: ürünün adı değişince backend'in de adı değişti, ama asıl mesele 
 **EN (text-on-video):** renamed the product, renamed the backend. but the real fix was a key that leaked on screen twice. a seen key is a dead key — rotate it, don't hope. security is same-session work.
 
 **Format:** reel
+
+---
+
+## m37 — "sonucun cevabını kartın üstünde SAKLADIM" (reel)
+
+hook: kartı paylaşınca cevabı da gösteriyordum. yanlıştı. o yüzden cevabı bulanıklaştırdım.
+
+seviyorsevmiyor bir sohbete bakıp "flört var mı yok mu" diyor, sonra paylaşılabilir bir kart üretiyor. ama fark ettim: kartı story'ye atınca hükmü de gösteriyordum, yani onu gören kimsenin siteye gelmesine gerek kalmıyordu. viral araçlar tam tersini yapar — cevabı saklar, merak boşluğu bırakır. o yüzden karttaki hükmü ve flört skorunu bir bulanıklık katmanının altına koydum, üstünde "dokun, öğren" yazıyor. kartı gören merak edip kendi sohbetini denemeye geliyor. hiçbir şey değişmedi motorda, sadece cevabı ne zaman gösterdiğimi değiştirdim. ders: paylaşılan çıktı cevabı verirse döngü orada biter; cevabı sakla, merakı paylaştır.
+
+**EN (text-on-video):** i was showing the verdict right on the shareable card, so nobody needed to visit. viral tools hide the answer. i blurred the verdict under a "tap to reveal" layer. the engine didn't change — only when i show the answer did. hide the payoff, share the curiosity.
+
+**Format:** reel
+
+---
+
+## m38 — "sohbete bir isim taktım: kuru cevap kralı" (reel)
+
+hook: insanlar bir skoru değil, oldukları bir şeyi paylaşır.
+
+kartta bir sürü istatistik vardı: kim başlatmış, kaç soru sorulmuş, kuru cevap oranı. doğruydu ama kimse bir tabloyu paylaşmaz. o yüzden aynı sayılardan tek bir etiket türettim: kuru cevap oranın yüksekse "kuru cevap kralı", plan ertelemesi çoksa "breadcrumb'çı", çift mesaj atıyorsan "çift mesajcı". yeni hiçbir veri toplamadım, zaten cihazda hesapladığım sayılardan bir isim çıkardım. çünkü insanlar bir skoru değil, oldukları bir şeyi etiketler ve etiketlerler. "am i unc" testleri de böyle yayıldı: kimlik paylaşılır, sayı paylaşılmaz. ders: veriyi kimliğe çevir; kullanıcı bir tablo değil, bir kişilik paylaşmak ister.
+
+**EN (text-on-video):** the card had stats — who texted first, dry-reply rate. true, but nobody shares a table. i turned the same numbers into one label: "dry-reply king", "breadcrumber", "double-texter". no new data, just a name from numbers already on the device. people share an identity, not a score.
+
+**Format:** reel
+
+---
+
+## m39 — "kartın altına tek bir cesaret cümlesi koydum" (reel)
+
+hook: en iyi paylaşım aynı zamanda bir meydan okumaysa olur.
+
+kartı ürettikten sonra kullanıcı ne yapsın? indirip bıraksın mı? döngüyü kapatan şey bir çağrıydı: kartın altına "bu kartı ona at, cevabını izle" yazdım. çünkü seviyorsevmiyor bir crush sohbetine bakıyor — o kartı asıl kişiye göndermek hem gerçek bir sosyal an yaratıyor hem de kartı yayıyor. theyseeyourphotos da böyle yayıldı, paylaşmanın kendisi meydan okumaydı. tek satır kod bile değil, tek cümle metin. ama döngüyü tamamlıyor: gören kişi merak ediyor, siteye geliyor, kendi kartını üretiyor, o da birine atıyor. ders: paylaşımı bir görev değil, bir cesaret oyununa çevir — en güçlü büyüme, kullanıcının kendi arkadaşına attığı andır.
+
+**EN (text-on-video):** what does the user do after the card renders? download and forget? i added one line under it: "send this to them, watch what they say." the share becomes a dare — a real social moment that also spreads the card. one sentence of copy closes the whole loop.
+
+**Format:** reel
