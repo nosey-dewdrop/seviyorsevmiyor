@@ -17,9 +17,9 @@
   padding: 2px 0 2px 12px; cursor: pointer; width: 100%;
 }
 .kaynak .k-ad { display: block; font-family: var(--mono); color: var(--ink-3); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-.kaynak:hover .k-ad { color: var(--ink); }
-.kaynak.active { border-left-color: var(--ink); }
-.kaynak.active .k-ad { color: var(--ink); }
+.kaynak:hover .k-ad { color: var(--ink-2); }
+.kaynak.active { border-left-color: var(--line-2); }
+.kaynak.active .k-ad { color: var(--ink-2); }
 /* açıklama + tuş sadece SEÇİLİ kaynakta görünür (sol listede) */
 .kaynak .k-kisa, .kaynak .k-tus { display: none; }
 .kaynak.active .k-kisa { display: block; font-family: var(--mono); font-weight: 500; font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
