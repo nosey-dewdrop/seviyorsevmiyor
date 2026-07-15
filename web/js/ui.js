@@ -313,26 +313,26 @@ export async function playReveal(root, r, messages, me) {
     const rows = [
       `${n.msgs} mesaj sayıldı (${n.mine} senden, ${n.theirs} ondan). soru sende ${n.questionsMine}, onda ${n.questionsTheirs}.`,
       n.overridden
-        ? `Model "${n.modelTone}" dedi (%${n.modelConf} güven) ama sayılan sinyaller ağır bastı. Hükmü onlar verdi.`
-        : `Ton modeli %${n.modelConf} güvenle "${n.modelTone}" dedi.`,
-      `${n.redKinds} red flag türü, ${n.greens} green flag sayıldı. Her cümle sayılan bir sinyale bağlı, hiçbir şey uydurulmaz.`,
+        ? `ton modeli "${n.modelTone}" dedi (%${n.modelConf} güven) ama sayılan sinyaller ağır bastı. hükmü onlar verdi.`
+        : `ton modeli %${n.modelConf} güvenle "${n.modelTone}" dedi.`,
+      `${n.redKinds} red flag türü, ${n.greens} green flag sayıldı. her cümle sayılan bir sinyale bağlı, hiçbir şey uydurulmadı.`,
       r.spiker
-        ? 'Hüküm ve sayılar cihazında hesaplandı. Yorum cümlelerini onayınla canlı spiker yazdı, içerik saklanmadı.'
-        : 'Hepsi cihazında hesaplandı. Mesajların hiçbir yere gitmedi.',
+        ? 'hüküm ve sayılar cihazında hesaplandı. yorum cümlelerini onayınla bulut yazdı, içerik saklanmadı.'
+        : 'hepsi cihazında hesaplandı. mesajların hiçbir yere gitmedi.',
     ];
     const det = el('details', 'howread');
     det.appendChild(el('summary', null, 'nasıl okudum?'));
     for (const tt of rows) det.appendChild(el('p', null, esc(tt)));
     yorum.appendChild(det);
   }
-  yorum.appendChild(el('div', 'reveal-note', 'Bu okuma otomatik bir tahmindir, kesin bir yargı ya da tavsiye değildir.'));
+  yorum.appendChild(el('div', 'reveal-note', 'bu okuma otomatik bir tahmindir; kesin bir yargı ya da tavsiye değildir.'));
 
   const kart = buildKart(r, st, okumaNo, senAgir, async (btn) => {
     btn.disabled = true;
     btn.textContent = 'hazırlanıyor...';
     ping('paylasim');
     try {
-      const { shareReveal } = await import('./share.js?v=61');
+      const { shareReveal } = await import('./share.js?v=65');
       const how = await shareReveal(r, st, okumaNo, senAgir);
       btn.textContent = how === 'downloaded' ? 'indirildi' : how === 'shared' ? 'paylaşıldı' : 'kartı indir';
     } catch { btn.textContent = 'olmadı, tekrar dene'; }
