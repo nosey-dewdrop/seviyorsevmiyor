@@ -44,7 +44,10 @@ Deploy: git subtree split --prefix web -b t && git push -f origin t:gh-pages && 
    flört tavsiyelerini yazacak (index.html .dev-notu içi).
 2. og.png: yeni sade kart tasarımıyla güncel değil (hâlâ terazi+kalp). PNG üretici yok + headless yasak →
    Damla og.svg'yi 1200x630 export etmeli. og.svg de sade karta göre güncellenebilir.
-3. LLAMA MİMARİ: ham sohbet metni hâlâ Llama'ya gidiyor (gizlilik.html dürüstçe böyle diyor, yasal temiz).
+3. WORKER DEPLOY (Damla yapacak): worker.js'te 2 commit'li değişiklik DEPLOY EDİLMEDİ → canlı spiker hâlâ ESKİ
+   "kanka" promptunu çalıştırıyor. `cd backend && npx wrangler deploy` yapılınca yeni theyseeyourphotos tonu +
+   kanıt-uydurma fix canlıya geçer. (spiker sadece consent verilirse çalışır; template floor zaten yeni tonda.)
+3b. LLAMA MİMARİ: ham sohbet metni hâlâ Llama'ya gidiyor (gizlilik.html dürüstçe böyle diyor, yasal temiz).
    Damla "gitmesin, sadece istatistik" istemişti — worker.js doc'u çıkar kararı ONUN.
 4. KART-YORUM TEKRARI: sonuçta kart (grafik) + sağ yorum (anlatı) bazı sayıyı tekrar ediyor. Bilinçli bıraktım
    (görsel vs okuma), ama Damla "fazla" derse yorumu daha çok subtext yaparım.

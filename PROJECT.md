@@ -47,6 +47,19 @@ shrinks over time. See CLAUDE.md for the full cascade contract.
 One line per example: `{ "text": "<A/B tagged conversation>", "tone": "flirty|friendly|cold|tense" }`.
 `text` uses `A:` / `B:` line prefixes. Interest balance and flags are computed by rules, not labeled.
 
+## Last session (2026-07-15, v45→v70 all live on gh-pages, "customer eye" marathon)
+Redesign: mercan/terazi/kalp DROPPED. New: antrasit+beyaz terminal, JetBrains Mono, two-column entry
+(left source list / right box), SIMPLE card (flört score bar + stat grid + msg-length graph), footer with
+ANSI colors (gizlilik orange / koşullar blue / analiz pink / @nosey-dewdrop purple github link). Comment
+voice = theyseeyourphotos (distant observer, no "kanka") in reveal.js templates + worker.js spiker prompt.
+Engine fix (v67): interestBalance now weighs message LENGTH + emotion asymmetry, so blatant one-sidedness
+reads "sen uzanıyorsun" not "even" (regression 3/3, balanced still even). Fixed critical cache bug: JS
+imports froze at ?v=61 (dynamic import too) — must force ALL js versions each bump. workflow now: no
+localhost, every change pushed to gh-pages + viewed live. devlog m28-m29 added.
+Bugs found + fixed: reset didn't clear body.sonuc; card canvas overflow on long chats (dip/CTA now hy-bound).
+Open (needs Damla): flört advice text (empty placeholder), og.png stale (terazi+kalp), Llama raw-text
+architecture decision, card-comment stat repetition, first-3-sec hook.
+
 ## Last session (2026-07-13 night marathon, v11→v17 all live)
 PM pass (v11): rule-guarded verdict (red flags veto flirty; one-sided → "tek taraflı" + per-side flirt),
 evidence counts + "nasıl okudum?", whole-chat readings, ~3s reveal + tap-to-skip, quota/paywall removed.
