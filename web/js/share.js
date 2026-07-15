@@ -37,81 +37,58 @@ export function buildShareCard(r, st, okumaNo, senAgir) {
     x.fillText(line, 130, hy); hy += 82;
   }
 
-  // kalp puanı: flört skoru 5 kalbe iner (web kartıyla aynı) — story'de göz yakalar.
-  // kalp için sistem sans fallback: mono kalbi (U+2665) desteklemese bile garanti çizilir.
-  const kalpFont = 'px "Arial Unicode MS", "Helvetica Neue", Arial, sans-serif';
-  const dolu = Math.max(0, Math.min(5, Math.round((r.flort_sinyali.score || 0) / 20)));
-  x.font = '54' + kalpFont; hy += 6;
-  x.fillStyle = '#fafafa'; x.fillText('♥'.repeat(dolu), 130, hy);
-  const doluW = x.measureText('♥'.repeat(dolu)).width;
-  x.fillStyle = '#4a4a52'; x.fillText('♥'.repeat(5 - dolu), 130 + doluW, hy);
-  x.fillStyle = '#8a8a92'; x.font = '28' + mono;
-  x.fillText(`${dolu}/5`, 130 + x.measureText('♥♥♥♥♥').width + 24, hy);
-  hy += 40;
+  // flört skoru barı (terazi/kalp yok — web kartıyla aynı sade dil)
+  const skor = Math.max(0, Math.min(100, r.flort_sinyali.score || 0));
+  hy += 20;
+  x.fillStyle = '#8a8a92'; x.font = '26' + mono;
+  x.fillText('flört skoru', 130, hy);
+  x.fillStyle = '#fafafa'; x.textAlign = 'right'; x.font = '700 26' + mono;
+  x.fillText(`%${skor}`, 950, hy); x.textAlign = 'left';
+  hy += 22;
+  x.fillStyle = '#3a3a40'; x.fillRect(130, hy, 820, 14);
+  x.fillStyle = '#fafafa'; x.fillRect(130, hy, 820 * skor / 100, 14);
+  hy += 70;
 
-  // terazi: kaide, direk, eğik kol, zincirler, kefeler. ağır kefe aşağıda (sol = SEN).
-  const cx = 540, ty = 560, a = (senAgir ? -9 : 9) * Math.PI / 180;
-  x.strokeStyle = '#8a8a92'; x.fillStyle = '#4a4a52'; x.lineWidth = 6;
-  x.beginPath(); x.moveTo(cx - 60, ty + 330); x.lineTo(cx + 60, ty + 330); x.lineTo(cx + 40, ty + 306); x.lineTo(cx - 40, ty + 306); x.closePath(); x.fill();
-  x.fillRect(cx - 5, ty, 10, 310);
-  x.beginPath(); x.arc(cx, ty, 11, 0, 7); x.fillStyle = '#8a8a92'; x.fill();
-  x.beginPath(); x.arc(cx, ty, 4, 0, 7); x.fillStyle = '#fafafa'; x.fill();
-  const kolX = Math.cos(a) * 300, kolY = Math.sin(a) * 300;
-  x.strokeStyle = '#8a8a92';
-  x.beginPath(); x.moveTo(cx - kolX, ty - kolY); x.lineTo(cx + kolX, ty + kolY); x.stroke();
-  const kefe = (px, py, renk, agiz) => {
-    x.strokeStyle = '#6a6a72'; x.lineWidth = 2.5;
-    [[-46, 0], [0, -6], [46, 0]].forEach((d) => {
-      x.beginPath(); x.moveTo(px, py); x.lineTo(px + d[0], py + 122 + d[1]); x.stroke();
-    });
-    x.fillStyle = agiz;
-    x.beginPath(); x.ellipse(px, py + 122, 58, 9, 0, 0, 7); x.fill();
-    x.fillStyle = renk;
-    x.beginPath(); x.moveTo(px - 58, py + 124);
-    x.quadraticCurveTo(px - 54, py + 176, px, py + 176);
-    x.quadraticCurveTo(px + 54, py + 176, px + 58, py + 124);
-    x.quadraticCurveTo(px, py + 140, px - 58, py + 124); x.closePath(); x.fill();
-  };
-  kefe(cx - kolX, ty - kolY, '#a1a1aa', '#c8c8ce');
-  kefe(cx + kolX, ty + kolY, '#4a4a52', '#55555c');
-  x.fillStyle = '#fafafa'; x.font = '30' + mono;
-  x.fillText(`SEN: ${st.senSoru} soru · başlatan ${st.baslatan}`, 130, ty + 420);
-  x.fillStyle = '#8a8a92'; x.textAlign = 'right';
-  x.fillText(`O: %${st.kuruOran} kuru cevap`, 950, ty + 420); x.textAlign = 'left';
+  // istatistik satırları — iki sütun, sade
+  const rows = [
+    ['başlatan', st.baslatan], ['soru dengesi', `${st.senSoru} · ${st.oSoru}`],
+    ['çift mesaj', String(st.cift)], ['plan ertelemesi', String(st.erteleme)],
+    ['ort. kelime', `${st.senOrt} · ${st.oOrt}`],
+  ];
+  if (st.oN > 0) rows.splice(2, 0, ['kuru cevap', `%${st.kuruOran}`]);
+  x.font = '27' + mono;
+  rows.forEach((row, i) => {
+    const col = i % 2, rw = Math.floor(i / 2);
+    const rx = 130 + col * 430, ry = hy + rw * 52;
+    x.fillStyle = '#8a8a92'; x.fillText(row[0], rx, ry);
+    x.fillStyle = '#fafafa'; x.textAlign = 'right'; x.fillText(row[1], rx + 390, ry); x.textAlign = 'left';
+  });
+  hy += Math.ceil(rows.length / 2) * 52 + 40;
 
-  // barlar (hesaplanan kelime sayıları), değerler + eksen etiketleri
-  // Damla 15 Tem: kırpma yok, tüm mesajlar çizilir (uzunda yoğunluk şeridi olur).
-  const senDizi = st.senKelimeler;
-  const oDizi = st.oKelimeler;
+  // mesaj boyu grafiği — düz bar şeridi (sen + o ayrı)
+  const senDizi = st.senKelimeler, oDizi = st.oKelimeler;
   const maks = Math.max(1, ...senDizi, ...oDizi);
-  const ciz = (dizi, y0, renk) => {
-    const bw = 840 / Math.max(dizi.length, 1);
-    const gap = dizi.length > 120 ? 0 : Math.min(12, bw * 0.25);
+  const ciz = (dizi, y0, renk, etiket) => {
+    x.fillStyle = '#8a8a92'; x.font = '22' + mono; x.fillText(etiket, 130, y0 - 12);
+    const bw = 820 / Math.max(dizi.length, 1);
+    const gap = dizi.length > 80 ? 0 : Math.min(6, bw * 0.2);
     dizi.forEach((k, i) => {
-      const h = Math.max(10, 130 * k / maks);
-      x.fillStyle = renk; x.fillRect(130 + i * bw, y0 - h, bw - gap, h);
-      if (dizi.length <= 16) {
-        x.fillStyle = '#8a8a92'; x.font = '20px Menlo, monospace'; x.textAlign = 'center';
-        x.fillText(k, 130 + i * bw + (bw - gap) / 2, y0 - h - 10); x.textAlign = 'left';
-      }
+      const h = Math.max(6, 90 * k / maks);
+      x.fillStyle = renk; x.fillRect(130 + i * bw, y0 + 90 - h, Math.max(1, bw - gap), h);
     });
-    x.fillStyle = '#8a8a92'; x.font = '20px Menlo, monospace';
-    x.fillText('ilk mesaj', 130, y0 + 30);
-    x.textAlign = 'right'; x.fillText('son mesaj', 970, y0 + 30); x.textAlign = 'left';
   };
-  x.fillStyle = '#8a8a92'; x.font = '26' + mono;
-  x.fillText('SEN · her mesajın boyu (y: kelime)', 130, 1180);
-  ciz(senDizi, 1340, '#a1a1aa');
-  x.fillStyle = '#8a8a92'; x.font = '26' + mono;
-  x.fillText('O · her mesajın boyu (y: kelime)', 130, 1400);
-  ciz(oDizi, 1560, '#4a4a52');
+  ciz(senDizi, hy, '#a1a1aa', `sen · ${senDizi.length} mesaj`);
+  hy += 140;
+  if (oDizi.length) { ciz(oDizi, hy, '#4a4a52', `o · ${oDizi.length} mesaj`); hy += 140; }
 
-  // ölçüm satırı — mono (kart terminal dili). O-yok sohbette kuru cevap satırı anlamsız, atla.
-  x.fillStyle = '#e4e4e7'; x.font = '30' + mono;
-  const kuruK = st.oN > 0 ? `    kuru cevap %${st.kuruOran}` : '';
-  x.fillText(`soru ${st.senSoru} · ${st.oSoru}${kuruK}    çift ${st.cift}    erteleme ${st.erteleme}`, 130, 1640);
+  // kısa yorum + dip
+  x.fillStyle = '#a1a1aa'; x.font = '25' + mono;
+  const yorum = st.oN > 0
+    ? `${st.senSoru} soruna ${st.oSoru} soru döndü, %${st.kuruOran} kuru.`
+    : `${st.senSoru} soru sordun, dönüş yok.`;
+  x.fillText(yorum, 130, hy); hy += 44;
   x.fillStyle = '#8a8a92'; x.font = '24' + mono;
-  x.fillText('hüküm cihazda verildi · mesajlar kimseye gitmez', 130, 1700);
+  x.fillText('cihazda hesaplandı · mesajlar hiçbir yere gitmedi', 130, 1700);
 
   // viral çağrı: story'de bu kartı gören biri nereye geleceğini bilsin (link tıklanamaz, adres yazılı).
   // NOT: gerçek canlı adres github.io. Damla özel domain (seviyorsevmiyor.*) bağlarsa burayı güncelle.
