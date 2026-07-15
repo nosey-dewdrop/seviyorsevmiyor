@@ -3,8 +3,8 @@
 // oturur. Her yorum satırı tıklanabilir: altında "NEDEN BÖYLE OKUDUM?" + "BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?"
 // + rızalı bağış açılır. Karttaki her sayı gerçek sohbetten hesaplanır, elle sayı yazılmaz.
 
-import { ping, itirazGonder } from './api.js?v=68';
-import { deflectedPlans } from './balance.js?v=68';
+import { ping, itirazGonder } from './api.js?v=69';
+import { deflectedPlans } from './balance.js?v=69';
 
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -19,7 +19,6 @@ function esc(s) {
 }
 
 const KARAR_TEXT = { var: 'flört var.', yok: 'flört yok.', tek: 'flört var, ama tek taraflı.' };
-const SOZ_FINAL = { var: 'seviyor.', yok: 'sevmiyor.', tek: 'seviyor, ama tek taraflı.' };
 
 // ---- kart istatistikleri: hepsi parse edilmiş sohbetten sayılır ----
 export function computeStats(messages, me) {
@@ -332,7 +331,7 @@ export async function playReveal(root, r, messages, me) {
     btn.textContent = 'hazırlanıyor...';
     ping('paylasim');
     try {
-      const { shareReveal } = await import('./share.js?v=68');
+      const { shareReveal } = await import('./share.js?v=69');
       const how = await shareReveal(r, st, okumaNo, senAgir);
       btn.textContent = how === 'downloaded' ? 'indirildi' : how === 'shared' ? 'paylaşıldı' : 'kartı indir';
     } catch { btn.textContent = 'olmadı, tekrar dene'; }
