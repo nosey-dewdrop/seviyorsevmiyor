@@ -116,3 +116,49 @@ burada asıl zorlanılan şey estetik değildi, sahiplenmeydi. kendi verdiğin b
 bir de şunu öğrendim: bu ürün bir mühendislik gösterisi değil, bir duygu. birine "sana flört ediyor mu" sorusunu soğuk bir dashboard'la cevaplayamazsın. o yüzden sonuca bir kalp puanı koydum, çünkü instagram story'sine bir sayı değil bir his gidiyor. paylaşılabilirlik sonradan eklenen bir özellik değil, en baştan bir tasarım kararı.
 
 ders: bir şeyi silmek çoğu zaman eklemekten daha çok tasarımdır. ve kendi onayını geri alabilmek, bir ürünü senin yapan şeyin ta kendisi.
+
+---
+
+## 8 — ismi üç kere değiştirmek zayıflık değil, dinlemektir
+
+bu ürünün adı üç oldu. whatdoyoumean ile başladı, mesajibirokusana oldu, sonunda seviyorsevmiyor'da durdu. dışarıdan bakınca bu kararsızlık gibi görünür; içeriden bakınca her isim bir öğrenmenin kalıntısı.
+
+ilk isim mühendisin ismiydi. whatdoyoumean kulağa akıllı geliyordu, "ne demek istedin" sorusunu ingilizce soruyordu. ama ürün türkçe, kullanıcı türkçe, ve türkçe bir ürünün ingilizce ismi ağızdan ağıza yayılamıyor. birine "şu siteye bak" derken adını heceleyemiyorsan, o isim viral olmaz. bunu masabaşında değil, kendi ağzımın takılmasında anladım.
+
+ikinci isim düzeltmeydi: mesajibirokusana. artık türkçeydi, üstelik ürünü kullanırken kurduğun cümleydi — "şu mesajı bir okusana". doğru yöndü ama uzundu, hantaldı, story'ye sığmıyordu. isim hâlâ benim tarif ettiğim şeydi, kullanıcının hissettiği şey değil.
+
+üçüncü isim ürünün ta kendisiydi: seviyorsevmiyor. papatya falı. çocukken yaprak kopardığın o oyun. ürün zaten bir sohbete bakıp "seviyor mu sevmiyor mu" diye hüküm veriyordu; ismi de o oyun olmalıydı. bu isim bir açıklama değil, bir duygu. kimseye ne yaptığını anlatmıyor, herkesin zaten bildiği bir hissi çağırıyor.
+
+buradaki asıl karar isimlerde değildi, kime kulak verdiğimdeydi. ilk isim benim zekamı gösteriyordu, sonuncusu kullanıcının duygusunu. bir ürünü adlandırırken kendini ne kadar akıllı gösterdiğin değil, karşıdakinin o ismi ne kadar kolay söylediği önemli. üç isim, üç kere egoyu bir kenara koymak demekti.
+
+ders: ismi değiştirmekten korkma. her değişiklik bir itiraf: "önceki, benim içindi, seninkini bulamamıştım." ürünün adı senin cümlen değil, kullanıcının ağzından çıkan cümle olmalı.
+
+---
+
+## 9 — on mockup çizip hepsini çöpe atmak
+
+bu ürünün görünüşünü bulmak için bir gecede on farklı dünya çizdim. fiş dünyası, terazi dünyası, mercan dünyası, terminal dünyası. sabah baktığımızda onunun da yaşamadığını gördük. ama o on ölü mockup boşa gitmedi; her biri bir yanlışı elenmiş halde bıraktı.
+
+en uzun yaşayan fikir "fiş"ti. sohbeti bir market fişi gibi göstermek — kalem kalem, altta toplam. tatlıydı, ama sahteydi. fişte para satırları olur, benim ölçtüğüm şey para değil; fiş görünümü sadece bir kostümdü, ürünün kendi dili değildi. onu attık. sonra terazi geldi: sallanan bir kefe, "seviyor... sevmiyor..." diye durulan. güzeldi ama süstü. ölçtüğüm şey terazi değil, sayılardı; metafor gerçeği süslüyordu, taşımıyordu.
+
+asıl karar şuydu: bir ürünün görseli, ölçtüğü şeyin dilini konuşmalı. fiş para sayar, terazi ağırlık tartar, ama ben mesaj okuyorum. o yüzden en sonunda bütün metaforları attık ve ürünü kendi diline bıraktık: bir yüzde, bir çubuk grafiği, düz sayılar, terminal sadeliği. süs değil, veri.
+
+on mockup'ı çizmeseydim bu sadeliğe inanamazdım. çünkü sadelik, denenmemiş bir tembellik olabilir de, elenmiş bir olgunluk da. aradaki farkı ancak süslü olanı çizip "hayır, bu benim değil" diyerek anlarsın. boşa çizim yoktur; her reddedilen tasarım, doğru olana bir kanıt bırakır.
+
+en acı ders şuydu: kendi onayladığın süsü silmek, hiç koymamaktan daha zordur. mercan rengini ben seçmiştim, kalp puanını ben koymuştum, terazi mekaniğini ben çizmiştim. üçünü de sildim. çünkü canlıda gördüğümde içim rahat etmedi, ve seni bağlayan şey dünkü onayın değil, bugünkü hissin olmalı.
+
+ders: on kötü fikir, bir iyi karardan ucuzdur. asıl pahalı olan, ilk çizdiğine âşık olup denemekten vazgeçmek.
+
+---
+
+## 10 — kullanıcı "eşit" hissetmiyorsa motor yanlıştır
+
+ürünün en değerli düzeltmesi bir sayı eklemek değil, bir yanlışı görmek oldu. bir sohbeti test ettim: bir taraf paragraf paragraf yazmış, kalbini dökmüş, sorular sormuş; diğeri "hı", "bakarız", "yoğunum" diye geçiştirmiş. motorum sonuca baktı ve "denge eşit" dedi. teknik olarak haklıydı — ikisi de üç mesaj atmıştı. ama insan olarak baktığımda bu apaçık yanlıştı.
+
+sorun şuydu: motorum mesaj sayısını sayıyordu. üçe üç, demek ki eşit. ama iletişimde eşitlik mesaj adedi değildir. biri kalbini döküyor, diğeri tek heceyle savuşturuyorsa, o sohbeti taşıyan tek kişi vardır ve diğeri sadece oradadır. kullanıcı bunu bir bakışta hisseder; motor hissetmiyorsa, motor kördür.
+
+skoru mesaj uzunluğuna ve duygu yüküne duyarlı hale getirdim. artık uzun, yatırım yüklü mesajlarla tek heceli geçiştirmeleri aynı kefeye koymuyor. şimdi o sohbete "konuşmayı taşıyan sensin, diğeri sadece orada" diyor. ama burada bir tuzak vardı: motoru "tek taraflı bulmaya" fazla hevesli hale getirirsem, bu sefer dengeli sohbetleri de yanlış okurdu. o yüzden düzelttikten sonra gerçekten dengeli bir sohbetle tekrar test ettim — hâlâ "eşit" diyor. yani agresifleştirmedim, doğrulttum.
+
+bu bana ürünün ne olduğunu hatırlattı: bu bir mühendislik gösterisi değil, bir ayna. birine "sana ilgi var mı" diye sorduğunda, aldığı cevap onun içinde zaten bildiği ama dışarıdan duymak istediği şey olmalı. motor kullanıcının aynada gördüğünden başka bir şey söylüyorsa, ne kadar doğru sayarsa saysın, yanlıştır.
+
+ders: bir modelin dürüstlüğü, matematiksel olarak haklı olması değil, kullanıcının hissettiğiyle aynı şeyi söylemesidir. sayı doğru olabilir ama his yanlışsa, ürün yalan söylüyordur.

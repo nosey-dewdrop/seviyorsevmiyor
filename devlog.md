@@ -342,3 +342,85 @@ karta bir terazi koymuştum, sallanan. sonra kalp puanı. ikisi de tatlıydı am
 hook: kullanıcı ne hissediyorsa motor onu görmüyorsa, motor yanlıştır.
 
 test ettim: bir taraf paragraf paragraf yalvarıyor, diğeri "hı", "bakarız", "yoğunum". motorum "denge eşit" dedi. çünkü mesaj SAYISINI sayıyordum, ikisi de 3 mesaj atmıştı. ama biri kalbini döküyor, diğeri tek heceyle geçiştiriyor — bu eşit değil. skoru mesaj uzunluğuna ve duygu yüküne duyarlı hale getirdim. şimdi "konuşmayı taşıyan sensin, diğeri sadece orada" diyor. sonra dengeli bir sohbetle tekrar test ettim, hâlâ "eşit" diyor — yani agresifleştirmedim, doğrulttum. ders: motorun dürüstlüğü, kullanıcının aynada gördüğüyle aynı şeyi söylemesidir.
+
+## m30 — "kanka gibi konuşuyordu, sesini soğuk bir gözlemciyle değiştirdim" (reel)
+
+hook: dün ürünüme "kanka" gibi konuşmayı öğretmiştim. bugün o sesi tamamen sildim.
+
+kanka sesi eğlenceliydi ama yanlış hissettiriyordu. birinin sohbetini okuyup samimiyet taslamak, ürünü ucuzlaştırıyordu. istediğim his theyseeyourphotos'tu: mesafeli, biraz ürkütücü, üçüncü bir göz. seni tanımadan tanıyan biri gibi. "kanka bu kız sana asık" değil, "hep kendini anlatmış, sana bir kez bile sen nasılsın dememiş." küçük harf, kısa soğuk cümleler, samimiyet yok. yorumu yazan katmandaki her cümleyi, hükmü, denge satırını, kapanışı, hatta buluttaki llama'nın promptunu baştan yazdım. aynı veri, bambaşka bir ses. ders: bir ürünün tonu bir özellik değil, karakteridir; yanlış ton doğru veriyi bile ucuzlatır.
+
+**EN (text-on-video):** it read your chat like a bestie. i deleted that voice. now it's a cold third eye — distant, a little eerie. same data, different soul. tone isn't a feature, it's character.
+
+**Format:** reel
+
+---
+
+## m31 — "gece boyu düzelttiğim kod canlıya hiç çıkmamış: cache beni kandırdı" (reel)
+
+hook: saatlerce kod düzelttim, canlıda hiçbir şey değişmedi. sebep bende değildi, tarayıcıdaydı.
+
+en sinsi bug'lardan biri. her deploy'da js dosyalarının sonuna bir versiyon numarası koyuyorum — dosya.js?v=61 gibi — ki tarayıcı eski kodu cache'ten çekmesin, yenisini indirsin. ama versiyonu artıran scriptim sadece dosyadaki son numarayı yakalıyordu; içeride başka bir dosyayı dinamik olarak çağıran satırdaki versiyon eski kalıyordu. sonuç: yeni kodu push ediyorum, safari eski dosyayı cache'ten çekiyor, ben de "neden değişmedi" diye saatlerce kendi kodumu suçluyorum. çözüm: her deploy'da dosyadaki BÜTÜN versiyonları zorla değiştir, tekini değil. ders: "çalışmıyor"un yarısı senin kodun değil, seninle kod arasındaki katmandır — cache, build, deploy. gerçek sitede çalışmadan bunu göremezsin.
+
+**EN (text-on-video):** i fixed the code for hours. nothing changed live. the bug wasn't my code — it was the cache serving stale files. half of "it doesn't work" lives between you and your code.
+
+**Format:** reel
+
+---
+
+## m32 — "yapay zeka sohbette olmayan bir alıntı uydurdu, ağzına kilit vurdum" (reel)
+
+hook: modelim "işte kanıtı" deyip sohbette hiç geçmeyen bir cümle uydurdu. yakaladım.
+
+buluttaki llama, sohbetteki gözden kaçanları söylüyor: "hep kendini anlatmış", "plan teklifini geçiştirmiş" gibi. güzel özellik ama tehlikeli bir huyu var: bazen "işte kanıtı" deyip sohbette hiç geçmeyen bir alıntı uyduruyor. güzel yazılmış bir yalan, ki yapay zekanın en tehlikeli hâli bu. o yüzden bir kilit koydum: her gözlemin dayandığı alıntı, sohbet metninde birebir geçmek zorunda. worker, llama'nın verdiği alıntıyı sohbette arıyor; bulamıyorsa o gözlemi sessizce düşürüyor. artık kanıt uyduramıyor, sadece gerçekten orada olanı gösterebiliyor. ders: yapay zekaya konuşma özgürlüğü ver ama kanıt özgürlüğü verme; her iddiayı kaynağa kelepçele.
+
+**EN (text-on-video):** the ai invented a quote that was never in the chat. so i locked it: every observation must match a verbatim line in the text. no match, no claim. give ai a voice, not a license to fabricate.
+
+**Format:** reel
+
+---
+
+## m33 — "gizlilik sayfamda bir çelişki buldum ve düzeltmek yerine önce itiraf ettim" (post)
+
+hook: ürünüm "mesajın buluta gitmiyor" diyordu ama kod öyle demiyordu.
+
+kafamda ürün şuydu: mesajlar buluta asla gitmez, sadece istatistikler gider. ama koda dikkatli baktığımda gördüm ki buluttaki modele hâlâ ham sohbet metni gidiyordu — çünkü "gözden kaçanlar" özelliği alıntı için metnin kendisine ihtiyaç duyuyor. yani gizlilik sözümle kodum çelişiyordu. iki yol vardı: ya sözü sessizce koda uydur, ya kodu söze. ikisini de aceleyle yapmadım. önce gizlilik sayfasını dürüst yaptım: "evet, onay verirsen o tek sohbet buluta gider, orada loglanmaz." çünkü kullanıcıya kod ne yapıyorsa onu söylemelisin, ne yapmasını istediğini değil. asıl mimari kararı — metni hiç göndermemek ama alıntı özelliğini feda etmek — bilerek erteledim, çünkü bu tek başıma verilecek bir karar değil. ders: bir çelişki bulunca ilk hamle düzeltmek değil, doğruyu söylemektir. gizlilik, kodunun gerçeğiyle eşleşmediği an gizlilik olmaktan çıkar.
+
+**EN (text-on-video):** my privacy page said one thing, my code did another. before fixing it, i made the page tell the truth. privacy that doesn't match your code isn't privacy.
+
+**Format:** post
+
+---
+
+## m34 — "papatya falı: ürünün adını çocukluk oyunundan aldım" (reel)
+
+hook: ürünümün üçüncü ismi bir mühendislik terimi değil, kopardığın papatya yaprağı.
+
+isim üç oldu. whatdoyoumean çok akıllıydı ama ingilizceydi, türk kullanıcı heceleyemiyordu. mesajibirokusana türkçeydi ama uzundu, story'ye sığmıyordu. sonunda en basit yere indim: seviyorsevmiyor. papatya falı. yaprak koparıp "seviyor, sevmiyor, seviyor..." dediğin o oyun. ürün zaten bir sohbete bakıp tam bunu yapıyor. isim bir açıklama değil, herkesin çocukluğundan bildiği bir his. birine anlatırken heceleyemiyorsan o isim yayılmaz; ama papatya falını herkes bilir. ders: en iyi ürün ismi ne yaptığını anlatmaz, çoktan bildiğin bir duyguyu çağırır.
+
+**EN (text-on-video):** my product's third name isn't a tech term — it's the daisy you pluck: loves me, loves me not. the best name doesn't explain the product, it summons a feeling you already know.
+
+**Format:** reel
+
+---
+
+## m35 — "girişteki tek kutuyu üç kapıya çevirdim: yapıştır, ekran görüntüsü, whatsapp" (reel)
+
+hook: insanların çoğu sohbeti elle yazmıyor, ekran görüntüsü atıyor. o yüzden tek kutuyu üç kapı yaptım.
+
+ilk sürümde tek bir metin kutusu vardı: sohbeti yapıştır. ama gerçek kullanıcıyı düşününce fark ettim, kimse sohbeti elle yazmaz. ya ekran görüntüsü alır ya whatsapp'tan dışa aktarır. o yüzden girişi üç kapıya çevirdim. bir: ctrl+v ile yapıştır. iki: ekran görüntüsü — cihazında tesseract ile okunuyor, baloncuğun sağda mı solda mı olduğuna bakıp kimin yazdığını tahmin ediyorum. üç: whatsapp .zip — tarayıcıda açıp içinden sohbeti çıkarıyorum, hiçbir şey sunucuya gitmeden. üçü de aynı okuma motoruna iniyor. ders: ürünün girişini kendi rahatına göre değil, kullanıcının elinde ne varsa ona göre tasarla.
+
+**EN (text-on-video):** nobody types a chat by hand — they screenshot it. so i turned one box into three doors: paste, screenshot (ocr on-device), whatsapp export. all feeding one engine. design the input for what the user already has.
+
+**Format:** reel
+
+---
+
+## m36 — "worker'ın adını değiştirdim ve sızan anahtarı çöpe attım" (reel)
+
+hook: ürünün adı değişince backend'in de adı değişti, ama asıl mesele bir anahtardı.
+
+ürün seviyorsevmiyor olunca buluttaki worker'ın eski adı ortada kaldı. yeni bir worker açtım, seviyorsevmiyor-api, ve ürünü ona bağladım, uçtan uca canlıda test ettim: llama gerçekten cevap veriyor. ama asıl önemli şey isim değildi. groq api anahtarım oturum sırasında iki kere ekranda göründü. bir anahtar bir kere görünürse artık güvenli değildir. yenisini oluşturdum, eskisini iptal ettim, taze anahtarı worker'a secret olarak koydum — koda değil, secret'a, ki repoda asla görünmesin. ders: sızan anahtar "belki kimse görmemiştir" değildir; görüldü say, iptal et, yenisini koy. güvenlik ertelenecek bir iş değil, aynı oturumun işi.
+
+**EN (text-on-video):** renamed the product, renamed the backend. but the real fix was a key that leaked on screen twice. a seen key is a dead key — rotate it, don't hope. security is same-session work.
+
+**Format:** reel
