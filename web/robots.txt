@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nosey-dewdrop.github.io/seviyorsevmiyor/sitemap.xml
+Sitemap: https://seviyorsevmiyor.noseydewdrop.com/sitemap.xml

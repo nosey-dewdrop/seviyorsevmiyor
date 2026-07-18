@@ -97,7 +97,7 @@ export function buildShareCard(r, st, okumaNo, senAgir) {
   x.fillStyle = '#fafafa'; x.font = '700 32' + mono;
   x.fillText('sen de dene →', 130, dy); dy += 46;
   x.fillStyle = '#fafafa'; x.font = '30' + mono;
-  x.fillText('nosey-dewdrop.github.io/seviyorsevmiyor', 130, dy); dy += 40;
+  x.fillText('seviyorsevmiyor.noseydewdrop.com', 130, dy); dy += 40;
   x.fillStyle = '#55555c'; x.font = '20' + mono;
   x.fillText('otomatik tahmin, kesin yargı değil · eğlence amaçlı', 130, dy);
 
