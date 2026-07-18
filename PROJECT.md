@@ -128,3 +128,113 @@ histogram. None require AI moderation and none change the privacy posture.
 ## Revenue model
 None by direction (2026-07-13): free idea-tool, audience first. Money is not a current goal for
 nosey-dewdrop products; nothing here is gated.
+
+---
+
+## ARŞİV — detay ve tarihçe (CLAUDE.md sadeleştirmesinden taşındı, 18 Tem)
+
+### The one non-negotiable idea: cascade, not wrapper
+This is NOT a GPT/Gemini wrapper. The engine is a **cascade**:
+1. Our own **statistical model** (TF-IDF n-gram + logistic regression, trained on CPU, NO GPU) runs
+   **in the browser** and scores the conversation.
+2. **If it is confident** (margin over threshold) → WE answer, data never leaves the device (KVKK solved).
+3. **Only if unsure** → optional fallback to Gemini via a Cloudflare Worker, with user consent.
+4. Gemini's hard-case answers (consented, anonymised) become new labels → periodic retrain → the
+   fallback share shrinks → Gemini eventually drops out entirely (the "beaver" plan).
+Gemini is the exception, never the brain. Honesty: nuance/sarcasm is where statistics struggle — that
+is exactly what earns a fallback. Held-out accuracy is measured and reported (build-in-public).
+
+### Engine (train/ + web/js)
+- Primary classifier = conversation **tone** ∈ {flirty, friendly, cold, tense}. Trained in numpy
+  logistic regression (no sklearn) on a seed labeled Turkish set (`train/data.jsonl`), exported as a
+  linear model JSON (`web/data/model.json`: per-token + per-numeric-feature weights + bias per class).
+- **who-wants-more / interest balance** is deterministic (message-length asymmetry, double-texting,
+  question ratio, initiation, reply lag) — a rule, not the classifier. That is the honest part.
+- **flags** = keyword/pattern rules (love-bombing, controlling, ghosting cadence) + model confidence.
+- Feature extractor is mirrored in `train/features.py` (training) and `web/js/features.js` (inference);
+  a parity check dumps features from Python and re-computes them in Node to catch drift.
+
+### Design (identity, evolves — CURRENT is terminal antrasit; this is the 13 Tem bubble-sea era, superseded)
+The whole page is one chat thread of separate "bubble" cards floating on an interactive canvas **bubble
+sea** (solid collision, flees the cursor, keeps clear of the cards). **DARK is default** (reads premium)
+and the sea uses Damla's Midjourney-generated **textured ivory bubble sprites** (`web/assets/bubbles/`,
+chroma-keyed to transparent); LIGHT mode uses colorful pastel vector bubbles. Type = Fraunces (display) +
+Inter (body). Reveal streams in as the app "texting you back" (typing dots → bubbles). Onboarding = mini chat.
+Still banned: cream backgrounds, colored single words, pill/gradient/emoji-bullet. Border-radius + font
+weight are FREE now (old sharp-corner + no-bold laws were dropped 13 Tem). Asset flow: Damla generates in
+MJ (recipe: matte black bg, ivory bubble, grainy stippled texture), I chroma-key to transparent PNGs and place.
+
+### KVKK / law (ships in the SAME version as any data collection)
+Story: most analysis stays on device; only unsure cases go to the cloud, with consent. Third-party data:
+the other person did not consent → visible warning + "I have the right to upload this" checkbox. No
+persistent storage in v1. `gizlilik.html` + consent line ship together. Worker logs no content.
+
+### Deploy contract (worker)
+Site = gh-pages subtree push (stitchu pattern). Worker = Cloudflare, GROQ_API_KEY (was Gemini) + APP_TOKEN
+as wrangler secrets, x-app-token from the app. Damla supplies the key + does OAuth.
+
+### Build story (13 Tem format — Damla's standing format for ALL projects)
+- `linkedin.md` — damla essays: 300-500 word blog posts, each carrying the numbered chain (idea
+  origin + the feeling → why each addition → pivots + the decision underneath → road to a real
+  product). Never inflate one sentence into a post.
+- `devlog.md` (renamed from devlog-tr.md) — Instagram build-in-public: the SMALLEST possible pieces,
+  lots of content (no limit, "yüz reels olabilir"). Reel / post / carousel. Every entry = a 30-60s
+  hooked reel script, spoken dev-diary voice (problem → change → decision underneath).
+- All entries must come from the real history (commits/plan) — no fabricated steps.
+
+### v70 STATUS DETAIL (15 Tem sabah, gerçek sitede çalışma)
+- GİRİŞ: iki sütun (solda yapıştır/ekran/whatsapp seçenek listesi, sağda tıklanan kutu). Akordeon DEĞİL.
+  Seçili öğe BEYAZ + başında "*", çizgi yok. Placeholder boş. İsme (brand) tıkla → developer flört tavsiyeleri.
+- RENKLER: gövde+seçili BEYAZ/nötr. Sadece FOOTER'da ANSI: gizlilik turuncu, koşullar mavi, "analiz cihazında
+  yapılır" pembe/magenta, @nosey-dewdrop mor (github link). --link mercanı kalktı.
+- KART SADE (terazi+kalp metaforundan bıktım): yüzde barı + istatistik grid (2 sütun) + mesaj boyu bar grafiği
+  + kısa yorum. Terazi/kalp/sallanan söz SİLİNDİ. Hem web kartı hem indirilen 1080x1920 PNG aynı sade dil.
+- YORUM DİLİ = theyseeyourphotos tonu: mesafeli, gözlemci, ürkütücü üçüncü göz. reveal.js + worker.js SPIKER
+  promptu çevrildi. Küçük harf. SONUÇ EKRANI: body.sonuc → wrap 1100px, giriş 680px dar.
+- v67 MÜŞTERİ HİSSİ FIX: balance motoru mesaj UZUNLUĞU+duygu asimetrisini sayıyor → tek-taraflı sohbet "eşit"
+  değil "sen uzanıyorsun" (regresyon 3/3 Node-kanıtlı). Bug: JS import'ları ?v=61'de DONMUŞTU → cache fix.
+
+### v45 GECE REDESIGN DETAIL (15 Tem, terminal yönü — mercan TERK)
+- MERCAN #ff8a70 TAMAMEN KALKTI ("slopware duruyor"). --accent nötr beyaz. Yeşil/mavi de reddedildi.
+- FONT: JetBrains Mono (Google Fonts 400/500/700, display=swap). --sans=--mono (HER YER mono). body 500 sabit.
+- GİRİŞ: kutu/border YOK. Kaynaklar AKORDEON, "/ / /" ayraç, tek 520px ortalı sütun. Onboarding + demo SİLİNDİ.
+  Bubble sea KAPATILDI. Kenarlarda sönük "*" papatyalar. Metinler Damla sesiyle yeniden yazıldı.
+- KART (bu turda): kalp puanı EKLENDİ (0-100 → ♥♥♥♥♥). Kartın KAHRAMANI 32px. (v70'te terazi/kalp söküldü.)
+- "bu nasıl yapıldı" tıkla-aç link: 2-model mimarisi anlatımı. EDGE-CASE: O-yok/tek-taraflı kuru "0/0" his
+  kırılması kapatıldı, division-by-zero korumaları, reduced-motion + focus-visible (a11y).
+- T21 PARSE DOĞRULAMA (Node 8/8 geçti): isimli düz, WhatsApp iOS/Android timestamp temizleme, düz-satır→
+  alternating+ambiguous, tek satır, boş satır, URL bölünmemesi. GÖZLEM: grup sohbetinde 3. kişi sessizce atılıyor.
+
+### mesajibirokusana era (13 Tem, v18 — hâlâ geçerli, üstü çizilmeyen yerlerde)
+- LLAMA SPIKER LIVE: worker `/api/spiker` (Groq llama-3.3-70b) engine satırlarını yeniden yazar + "gözden
+  kaçanlar" (kanıt-alıntılı gözlemler). Engine facts LAW, açık isimli sayılar olarak gider ("5-3" string DEĞİL).
+  Consent checkbox gate (KVKK aynı session), fuse: 6/min + 60/day per IP, 2000/day global, SPIKER_OPEN kill switch.
+- NET HÜKÜM ("varsa var yoksa yok"): flört var. / flört yok. / flört var, ama tek taraflı. Mumbling orta-band silindi.
+- VOICE LAW: spor metaforu yok, gendered register yok, ai filler yok, "red flag/green flag" (kırmızı bayrak değil),
+  Pudding Spotify-roast register (veriye tepki ver, anlatma). DESIGN o dönem: dark ONLY, Arial, content bold.
+- v20 "paketleyelim": spiker post-process (TR lowercase, "sanki" tic strip), content-free counters (/api/ping +
+  /api/stats + panel.html), itiraz button → consented donation (/api/itiraz, tek content-storing route, corpus:
+  KV keys), kayıt defteri (localStorage, isim+skor → "ısınmış/soğumuş" return loop).
+- DONE 15 Tem v21-v23: 21-final sahne web'e port, KVKK pass clean, TRAINING RUN: baseline 72.2% → 420 synth 75.9%
+  (aynı 54 real held-out, synth train-only, parity 1.11e-16), model.json 49KB→245KB, WORKER RENAME (seviyorsevmiyor-api
+  deploy, GROQ_API_KEY rotate, config.js güncel). Eski mesajibirokusana-api worker Cloudflare'de duruyor (silinebilir).
+
+### VISION (Damla, 13 Tem)
+NOT a company, NOT B2B, NOT VC-fundable. Viral fun tool à la theyseeyourphotos whose "thing" is the OWN ENGINE
+(cascade, on-device verdict, donation flywheel). PM/VC/lig analizi arşiv: reports/2026-07-13-mesajibirokusana-pm-vc-lig.md.
+
+### TRAINING TRACK (teacher distillation)
+3 Claude agents labeled synthetic TR chats (150 flirty/friendly, 150 cold/tense, 120 gray/hard) → train/synth_claude_*.jsonl.
+HONESTY RULE: held-out eval stays on ORIGINAL 268 real seed's every-5th split; synthetic → TRAIN SPLIT ONLY. Report
+old vs new side by side; ship model.json only if it improves. Later teachers: Llama (Groq) + Gemini; disagreement → "hard"
+pile for human/donation labeling. Long game: donations label the motor; at millions of samples switch everything to own models.
+
+### KNOWN SPIKER TIC (not fixed)
+Llama occasionally glues words (b'ninpositive) and invents "kanit" quotes not in the doc. Engine numbers stay LAW so
+verdict is safe, but gozden_kacanlar "kanit" is free-text Llama. Fix later: constrain kanit to verbatim doc substrings or drop.
+
+### STILL TO DO (arşiv, tarih geçmiş "sırada X" kayıtları)
+Full manual walk on live, EN engine, OCR quality run (~10 real screenshots from Damla), spiker contract extension for
+itiraz reasoning fields, spiker kanit-hallucination fix, next distillation round (Llama/Gemini teachers + real donations).
+Groq key was exposed in-session twice; rotated fresh — consider one more clean rotation. First-3-sec hook / "örnek dene"
+demo geri (Damla kararı). Card-comment stat repetition (bilinçli bırakıldı, Damla "fazla" derse subtext'e çekilir).
