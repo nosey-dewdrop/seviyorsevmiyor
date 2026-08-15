@@ -1,8 +1,8 @@
 # rabadon devridaim — seviyorsevmiyor
-updated: 2026-08-14T21:36:23Z
+updated: 2026-08-15T23:25:55Z
 
 ## goal (as captured from the session)
-(no goal captured)
+kanka emin misin olduğuna bittiğine theyseeyourphotos gibi mi
 
 ## tests
 not run this cycle
@@ -11,14 +11,18 @@ not run this cycle
 - none
 
 ## last moves
-- bash: git add web/js/time/cpd.js train/cpd_check.mjs && git -c user.email=teenagemutan
-- bash: git push origin main 2>&1 | tail -3; echo "---"; git status -sb | head -2
-- bash: git log -1 --format='%B' | tail -8; echo "=== uzak durum:"; git rev-parse HEAD o
-- bash: head -60 /home/user/damla_projects_2026/icerik/dewrites.md 2>/dev/null |
-- bash: cd /home/user/.claude/projects/-Users-damummyphus/memory && wc -l user_d
-- Read: user_damla_ses_ve_karakter.md
-- Read: feedback_ses_ve_yazim.md
-- bash: cd /home/user/damla_projects_2026/icerik && wc -l dewrites.md && echo "=
+- bash: cat > /tmp/geri2.mjs <<'EOF'
+const P='/home/user/damla_projects_2026/sev
+- bash: sed -i '' 's|console.log(.ok numericFeatures ->., f.length.*|console.log("ok num
+- bash: for t in parse timeline cpd e2e yazi; do printf "%-9s " "$t"; node train/${t}_ch
+- bash: git add -A && git -c user.email=redacted@example.invalid -c user.name=
+- bash: git branch -D t 2>/dev/null; git subtree split --prefix web -b t >/dev/null 2>&1
+- bash: for i in 1 2 3 4 5 6; do
+  c=$(curl -s --max-time 15 -o /dev/null -w "%{http_cod
+- bash: B=https://nosey-dewdrop.github.io/seviyorsevmiyor
+for p in zaman.html css/zaman.
+- bash: B=https://nosey-dewdrop.github.io/seviyorsevmiyor
+echo "=== canli parse.js yeni 
 
 ## for the next session
 - if tests are RED above: that is the open front — start there.

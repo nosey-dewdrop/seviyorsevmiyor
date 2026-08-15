@@ -190,3 +190,18 @@ h3 { font-size: 14px; font-weight: 700; margin: 0 0 8px; color: var(--ink-2); }
   .adimlar { grid-template-columns: 1fr; gap: 20px; }
   .sayilar { grid-template-columns: repeat(2, 1fr); }
 }
+
+.acilis { color: var(--ink-2); margin: 0 0 10px; font-size: 15px; }
+
+/* archetype: a plain label with its own number under it, no pill, no badge, no colour */
+.arketip {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 16px 0;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ark-ad { font-size: 21px; font-weight: 700; letter-spacing: -0.03em; }
+.ark-kanit { color: var(--ink-3); font-size: 13px; }

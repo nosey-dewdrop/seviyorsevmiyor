@@ -4,6 +4,11 @@
 // do not disappear, they sit in their own block underneath, because a p value in the headline kills
 // the sentence and a headline with no p value anywhere is the thing this engine exists not to be.
 
+import {
+  sec, ACILIS_KIRILMA, ACILIS_YOK, ACILIS_KESINTI, CUMLE, arketip,
+  KAPANIS_KIRILMA, KAPANIS_YOK,
+} from './soz.js?v=71';
+
 const AY = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran',
   'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık'];
 
@@ -64,29 +69,59 @@ function taraf(label, ad) {
   return m ? ad[m[1]] : null;
 }
 
-function noktaCumlesi(p, ad) {
+// The sentence comes from the phrasebook, the values come from the engine. The model never sees a
+// number and never writes one, so a fabricated figure is not possible here.
+function noktaCumlesi(p, ad, seed, slot) {
   const k = kavram(p.label);
   const kim = taraf(p.label, ad);
-  const ne = ETIKET[k] || k;
-  if (k === 'gecikme') {
-    const a = sure(Math.exp(p.before) - 0.5);
-    const b = sure(Math.exp(p.after) - 0.5);
-    return `${kim ? esc(kim) + ' ' : ''}cevap süresi ${a} iken ${b} oldu.`;
+  let onceki, sonraki, fark = '';
+
+  if (k === 'gecikme' || k === 'sessizlik') {
+    const a = Math.exp(p.before) - 0.5;
+    const b = Math.exp(p.after) - 0.5;
+    onceki = sure(a);
+    sonraki = sure(b);
+    fark = (b / Math.max(a, 0.5)).toFixed(1).replace('.', ',');
+  } else if (k === 'uzunluk') {
+    onceki = `${Math.round(Math.exp(p.before) - 1)} kelime`;
+    sonraki = `${Math.round(Math.exp(p.after) - 1)} kelime`;
+  } else {
+    onceki = yuzde(p.before);
+    sonraki = yuzde(p.after);
   }
-  if (k === 'sessizlik') {
-    const a = sure(Math.exp(p.before) - 0.5);
-    const b = sure(Math.exp(p.after) - 0.5);
-    return `konuşmalar arasındaki sessizlik ${a} iken ${b} oldu.`;
-  }
-  if (k === 'uzunluk') {
-    const a = Math.round(Math.exp(p.before) - 1);
-    const b = Math.round(Math.exp(p.after) - 1);
-    return `${kim ? esc(kim) + ' ' : ''}mesaj başına ${a} kelime yazarken ${b} kelime yazar oldu.`;
-  }
-  if (k === 'baslatma' || k === 'bitiren' || k === 'gece') {
-    return `${kim ? esc(kim) + ' ' : ''}${ne} payı ${yuzde(p.before)} iken ${yuzde(p.after)} oldu.`;
-  }
-  return `${ne} değişti.`;
+
+  const kalip = sec(CUMLE[k], seed, slot);
+  if (!kalip) return `${ETIKET[k] || k} değişti.`;
+  return kalip
+    .replace('{kim}', kim ? esc(kim) : 'karşı taraf')
+    .replace('{onceki}', onceki)
+    .replace('{sonraki}', sonraki)
+    .replace('{fark}', fark);
+}
+
+// Inputs for the archetype label, all of them plain counts.
+function arketipVerisi(res) {
+  const s = res.summary;
+  const lat = res.latency;
+  const me = 'A';
+  const other = 'B';
+  // One source for this ratio. Computing it here as a raw median ratio while the details block
+  // derived it from the log2 asymmetry printed 11,2 and 10,4 for the same fact on the same screen.
+  const asim = lat.asymmetry;
+  const oranGecikme = asim && asim.different ? Math.pow(2, Math.abs(asim.ratio)) : null;
+  const gecOlan = asim ? (asim.ratio > 0 ? res.speakers.A : res.speakers.B) : null;
+  const senMsj = s[me].messages || 1;
+  const oMsj = s[other].messages || 1;
+  return {
+    oranGecikme,
+    gecOlan,
+    senKelime: Math.round(s[me].words / senMsj),
+    oKelime: Math.round(s[other].words / oMsj),
+    senBaslatmaPay: s.sessions ? s[me].starts / s.sessions : 0,
+    uzunSessizlik: s.longestSilenceMin != null ? Math.round(s.longestSilenceMin / 1440) : null,
+    geceBirlesik: (s[me].nightMessages + s[other].nightMessages) / (senMsj + oMsj),
+    oturum: s.sessions,
+  };
 }
 
 function redKarti(res) {
@@ -128,6 +163,7 @@ export function yaz(res, dosyaAdi) {
   const gosterilebilir = tekilleştir(res.points.filter((p) => p.dateShowable && p.kind === 'degisim'));
   const kesintiler = res.points.filter((p) => p.kind === 'kesinti');
 
+  const seed = res.seed >>> 0;
   let mansel;
   if (gosterilebilir.length) {
     const j = res.joint;
@@ -137,25 +173,36 @@ export function yaz(res, dosyaAdi) {
     const lo = ana.tsLo != null ? kisaTarih(ana.tsLo) : null;
     const hi = ana.tsHi != null ? kisaTarih(ana.tsHi) : null;
     const aralik = lo && hi && lo !== hi ? ` <span class="aralik">(${lo} ile ${hi} arası)</span>` : '';
-    mansel = `<p class="tarih">${tarih(ana.ts)}${aralik}</p>
-      <ul class="degisimler">${gosterilebilir.map((p) => `<li>${noktaCumlesi(p, ad)}</li>`).join('')}</ul>`;
+    mansel = `<p class="acilis">${sec(ACILIS_KIRILMA, seed, 1)}</p>
+      <p class="tarih">${tarih(ana.ts)}${aralik}</p>
+      <ul class="degisimler">${gosterilebilir.map((p, i) => `<li>${noktaCumlesi(p, ad, seed, i + 2)}</li>`).join('')}</ul>`;
     if (j && j.k >= 2) {
       const bir = Math.round(1 / j.prob);
-      mansel += `<p class="birlesik">aynı iki hafta içinde ${j.k} ayrı şey değişti.
-        bunun rastlantı olma ihtimali ${bir} de 1.</p>`;
+      mansel += `<p class="birlesik">${sec(KAPANIS_KIRILMA, seed, 9)}
+        ${j.k} ayrı ölçüm aynı iki haftaya düştü. bunun rastlantı olma ihtimali ${bir} de 1.</p>`;
     }
   } else if (res.points.length) {
-    mansel = `<p class="tarih">bir şey değişti, ama tarihi net değil.</p>
-      <ul class="degisimler">${tekilleştir(res.points).map((p) => `<li>${noktaCumlesi(p, ad)}</li>`).join('')}</ul>
+    mansel = `<p class="acilis">${sec(ACILIS_KIRILMA, seed, 1)}</p>
+      <p class="tarih">gün net değil.</p>
+      <ul class="degisimler">${tekilleştir(res.points).map((p, i) => `<li>${noktaCumlesi(p, ad, seed, i + 2)}</li>`).join('')}</ul>
       <p class="ince">tarih aralığı ${res.need.ciDaysMax} günden geniş çıktı, o yüzden gün yazılmıyor.</p>`;
   } else {
-    mansel = `<p class="tarih">bu sohbette bir kırılma yok.</p>
-      <p class="ince">motor ${Math.round(s.spanDays)} günü tarayıp hiçbir tarihte kalıcı bir değişiklik bulamadı.
-      yavaşça değişmiş olabilir, ama bir gün gösteremiyorum.</p>`;
+    mansel = `<p class="acilis">${sec(ACILIS_YOK, seed, 1)}</p>
+      <p class="tarih">bir kırılma yok.</p>
+      <p class="ince">motor ${Math.round(s.spanDays)} günü taradı ve hiçbir tarihte kalıcı bir değişiklik bulamadı.
+      ${sec(KAPANIS_YOK, seed, 9)}</p>`;
   }
 
+  const av = arketipVerisi(res);
+  const ark = arketip(av, { ben: esc(ad.A), o: esc(ad.B), gec: esc(av.gecOlan || ad.B) });
+  const arketipBlok = ark
+    ? `<div class="arketip"><span class="ark-ad">${esc(ark.ad)}</span><span class="ark-kanit">${ark.kanit}</span></div>`
+    : '';
+
   const kesintiBlok = kesintiler.length
-    ? `<p class="kesinti">${kesintiler.map((p) => `${tarih(p.ts)} civarındaki değişiklik uzun bir sessizliğin içine düşüyor. bu bir kopukluk, duygu değişimi olarak okunmamalı.`).join(' ')}</p>`
+    ? `<p class="kesinti">${sec(ACILIS_KESINTI, seed, 20)}
+       ${tarih(kesintiler[0].ts)} civarındaki değişiklik uzun bir sessizliğin içine düşüyor,
+       o yüzden duygu değişimi olarak okunmamalı.</p>`
     : '';
 
   const lat = res.latency;
@@ -211,6 +258,7 @@ export function yaz(res, dosyaAdi) {
   return `<div class="kart">
     <p class="ust-etiket">${esc(ad.A)} ve ${esc(ad.B)}</p>
     ${mansel}
+    ${arketipBlok}
     ${kesintiBlok}
     ${sayilar}
     ${nasil}

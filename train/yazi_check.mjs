@@ -34,7 +34,7 @@ function want(name, html, needles, forbidden = []) {
   const { text } = makeExport({ seed: 9, latBefore: 6, latAfter: 6, initBefore: 0.5, initAfter: 0.5 });
   const html = yaz(analyzeTime(text, { B: 999, Bboot: 200 }), 'x.txt');
   want('degismedi, uydurma tarih yok', html,
-    ['bu sohbette bir kırılma yok'], ['undefined', 'NaN']);
+    ['bir kırılma yok', 'bulamadım'], ['undefined', 'NaN']);
 }
 
 // 3. too short
@@ -69,6 +69,34 @@ function want(name, html, needles, forbidden = []) {
   const kotu = basliklar.filter((b) => /^(nasıl|neden|ne zaman|kim|hangi)/i.test(b) && !b.endsWith('?'));
   if (kotu.length) { fails++; console.log(`*** soru basligi "?" ile bitmiyor: ${kotu.join(', ')}`); }
   else console.log('ok  soru basliklari "?" ile bitiyor');
+}
+
+// 7. the same fact must not appear with two different numbers
+{
+  const { text } = makeExport({ seed: 5 });
+  const t = strip(yaz(analyzeTime(text, { B: 999, Bboot: 200 }), 'x.txt'));
+  const katlar = [...t.matchAll(/([0-9]+,[0-9]) kat/g)].map((m) => m[1]);
+  const tekil = [...new Set(katlar)];
+  if (katlar.length > 1 && tekil.length > 1) {
+    fails++; console.log(`*** ayni ekranda farkli kat sayilari: ${tekil.join(' / ')}`);
+  } else console.log(`ok  kat sayisi tutarli (${tekil.join('') || 'yok'})`);
+}
+
+// 8. this flow never asks who the reader is, so it must not address them as "sen"
+{
+  const { text } = makeExport({ seed: 5 });
+  const t = strip(yaz(analyzeTime(text, { B: 999, Bboot: 200 }), 'x.txt'));
+  const ikinciSahis = /\b(senden|sensin|sen |senin |seni )/i.test(t);
+  if (ikinciSahis) { fails++; console.log('*** okuyucuya "sen" diye sesleniyor, oysa kim oldugu sorulmadi'); }
+  else console.log('ok  okuyucuya yanlis kisi diye seslenmiyor');
+}
+
+// 9. archetype label is present and carries its own number
+{
+  const { text } = makeExport({ seed: 5 });
+  const t = strip(yaz(analyzeTime(text, { B: 999, Bboot: 200 }), 'x.txt'));
+  const var_ = /(bekleten|kuru cevap|tek tarafl|kaybolan|gece hatt|dengeli)/.test(t);
+  if (!var_) { fails++; console.log('*** arketip etiketi yok'); } else console.log('ok  arketip etiketi var');
 }
 
 console.log('');
