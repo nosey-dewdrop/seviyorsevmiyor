@@ -8,17 +8,32 @@ a call ("flört var mı, yok mu?") with evidence, theyseeyourphotos energy, Turk
 Not a wrapper: own on-device statistical cascade; Llama (Groq worker) only voices the reveal with consent;
 engine numbers are LAW. Renamed 15 Tem from mesajibirokusana (terazi mekaniği + Damla "repo adı bu olsun").
 
-## Status (v70, CANLI: nosey-dewdrop.github.io/seviyorsevmiyor)
-Ürün canlıda çalışıyor: iki-sütun giriş, analiz, SADE kart (skor barı+istatistik+grafik), theyseeyourphotos
-tonlu yorum. Motor parse+balance Node-kanıtlı. Worker `seviyorsevmiyor-api` deploy'lu, GROQ_API_KEY taze.
+## Status (v72, CANLI: nosey-dewdrop.github.io/seviyorsevmiyor)
+İKİ AKIŞ var. Eski: `index.html`, kısa sohbet yapıştır → flört hükmü. Yeni: `zaman.html`, WhatsApp
+export bırak → "bu sohbet ne zaman değişti" + tarih + güven aralığı. Yeni akış 16 Ağu'da kuruldu.
 
-Açık işler (Damla'da / karar onun):
-- Spiker kanıt-uydurma fix commit'li ama HENÜZ DEPLOY EDİLMEDİ → `cd backend && npx wrangler deploy`.
-- FLÖRT TAVSİYESİ metni: brand'e tıkla → boş placeholder, Damla kendi sesiyle yazacak (index.html .dev-notu).
-- og.png stale (hâlâ terazi+kalp): PNG üretici yok + headless yasak → Damla og.svg'yi 1200x630 export etmeli.
-- LLAMA MİMARİ ÇELİŞKİSİ: ham `doc` metni hâlâ Llama'ya gidiyor (gizlilik.html dürüstçe böyle diyor). Damla
-  "sadece istatistik gitsin" istemişti; doc'u çıkar (kanıt/alıntı düşer) vs kalsın kararı ONA ait.
-- DOMAIN: share.js + og:url uzun github.io adresi yazıyor; kısa domain bağlanırsa ikisi güncellenmeli.
+ZAMAN MOTORU (`web/js/time/`, 6 Node kapısı yeşil, `node train/*_check.mjs`):
+parse damgayı artık atmıyor (naive dakika, Date.UTC), tur/oturum bölütleme, veriden kestirilen tau,
+uyku düzeltmesi, rank-CUSUM değişim noktası + blok permütasyon + residual bootstrap tarih CI.
+Ölçüm: null seride yanlış pozitif %0, sürüklenmede %0 (trend kapısı 0.95, taramayla seçildi),
+gerçek 4x sıçramada güç %75, tarih CI kapsama %89.3 (nominal %90). 39.5k mesaj 686 ms.
+E2E: ekilen kırılma 2 Nisan, bulunan 3 Nisan.
+
+⚠ TARAYICIDA HİÇ ÇALIŞMADI. Worker, dosya bırakma, zip açma, bulut butonu sadece Node'da doğrulandı.
+Damla bir export bırakana kadar "çalışıyor" DENMEZ. Açık blokör budur.
+
+Açık işler:
+- PAYLAŞIM KARTI yok: share.js zaman akışına bağlı değil, viral yüzey eksik.
+- og.png stale (hâlâ terazi+kalp): headless yasak → Damla og.svg'yi 1200x630 export etmeli.
+- LLAMA MİMARİ ÇELİŞKİSİ **eski akışta duruyor**: index.html hâlâ ham `doc` yolluyor. Yeni akışta
+  çözüldü (sadece 326 baytlık sayı gider, isim/mesaj yok, `train/bulut_check.mjs` kanıtlıyor).
+- ocr.js hâlâ CDN'den Tesseract çekiyor (jszip yerele alındı, bu alınmadı).
+- FLÖRT TAVSİYESİ metni: brand'e tıkla → boş placeholder (index.html .dev-notu).
+- DOMAIN: share.js + og:url uzun github.io adresi yazıyor.
+
+16 Ağu NOTU: worker KAZARA deploy edildi (commit mesajındaki backtick zsh'de çalıştı, Version ID
+0bced59e). Yan etkisi: bekleyen spiker kanıt-uydurma fix'i de canlıya çıktı. Kırılan yok, secret
+yerinde. Geri dönülecekse `npx wrangler rollback`.
 
 ## Kritik kurallar
 - LOCALHOST YOK: her değişiklik gh-pages'e push edilip canlıda görülür (Damla emri, 15 Tem).
@@ -29,7 +44,8 @@ Açık işler (Damla'da / karar onun):
   EM DASH yok, sorular "?" ile biter, "kanka" yasak (mesafeli gözlemci), krem/renkli-tek-kelime/pill yasak.
 
 ## Retrain / verify
-`python3 train/train.py`; verify `python3 train/parity_check.py && node train/parity_check.mjs`.
+Zaman motoru: `for t in parse timeline cpd e2e yazi bulut; do node train/${t}_check.mjs; done`.
+Ton modeli: `python3 train/train.py`; verify `python3 train/parity_check.py && node train/parity_check.mjs`.
 Seed 268, held-out 72.2% (hard set). Ship model.json only if it improves; synth train-only, real held-out.
 
 Detay/tarihçe/arşiv + viral hamleler + roadmap → PROJECT.md.
