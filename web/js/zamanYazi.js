@@ -7,7 +7,7 @@
 import {
   sec, ACILIS_KIRILMA, ACILIS_YOK, ACILIS_KESINTI, CUMLE, arketip,
   KAPANIS_KIRILMA, KAPANIS_YOK,
-} from './soz.js?v=71';
+} from './soz.js?v=72';
 
 const AY = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran',
   'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık'];
@@ -260,8 +260,44 @@ export function yaz(res, dosyaAdi) {
     ${mansel}
     ${arketipBlok}
     ${kesintiBlok}
+    <div id="bulutYer"></div>
     ${sayilar}
     ${nasil}
     <button class="btn" id="yeniBtn" type="button">başka sohbet</button>
   </div>`;
+}
+
+// The cloud block. It sits under the verdict and never replaces it, so the page reads the same
+// whether the quota is open, spent, or the endpoint is not deployed at all.
+export function bulutBlok(durum, kalan, gunluk, satirlar) {
+  if (durum === 'teklif') {
+    return `<div class="bulut">
+      <p class="bulut-not">bu okumayı bulut kendi cümleleriyle de yazabilir.
+      cihazından sadece sayılar çıkar, mesajlar ve isimler çıkmaz.</p>
+      <button class="btn ghost" id="bulutBtn" type="button">bulut da yazsın</button>
+      <span class="bulut-kalan">bugün ${kalan} kişilik hak kaldı, günlük ${gunluk}</span>
+    </div>`;
+  }
+  if (durum === 'yaziyor') {
+    return '<div class="bulut"><p class="bulut-not">bulut yazıyor</p></div>';
+  }
+  if (durum === 'yazdi') {
+    return `<div class="bulut yazili">
+      ${satirlar.map((x) => `<p class="bulut-satir">${esc(x)}</p>`).join('')}
+      <span class="bulut-kalan">bu okumayı bulut yazdı. bugün ${kalan} kişilik hak kaldı.</span>
+    </div>`;
+  }
+  if (durum === 'doldu') {
+    return `<div class="bulut">
+      <p class="bulut-not">bugünlük bulut hakkı bitti. api'yi ben sınırladım, çünkü sınırsız
+      bıraksam ilk kalabalıkta herkese hata dönerdi. yukarıdaki okuma zaten tamamı, hiçbir şey
+      eksik değil. yarın sıfırlanıyor. uğradığın için teşekkürler.</p>
+    </div>`;
+  }
+  if (durum === 'kisiKotasi') {
+    return `<div class="bulut">
+      <p class="bulut-not">bugün senin bulut hakkın doldu. okuman yukarıda, eksiksiz duruyor.</p>
+    </div>`;
+  }
+  return '';
 }

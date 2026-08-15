@@ -40,6 +40,17 @@ export default {
         return json(await readStats(env));
       }
 
+      // how many cloud-written readings are left today. reading this does NOT spend one, so the
+      // page can show an honest number before the user decides.
+      if (url.pathname === '/api/zaman-kalan') {
+        return json({ kalan: await zamanKalan(env), gunluk: ZAMAN_GUNLUK });
+      }
+
+      // the time engine's optional voice. facts only, never messages.
+      if (url.pathname === '/api/zaman') {
+        return handleZaman(request, env, ip);
+      }
+
       // consented hard-case donation: user pressed "yanlış okudun" AND approved storing this
       // one chat for training. The ONLY route that ever stores content.
       if (url.pathname === '/api/itiraz') {
@@ -93,7 +104,7 @@ export default {
   },
 };
 
-const PING_EVENTS = ['analiz', 'spiker', 'paylasim', 'itiraz'];
+const PING_EVENTS = ['analiz', 'spiker', 'paylasim', 'itiraz', 'zaman'];
 
 async function bump(env, olay) {
   const day = new Date().toISOString().slice(0, 10);
@@ -123,6 +134,136 @@ async function limited(env, keyBase, max, ttl) {
   if (cur >= max) return true;
   await env.RATE_LIMIT?.put(key, String(cur + 1), { expirationTtl: ttl });
   return false;
+}
+
+// ---- /api/zaman — the time engine's optional voice ------------------------------------------
+//
+// The page always works without this. The on-device engine produces the verdict and a shipped
+// phrasebook produces the wording, so a reading is complete before this endpoint is ever called.
+// What this adds is freshness: a line written for THIS chat rather than picked from four variants.
+//
+// It is capped on purpose and the cap is stated on the page. The free tier gives 100k tokens a day,
+// which is why an uncapped cloud path would return 429 to everyone within the first viral hour
+// instead of degrading. Capped, the first hundred readings of the day get a written line and the
+// rest get the phrasebook, which is a worse sentence rather than a broken page.
+//
+// Two hard rules, both enforced here rather than trusted:
+//   1. only derived numbers arrive. no message text, ever. anything that looks like prose is rejected.
+//   2. the model may not write digits. every figure on screen is injected by the engine, so an
+//      invented number cannot reach the user. this is the same failure the live spiker had when it
+//      quoted lines that were never in the chat.
+
+const ZAMAN_GUNLUK = 100;      // global readings per day
+const ZAMAN_IP_GUNLUK = 3;     // per person per day, so one visitor cannot drain the pool
+const ZAMAN_MAX_BYTES = 2000;
+
+async function zamanKalan(env) {
+  const day = new Date().toISOString().slice(0, 10);
+  const used = parseInt((await env.RATE_LIMIT?.get(`zaman:gun:${day}`)) || '0');
+  return Math.max(0, ZAMAN_GUNLUK - used);
+}
+
+// Facts must be a small, flat, numeric object. This is the wall that keeps chat text from leaving
+// the device even if a future client is careless about what it puts in the payload.
+function olguTemiz(f) {
+  if (!f || typeof f !== 'object' || Array.isArray(f)) return null;
+  const out = {};
+  let n = 0;
+  for (const [k, v] of Object.entries(f)) {
+    if (++n > 24) break;
+    if (!/^[a-zA-Z_]{1,24}$/.test(k)) continue;
+    if (typeof v === 'number' && Number.isFinite(v)) out[k] = Math.round(v * 100) / 100;
+    else if (typeof v === 'boolean') out[k] = v;
+    // strings are allowed only as short display names, never as content
+    else if (typeof v === 'string' && v.length <= 24 && !/\s{2,}/.test(v)) out[k] = v;
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+const ZAMAN_SYSTEM = `sen bir sohbet analiz motorunun sesisin. sana bir sohbetin SAYILARI veriliyor, mesajları değil.
+
+görevin: bu sayılara bakıp üç kısa cümle yazmak.
+
+ton (theyseeyourphotos):
+- mesafeli, gözlemci, biraz ürkütücü bir üçüncü göz. dışarıdan bakıyorsun ve gördüğünü soğukkanlılıkla söylüyorsun.
+- "kanka", "aga", "dostum" gibi samimi hitap YOK. şaka YOK. teselli YOK. öğüt YOK.
+- ağırlıkla insanlar hakkında konuş, okuyucuya "sen" deme.
+- küçük harfle yaz. kısa cümleler. süs yok, metafor yok, slogan yok.
+- soru cümlesi kurarsan "?" ile bitir.
+
+mutlak kurallar:
+- RAKAM YAZMA. hiçbir sayı, yüzde, tarih, saat yazma. sayıları ekrana motor kendisi basıyor.
+- alıntı uydurma. elinde mesaj yok, sohbetten cümle biliyormuş gibi yapma.
+- nedensellik kurma. "aldatıyor", "biriyle tanıştı", "senden sıkıldı" gibi şeyler yazma. sadece görüneni söyle.
+- her cümle 12 kelimeyi geçmesin.
+
+çıktı: sadece üç satır, her satır bir cümle, numaralandırma yok, tırnak yok.`;
+
+// A single digit in the output means the model tried to state a figure of its own, and that figure
+// was not measured by anything. Reject the whole reading rather than repair it.
+function zamanGecerli(satirlar) {
+  if (!Array.isArray(satirlar) || satirlar.length < 2) return null;
+  const temiz = [];
+  for (const s of satirlar.slice(0, 3)) {
+    if (typeof s !== 'string') return null;
+    const t = s.trim().replace(/^[-*\d.)\s]+/, '');
+    if (!t || t.length > 140) return null;
+    if (/[0-9٠-٩]/.test(t)) return null;
+    if (/(kanka|aga|reis|dostum|moruk)/i.test(t)) return null;
+    if (/["“”«»]/.test(t)) return null;
+    temiz.push(t);
+  }
+  return temiz.length >= 2 ? temiz : null;
+}
+
+async function handleZaman(request, env, ip) {
+  const day = new Date().toISOString().slice(0, 10);
+  const kalan = await zamanKalan(env);
+  if (kalan <= 0) return json({ ok: false, sebep: 'gunluk_doldu', kalan: 0, gunluk: ZAMAN_GUNLUK });
+  if (await limited(env, `zip:${ip}`, ZAMAN_IP_GUNLUK, 90000)) {
+    return json({ ok: false, sebep: 'kisi_kotasi', kalan, gunluk: ZAMAN_GUNLUK });
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const olgu = olguTemiz(body.olgu);
+  if (!olgu) return json({ ok: false, sebep: 'olgu_yok', kalan, gunluk: ZAMAN_GUNLUK });
+  const payload = JSON.stringify(olgu);
+  if (payload.length > ZAMAN_MAX_BYTES) {
+    return json({ ok: false, sebep: 'cok_buyuk', kalan, gunluk: ZAMAN_GUNLUK });
+  }
+  if (!env.GROQ_API_KEY) return json({ ok: false, sebep: 'anahtar_yok', kalan, gunluk: ZAMAN_GUNLUK });
+
+  // spend the global slot before calling out, so a burst cannot overshoot the cap
+  const used = parseInt((await env.RATE_LIMIT?.get(`zaman:gun:${day}`)) || '0');
+  await env.RATE_LIMIT?.put(`zaman:gun:${day}`, String(used + 1), { expirationTtl: 60 * 60 * 30 });
+
+  let satirlar = null;
+  try {
+    const res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${env.GROQ_API_KEY}` },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        temperature: 0.8,
+        max_tokens: 220,
+        messages: [
+          { role: 'system', content: ZAMAN_SYSTEM },
+          { role: 'user', content: `sohbetin sayıları:\n${payload}` },
+        ],
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const metin = data?.choices?.[0]?.message?.content || '';
+      satirlar = zamanGecerli(metin.split('\n').map((x) => x.trim()).filter(Boolean));
+    }
+  } catch (e) {
+    satirlar = null;
+  }
+
+  await bump(env, 'zaman');
+  if (!satirlar) return json({ ok: false, sebep: 'gecersiz_cikti', kalan: kalan - 1, gunluk: ZAMAN_GUNLUK });
+  return json({ ok: true, satirlar, kalan: kalan - 1, gunluk: ZAMAN_GUNLUK });
 }
 
 // ---- /api/spiker — Llama is the mouth, never the judge -------------------------------------

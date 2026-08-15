@@ -205,3 +205,26 @@ h3 { font-size: 14px; font-weight: 700; margin: 0 0 8px; color: var(--ink-2); }
 }
 .ark-ad { font-size: 21px; font-weight: 700; letter-spacing: -0.03em; }
 .ark-kanit { color: var(--ink-3); font-size: 13px; }
+
+/* cloud block. always additive, never replaces the verdict above it */
+.bulut {
+  border: 1px solid var(--line);
+  border-radius: var(--r-ui);
+  padding: 16px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+.bulut.yazili { border-style: solid; background: var(--surface-2); }
+.bulut-not { margin: 0; color: var(--ink-2); font-size: 13px; }
+.bulut-satir { margin: 0; font-size: 15px; }
+.bulut-kalan { color: var(--ink-4); font-size: 12px; }
+.btn.ghost {
+  margin-top: 0;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line-2);
+}
+.btn.ghost:hover { background: var(--surface-2); }
