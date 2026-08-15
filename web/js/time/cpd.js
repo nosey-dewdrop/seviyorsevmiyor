@@ -162,18 +162,38 @@ function median(a) {
   return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2;
 }
 
-// Percentile CI for the change index, via block bootstrap inside the segment. A single date is not
-// an honest answer: k-hat is an estimate and carries its own spread.
-function bootstrapIndexCi(x, lo, hi, b, B, rnd, kmin) {
+// Percentile CI for the change index, by RESIDUAL block bootstrap. A single date is not an honest
+// answer, because k-hat is an estimate and carries its own spread.
+//
+// Shuffling the segment itself (an earlier version did) destroys the very step whose position is
+// being measured, so every replicate puts k somewhere random and the interval swallows the whole
+// chat. Measured: a break located to within one day came back with a two year interval, which the
+// honesty layer then refused to print. The fix is to keep the fitted step and resample only what is
+// left over: take residuals around the two regime means, block-resample those, add the step back,
+// and re-estimate k on the reconstruction.
+function bootstrapIndexCi(x, lo, hi, k0, b, B, rnd, kmin) {
   const m = hi - lo;
-  const seg = Float64Array.from(x.slice(lo, hi));
+  if (m < 8 || k0 <= lo || k0 >= hi) return null;
+  let m1 = 0, m2 = 0;
+  for (let i = lo; i < k0; i++) m1 += x[i];
+  for (let i = k0; i < hi; i++) m2 += x[i];
+  m1 /= (k0 - lo); m2 /= (hi - k0);
+
+  const fitted = new Float64Array(m);
+  const resid = new Float64Array(m);
+  for (let i = 0; i < m; i++) {
+    const abs = lo + i;
+    fitted[i] = abs < k0 ? m1 : m2;
+    resid[i] = x[abs] - fitted[i];
+  }
+
   const buf = new Float64Array(m);
+  const rebuilt = new Float64Array(m);
   const ks = [];
   for (let t = 0; t < B; t++) {
-    circularBlockShuffle(seg, buf, b, rnd);
-    // resample preserves the level shift only if we bootstrap residual blocks around the estimate;
-    // here we bootstrap the segment itself and re-estimate, which is the conservative choice.
-    const r = rankTransform(buf);
+    circularBlockShuffle(resid, buf, b, rnd);
+    for (let i = 0; i < m; i++) rebuilt[i] = fitted[i] + buf[i];
+    const r = rankTransform(rebuilt);
     let mean = 0; for (let i = 0; i < m; i++) mean += r[i];
     mean /= m;
     let sd = 0; for (let i = 0; i < m; i++) { const d = r[i] - mean; sd += d * d; }
@@ -240,7 +260,7 @@ export function detectChangePoints(x, tsList, opts = {}) {
     // Significance is not a story. At 15k events a 2% shift is p<0.001 and not worth a sentence.
     if (Math.abs(after - before) < minEffect) return;
 
-    const ci = bootstrapIndexCi(x, lo, hi, b, Bboot, rnd, kmin);
+    const ci = bootstrapIndexCi(x, lo, hi, kAbs, b, Bboot, rnd, kmin);
     points.push({
       label,
       index: kAbs,
@@ -288,13 +308,17 @@ export function holmAdjust(results, B = 999) {
 export function jointClaim(points, spanDays, windowDays = 14) {
   const sig = points.filter((p) => p.significant !== false);
   if (sig.length < 2) return null;
+  // "A ends the conversation" and "B ends the conversation" are one fact seen from two sides, and
+  // counting them as two independent witnesses inflates the joint probability by a whole factor.
+  // Collapse each concept to its stem before counting.
+  const concept = (l) => String(l).replace(/_[AB]$/, '');
   let best = null;
   for (const anchor of sig) {
     const near = sig.filter((p) => Math.abs(p.ts - anchor.ts) / 1440 <= windowDays);
-    const labels = new Set(near.map((p) => p.label));
+    const labels = new Set(near.map((p) => concept(p.label)));
     if (labels.size < 2) continue;
     const k = labels.size;
-    const S = new Set(sig.map((p) => p.label)).size;
+    const S = new Set(sig.map((p) => concept(p.label))).size;
     const prob = Math.min(1, choose(S, k) * Math.pow((2 * windowDays) / Math.max(spanDays, 1), k - 1));
     if (!best || prob < best.prob) {
       best = {

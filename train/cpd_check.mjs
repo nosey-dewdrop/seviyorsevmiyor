@@ -81,7 +81,11 @@ for (let t = 0; t < TRIALS; t++) {
 }
 console.log(`3) GERÇEK 4x sıçrama (n=400)     → tespit: ${hit}/${TRIALS} = %${((hit / TRIALS) * 100).toFixed(1)}`);
 console.log(`   tespit edilenlerin ±20 olay içinde doğru yeri: ${within}/${hit || 1}`);
-console.log(`   tarih CI'si gerçek noktayı kapsıyor          : ${ciCover}/${hit || 1}`);
+{
+  const cov = (ciCover / (hit || 1)) * 100;
+  const okCal = cov >= 84 && cov <= 96;   // nominal 90% (5-95 percentile); 100% would mean useless width
+  console.log(`   tarih CI kapsama (nominal %90)               : ${ciCover}/${hit || 1} = %${cov.toFixed(1)} ${okCal ? 'kalibre' : '*** kalibrasyon bozuk'}`);
+}
 
 // ---- 4. small effect must be refused by the effect gate ----
 let smallFp = 0;
