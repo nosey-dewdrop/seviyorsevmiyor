@@ -1,0 +1,52 @@
+{
+  "project": "seviyorsevmiyor",
+  "bash": [
+    {
+      "id": "no-force-push-main",
+      "deny": "git\\s+push[^\\n]*(--force|\\s-f\\b)[^\\n]*\\bmain\\b",
+      "why": "Baseline safety: force push to main forbidden (deploy force-push targets gh-pages only, which stays allowed)"
+    },
+    {
+      "id": "no-rm-rf-outside-project",
+      "deny": "rm\\s+(-[a-z]*r[a-z]*f|-[a-z]*f[a-z]*r)[a-z]*\\s+(/|~)",
+      "why": "Baseline safety: destructive recursive delete on root or home"
+    },
+    {
+      "id": "no-hard-reset-shared",
+      "deny": "git\\s+reset\\s+--hard\\s+[^\\n]*\\b(origin/)?(main|gh-pages)\\b",
+      "why": "Baseline safety: no destructive reset on shared branches (main, gh-pages)"
+    },
+    {
+      "id": "no-localhost-server",
+      "deny": "(python3?\\s+-m\\s+http\\.server|npx\\s+(serve|http-server)\\b|live-server)",
+      "why": "Kritik kurallar: LOCALHOST YOK — every change is pushed to gh-pages and verified live (Damla emri, 15 Tem)"
+    },
+    {
+      "id": "no-headless-browser",
+      "deny": "(--headless|puppeteer|playwright)",
+      "why": "Status/og.png note: headless yasak — no headless browser use (og.png export is Damla's manual job)"
+    }
+  ],
+  "protectedPaths": [
+    {
+      "id": "model-json-generated",
+      "match": "model\\.json$",
+      "why": "Retrain law: model.json is produced by train/train.py and shipped only if it improves — retrain, never hand-edit"
+    },
+    {
+      "id": "og-png-manual-export",
+      "match": "og\\.png$",
+      "why": "og.png is Damla's manual 1200x630 export from og.svg (no PNG generator + headless yasak) — agent must not write it"
+    }
+  ],
+  "codePaths": [
+    "^web/js/.*\\.js$",
+    "^backend/.*\\.(mjs|js)$",
+    "^train/.*\\.(py|mjs)$"
+  ],
+  "testPaths": [
+    "^train/parity_check\\.(py|mjs)$"
+  ],
+  "testCommand": "(python3\\s+train/parity_check\\.py|node\\s+train/parity_check\\.mjs)",
+  "generatedBy": "rabadon guard (claude code cli)"
+}

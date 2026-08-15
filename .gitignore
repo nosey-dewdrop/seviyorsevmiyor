@@ -5,3 +5,7 @@ train/.venv/
 backend/.dev.vars
 *.log
 backend/.wrangler/
+.vercel
+.env*
+
+.rabadon/state.json
