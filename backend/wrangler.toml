@@ -2,15 +2,40 @@ name = "seviyorsevmiyor-api"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
-# KV for per-IP rate counters only (no content is ever stored).
+# KV for per-IP rate counters only (no content is ever stored here).
 # Namespace title is MESAJ_RATE_LIMIT (account already had a generic RATE_LIMIT from another worker).
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
 id = "facdf8b5b45d493b808c18fe9fa3e7a1"
 
+# Donated conversations (/api/itiraz) must NOT share a namespace with rate counters: different
+# data, different retention, different blast radius. Create it once and uncomment:
+#   npx wrangler kv namespace create CORPUS
+# [[kv_namespaces]]
+# binding = "CORPUS"
+# id = "<paste the id wrangler prints>"
+# Until the binding exists the worker falls back to RATE_LIMIT, but the 180-day expirationTtl is
+# applied either way.
+
 [vars]
+# Only these origins may talk to the worker. Empty or missing => the worker returns 503 naming
+# ALLOWED_ORIGINS. It never falls back to "*".
+ALLOWED_ORIGINS = "https://nosey-dewdrop.github.io"
+
 # Spiker (Groq/Llama voice layer). "on" = live; flip to "off" as the kill switch.
-# Fuses in code: 6/min + 60/day per IP, 2000/day global.
+# Fuses in code: 6/min + 60/day per IP, 900/day global (Groq free tier is 1000/day).
 SPIKER_OPEN = "on"
 
-# Secrets (never in this file): GROQ_API_KEY — set via `wrangler secret put`.
+# Consented hard-case donation. Its own kill switch, so stopping content storage no longer means
+# stopping the spiker too.
+ITIRAZ_OPEN = "on"
+
+# Secrets (never in this file), all three set via `npx wrangler secret put <NAME>`:
+#   GROQ_API_KEY      — console.groq.com
+#   TURNSTILE_SECRET  — Cloudflare dash > Turnstile > widget > secret key
+#   BILET_SECRET      — any long random string, signs our own short-lived tickets
+#                       e.g. openssl rand -hex 32
+# TURNSTILE_SECRET or BILET_SECRET missing => /api/bilet, /api/spiker and /api/itiraz return 503
+# listing the missing name. Nothing stays quietly open.
+#
+# The Turnstile SITE key (public, not a secret) goes in web/js/api.js as TURNSTILE_SITEKEY.

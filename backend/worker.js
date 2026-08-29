@@ -12,80 +12,212 @@
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const TURNSTILE_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+
+// Every KV write carries a TTL. Nothing this worker stores is allowed to live forever, least of
+// all the donated conversations in `corpus:` — an indefinite retention period is a KVKK breach,
+// not a storage detail. Numbers are seconds.
+const TTL = {
+  corpus: 60 * 60 * 24 * 180,   // 180 days: long enough to retrain on, short enough to defend
+  stat: 60 * 60 * 24 * 400,
+  zamanGun: 60 * 60 * 30,
+};
 
 export default {
   async fetch(request, env) {
-    if (request.method === 'OPTIONS') return new Response(null, { headers: cors() });
     const url = new URL(request.url);
+    const origin = request.headers.get('origin') || '';
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+
+    // ---- gate 1: origin -----------------------------------------------------------------------
+    // The old worker answered `Access-Control-Allow-Origin: *`, which is not a rate-limit problem
+    // but an ownership problem: any page anywhere could spend this account's Groq key. The
+    // allowlist is configuration, so a missing/empty one is a misconfiguration and the worker says
+    // so by name instead of falling back to "open".
+    const izinli = izinliOriginler(env);
+    if (!izinli.length) {
+      return json({ error: 'Sunucu yapilandirilmadi', eksik: ['ALLOWED_ORIGINS'] }, 503, '');
+    }
+    if (!izinli.includes(origin)) {
+      // No CORS header on this path on purpose: the browser must not be able to read the body.
+      return json({ error: 'Origin not allowed' }, 403, '');
+    }
+    if (request.method === 'OPTIONS') return new Response(null, { headers: cors(origin) });
+
     try {
-      if (request.method !== 'POST') return json({ error: 'Not found' }, 404);
+      if (request.method !== 'POST') return json({ error: 'Not found' }, 404, origin);
       const len = parseInt(request.headers.get('content-length') || '0');
-      if (len > 60_000) return json({ error: 'Conversation too large' }, 413);
+      if (len > 60_000) return json({ error: 'Conversation too large' }, 413, origin);
+
+      // ---- gate 2: hand out a short-lived ticket for a solved Turnstile challenge --------------
+      // The widget alone protects nothing; an attacker POSTs straight at the endpoint. So the
+      // Turnstile response is verified HERE, server side, and what the client gets back is our own
+      // HMAC ticket with a five minute life. The expensive routes accept the ticket, not the widget.
+      if (url.pathname === '/api/bilet') {
+        const eksik = eksikSirlar(env);
+        if (eksik.length) return json({ error: 'Sunucu yapilandirilmadi', eksik }, 503, origin);
+        if (await limited(env, `b:${ip}`, 20, 120)) {
+          return json({ error: 'Rate limit exceeded' }, 429, origin);
+        }
+        const b = await request.json().catch(() => ({}));
+        const cevap = typeof b.turnstile === 'string' ? b.turnstile : '';
+        if (!cevap) return json({ error: 'Turnstile cevabi yok' }, 403, origin);
+        if (!(await siteverify(env, cevap, ip))) {
+          return json({ error: 'Turnstile dogrulanmadi' }, 403, origin);
+        }
+        return json({ bilet: await biletVer(env), omur_sn: BILET_OMUR_SN }, 200, origin);
+      }
 
       // fire-and-forget counters: no content, no identity, daily totals only (Faz 1 metrics)
       if (url.pathname === '/api/ping') {
-        if (await limited(env, `p:${ip}`, 30, 120)) return json({ ok: true });
+        if (await limited(env, `p:${ip}`, 30, 120)) return json({ ok: true }, 200, origin);
         const b = await request.json().catch(() => ({}));
         if (PING_EVENTS.includes(b.olay)) await bump(env, b.olay);
-        return json({ ok: true });
+        return json({ ok: true }, 200, origin);
       }
 
       // public read-only counts (the panel)
-      if (url.pathname === '/api/stats' && request.method === 'POST') {
-        return json(await readStats(env));
+      if (url.pathname === '/api/stats') {
+        return json(await readStats(env), 200, origin);
       }
 
       // how many cloud-written readings are left today. reading this does NOT spend one, so the
       // page can show an honest number before the user decides.
       if (url.pathname === '/api/zaman-kalan') {
-        return json({ kalan: await zamanKalan(env), gunluk: ZAMAN_GUNLUK });
+        return json({ kalan: await zamanKalan(env), gunluk: ZAMAN_GUNLUK }, 200, origin);
       }
 
       // the time engine's optional voice. facts only, never messages.
       if (url.pathname === '/api/zaman') {
-        return handleZaman(request, env, ip);
+        return handleZaman(request, env, ip, origin);
       }
 
       // consented hard-case donation: user pressed "yanlış okudun" AND approved storing this
-      // one chat for training. The ONLY route that ever stores content.
+      // one chat for training. The ONLY route that ever stores content — so it gets its own kill
+      // switch, its own retention window, and the ticket gate.
       if (url.pathname === '/api/itiraz') {
+        if (env.ITIRAZ_OPEN !== 'on') return json({ error: 'Itiraz is not open' }, 403, origin);
+        const red = await biletKapisi(env, request, origin);
+        if (red) return red;
         if (await limited(env, `i:${ip}`, 5, 120) || await limited(env, `iday:${ip}`, 20, 90000)) {
-          return json({ error: 'Rate limit exceeded' }, 429);
+          return json({ error: 'Rate limit exceeded' }, 429, origin);
         }
         const b = await request.json().catch(() => ({}));
         const doc = typeof b.doc === 'string' ? b.doc.slice(0, 8000) : '';
-        if (!doc || b.onay !== true) return json({ error: 'Invalid request' }, 400);
+        if (!doc || b.onay !== true) return json({ error: 'Invalid request' }, 400, origin);
         const kayit = {
           doc,
           hukum: typeof b.hukum === 'string' ? b.hukum.slice(0, 40) : '',
           karar: typeof b.karar === 'string' ? b.karar.slice(0, 10) : '',
           ts: Date.now(),
         };
-        await env.RATE_LIMIT?.put(`corpus:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
-          JSON.stringify(kayit));
+        // Donated content does not belong in the rate-limit namespace. CORPUS is its own binding;
+        // until it exists the write still lands with a retention window rather than forever.
+        await korpusKV(env)?.put(`corpus:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
+          JSON.stringify(kayit), { expirationTtl: TTL.corpus });
         await bump(env, 'itiraz_bagis');
-        return json({ ok: true });
+        return json({ ok: true }, 200, origin);
       }
 
       if (url.pathname === '/api/spiker') {
-        if (env.SPIKER_OPEN !== 'on') return json({ error: 'Spiker is not open yet' }, 403);
+        if (env.SPIKER_OPEN !== 'on') return json({ error: 'Spiker is not open yet' }, 403, origin);
+        const red = await biletKapisi(env, request, origin);
+        if (red) return red;
         // Fuses: per-IP per-minute, per-IP per-day, and a global daily cap on the free key.
         if (await limited(env, `smin:${ip}`, 6, 120) || await limited(env, `sday:${ip}`, 60, 90000)) {
-          return json({ error: 'Rate limit exceeded. Please wait.' }, 429);
+          return json({ error: 'Rate limit exceeded. Please wait.' }, 429, origin);
         }
-        if (await limited(env, 'sglobal', 2000, 90000)) {
-          return json({ error: 'Daily capacity reached' }, 429);
+        // 900, not 2000: the Groq free tier is 1000 requests a day, so the old cap sat above the
+        // thing it was supposed to protect.
+        if (await limited(env, 'sglobal', SPIKER_GLOBAL_GUNLUK, 90000)) {
+          return json({ error: 'Daily capacity reached' }, 429, origin);
         }
-        return handleSpiker(request, env);
+        return handleSpiker(request, env, origin);
       }
 
-      return json({ error: 'Not found' }, 404);
+      return json({ error: 'Not found' }, 404, origin);
     } catch {
-      return json({ error: 'Internal error' }, 500);
+      return json({ error: 'Internal error' }, 500, origin);
     }
   },
 };
+
+const SPIKER_GLOBAL_GUNLUK = 900;
+const BILET_OMUR_SN = 300;
+
+function izinliOriginler(env) {
+  return String(env.ALLOWED_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+// Corpus lives in its own namespace once the binding exists. RATE_LIMIT is the fallback so a
+// donation is never silently dropped, but the key prefix and the TTL are the same either way.
+function korpusKV(env) { return env.CORPUS || env.RATE_LIMIT; }
+
+// Named, not boolean: a 503 that says which secret is missing is a bug report. A worker that
+// quietly stays open because a secret was never set is the failure this phase exists to remove.
+function eksikSirlar(env) {
+  return ['TURNSTILE_SECRET', 'BILET_SECRET'].filter((ad) => !env[ad]);
+}
+
+async function siteverify(env, cevap, ip) {
+  try {
+    const form = new URLSearchParams({ secret: env.TURNSTILE_SECRET, response: cevap });
+    if (ip && ip !== 'unknown') form.set('remoteip', ip);
+    const res = await fetch(TURNSTILE_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: form.toString(),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data?.success === true;
+  } catch {
+    return false;
+  }
+}
+
+// ---- our own ticket: exp + nonce + HMAC-SHA256, verified in constant time ---------------------
+
+async function hmac(secret, mesaj) {
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(mesaj));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function biletVer(env) {
+  const son = Date.now() + BILET_OMUR_SN * 1000;
+  const nonce = crypto.randomUUID().slice(0, 8);
+  const govde = `${son}.${nonce}`;
+  return `${govde}.${await hmac(env.BILET_SECRET, govde)}`;
+}
+
+function esit(a, b) {
+  if (a.length !== b.length) return false;
+  let fark = 0;
+  for (let i = 0; i < a.length; i++) fark |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return fark === 0;
+}
+
+async function biletGecerli(env, bilet) {
+  if (typeof bilet !== 'string') return false;
+  const parca = bilet.split('.');
+  if (parca.length !== 3) return false;
+  const [sonStr, nonce, imza] = parca;
+  const son = parseInt(sonStr, 10);
+  if (!Number.isFinite(son) || Date.now() > son) return false;
+  if (son > Date.now() + (BILET_OMUR_SN + 60) * 1000) return false;   // no far-future tickets
+  if (!/^[a-z0-9-]{4,36}$/i.test(nonce)) return false;
+  return esit(imza, await hmac(env.BILET_SECRET, `${sonStr}.${nonce}`));
+}
+
+async function biletKapisi(env, request, origin) {
+  const eksik = eksikSirlar(env);
+  if (eksik.length) return json({ error: 'Sunucu yapilandirilmadi', eksik }, 503, origin);
+  const bilet = request.headers.get('x-app-token') || '';
+  if (!(await biletGecerli(env, bilet))) return json({ error: 'Bilet gecersiz' }, 403, origin);
+  return null;
+}
 
 const PING_EVENTS = ['analiz', 'spiker', 'paylasim', 'itiraz', 'zaman'];
 
@@ -93,7 +225,7 @@ async function bump(env, olay) {
   const day = new Date().toISOString().slice(0, 10);
   const key = `stat:${olay}:${day}`;
   const cur = parseInt((await env.RATE_LIMIT?.get(key)) || '0');
-  await env.RATE_LIMIT?.put(key, String(cur + 1), { expirationTtl: 60 * 60 * 24 * 400 });
+  await env.RATE_LIMIT?.put(key, String(cur + 1), { expirationTtl: TTL.stat });
 }
 
 async function readStats(env) {
@@ -199,26 +331,26 @@ function zamanGecerli(satirlar) {
   return temiz.length >= 2 ? temiz : null;
 }
 
-async function handleZaman(request, env, ip) {
+async function handleZaman(request, env, ip, origin) {
   const day = new Date().toISOString().slice(0, 10);
   const kalan = await zamanKalan(env);
-  if (kalan <= 0) return json({ ok: false, sebep: 'gunluk_doldu', kalan: 0, gunluk: ZAMAN_GUNLUK });
+  if (kalan <= 0) return json({ ok: false, sebep: 'gunluk_doldu', kalan: 0, gunluk: ZAMAN_GUNLUK }, 200, origin);
   if (await limited(env, `zip:${ip}`, ZAMAN_IP_GUNLUK, 90000)) {
-    return json({ ok: false, sebep: 'kisi_kotasi', kalan, gunluk: ZAMAN_GUNLUK });
+    return json({ ok: false, sebep: 'kisi_kotasi', kalan, gunluk: ZAMAN_GUNLUK }, 200, origin);
   }
 
   const body = await request.json().catch(() => ({}));
   const olgu = olguTemiz(body.olgu);
-  if (!olgu) return json({ ok: false, sebep: 'olgu_yok', kalan, gunluk: ZAMAN_GUNLUK });
+  if (!olgu) return json({ ok: false, sebep: 'olgu_yok', kalan, gunluk: ZAMAN_GUNLUK }, 200, origin);
   const payload = JSON.stringify(olgu);
   if (payload.length > ZAMAN_MAX_BYTES) {
-    return json({ ok: false, sebep: 'cok_buyuk', kalan, gunluk: ZAMAN_GUNLUK });
+    return json({ ok: false, sebep: 'cok_buyuk', kalan, gunluk: ZAMAN_GUNLUK }, 200, origin);
   }
-  if (!env.GROQ_API_KEY) return json({ ok: false, sebep: 'anahtar_yok', kalan, gunluk: ZAMAN_GUNLUK });
+  if (!env.GROQ_API_KEY) return json({ ok: false, sebep: 'anahtar_yok', kalan, gunluk: ZAMAN_GUNLUK }, 200, origin);
 
   // spend the global slot before calling out, so a burst cannot overshoot the cap
   const used = parseInt((await env.RATE_LIMIT?.get(`zaman:gun:${day}`)) || '0');
-  await env.RATE_LIMIT?.put(`zaman:gun:${day}`, String(used + 1), { expirationTtl: 60 * 60 * 30 });
+  await env.RATE_LIMIT?.put(`zaman:gun:${day}`, String(used + 1), { expirationTtl: TTL.zamanGun });
 
   let satirlar = null;
   try {
@@ -245,8 +377,8 @@ async function handleZaman(request, env, ip) {
   }
 
   await bump(env, 'zaman');
-  if (!satirlar) return json({ ok: false, sebep: 'gecersiz_cikti', kalan: kalan - 1, gunluk: ZAMAN_GUNLUK });
-  return json({ ok: true, satirlar, kalan: kalan - 1, gunluk: ZAMAN_GUNLUK });
+  if (!satirlar) return json({ ok: false, sebep: 'gecersiz_cikti', kalan: kalan - 1, gunluk: ZAMAN_GUNLUK }, 200, origin);
+  return json({ ok: true, satirlar, kalan: kalan - 1, gunluk: ZAMAN_GUNLUK }, 200, origin);
 }
 
 // ---- /api/spiker — Llama is the mouth, never the judge -------------------------------------
@@ -302,12 +434,12 @@ ${doc}
  "kapanis":"tek vuruşluk içten kapanış, 1 cümle"}`;
 }
 
-async function handleSpiker(request, env) {
+async function handleSpiker(request, env, origin) {
   const body = await request.json();
   const facts = body.facts;
   const doc = typeof body.doc === 'string' ? body.doc.slice(0, 6000) : '';
   if (!facts || typeof facts !== 'object' || !doc || doc.split('\n').length < 2) {
-    return json({ error: 'Invalid request' }, 400);
+    return json({ error: 'Invalid request' }, 400, origin);
   }
 
   const res = await fetch(GROQ_URL, {
@@ -324,17 +456,17 @@ async function handleSpiker(request, env) {
       ],
     }),
   });
-  if (!res.ok) return json({ error: 'Upstream error' }, 502);
+  if (!res.ok) return json({ error: 'Upstream error' }, 502, origin);
   const data = await res.json();
   const text = data?.choices?.[0]?.message?.content || '';
   let out;
-  try { out = JSON.parse(text); } catch { return json({ error: 'Could not read this one' }, 502); }
+  try { out = JSON.parse(text); } catch { return json({ error: 'Could not read this one' }, 502, origin); }
 
   const spiker = validateSpiker(out, Array.isArray(facts.okumalar) ? facts.okumalar.length : 0, doc);
-  if (!spiker) return json({ error: 'Could not read this one' }, 502);
+  if (!spiker) return json({ error: 'Could not read this one' }, 502, origin);
   const serious = facts?.hukum?.tur === 'tense' || (facts?.sayim?.red_flag_turu || 0) >= 1;
   postProcess(spiker, serious);
-  return json({ source: 'groq', spiker });
+  return json({ source: 'groq', spiker }, 200, origin);
 }
 
 // The LLM does not fully obey the voice law, so we enforce it in code: playful screens are
@@ -401,15 +533,20 @@ function validateSpiker(out, readingCount, doc) {
   return spiker;
 }
 
-function json(data, status = 200) {
+function json(data, status = 200, origin = '') {
   return new Response(JSON.stringify(data), {
-    status, headers: { 'Content-Type': 'application/json', ...cors() },
+    status, headers: { 'Content-Type': 'application/json', ...cors(origin) },
   });
 }
-function cors() {
-  return {
-    'Access-Control-Allow-Origin': '*',
+// The allowed origin is echoed back, never "*". Vary: Origin keeps a cached allowed response from
+// being replayed to a different site.
+function cors(origin) {
+  const h = {
+    Vary: 'Origin',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, x-app-token',
+    'Access-Control-Max-Age': '600',
   };
+  if (origin) h['Access-Control-Allow-Origin'] = origin;
+  return h;
 }
