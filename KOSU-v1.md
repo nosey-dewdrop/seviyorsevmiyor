@@ -1458,6 +1458,33 @@ hakem notu: testin kendisi mutasyonla doğrulandı — eski self-writing
 parity_check.py geri konunca negatif test 3 assertion'da kırmızı yandı, yani
 hep-geçen bir test değil. Diff dört dosyada, kartın dışına çıkmadı.
 
+## S1.6 — Temizlik sadece main'e uygulandı — GEÇTİ
+ölçülen: iki dalda sızıntı 0 · 116 commit metadata + içerik tarandı · gh-pages
+69 → 1 commit, dosya sayısı 55 → 55 (ağaç kaybı yok) · çalışma ağacı 72 dosya
+0 vuruş · birikimli 10/10 yeşil
+eşik: tüm dallarda kişisel adres 0 · noreply dışı commit 0 · literal hesap
+ID'si 0 · iki yayın sayfasında adres 0
+commit: 7624cc1 (main geçmişi yeniden yazıldı) + 00fbe1e (gh-pages kökü)
+hakem notu: kapı dört ayrı mutasyonun dördünde de kırmızı yandı — desen
+dosyası yokken exit 1 ve sessizce üretmiyor, HEAD dışı dalda ekilen sızıntıyı
+yakalıyor, noreply olmayan metadata'yı yakalıyor. Yanlış pozitif yok. Sırrın
+kendisi hiçbir tracked dosyada kalmadı; desen dosyası untracked, .gitignore
+satırı commit'li.
+
+### S1.6'dan devredilen
+- **Askıda kalan e-posta talimatı.** `gizlilik.html:65` hâlâ "talepler için
+  yukarıdaki e-postaya yazabilirsin" diyor ama yukarıda artık e-posta yok.
+  `:54` "bağışını sildirmek için e-posta atman yeterli" diyor. KVKK madde 11
+  hakları sayılıyor, başvurulacak yer yok — metin kendi kendine atıfta
+  bulunuyor → **S3'ün bloke edici borcunda**
+- **main ile gh-pages ayrıştı.** main/web/*.html GitHub issues linki veriyor,
+  gh-pages "ayrıca duyurulacaktır" diyor. gh-pages artık web/'in sadık bir
+  build'i değil → S13 (CI + deploy)
+- **Kapı `refs/heads/` dışına bakmıyor.** refs/backup/* ve
+  refs/original/refs/heads/main kirli geçmişi yerelde taşıyor. Taze klonda
+  sorun yok ama `git push --all` / `--mirror` ya da klasörün kopyalanması
+  sızdırır → S13
+
 ## S2 — Worker sertleştirme — KART YANLIŞ (eşik zorlaştırıldı, faz tekrar koşar)
 ölçülen: 36/36 kapı yeşil · yabancı origin her rotada 403 · ACAO yıldız değil ·
 TTL'siz KV yazımı 0 (13 yazım tarandı) · secret sızıntısı 0 · secret yokken
