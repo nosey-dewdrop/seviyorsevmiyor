@@ -1231,8 +1231,59 @@ nisan)". Tek bir değer kesinlik ima eder (NYT iğnesi tartışmasının dersi).
 
 Fazlar bittikçe buraya yazılır.
 
-```
-## S1 — Depo temiz + sızıntı — <durum>
-ölçülen:   eşik:   commit:
-hakem notu:
-```
+## S1 — Depo temiz + sızıntı — KALDI×3 — KOŞU DURDU
+ölçülen: sızıntı 0/0 · dosya 68 · README only/never 2
+eşik: 0 ve 0 ve ≤120 ve her iddia kodda doğrulanıyor
+commit: 2521b72 (push EDİLMEDİ — history rewrite, force push kararı Damla'da)
+hakem notu: sızıntı, ölü ağırlık, kapılar ve README gövdesi temiz, ama
+"hiçbir içerik saklanmıyor" yalanı repoda üç dosyada daha ayakta
+(gizlilik.html:43/65, worker.js:3-4, wrangler.toml:5) ve /api/itiraz
+sohbet metnini TTL'siz KV'ye kalıcı yazıyor.
+
+**Kart üç kez koşuldu, üçünde de aynı hata sınıfı: kodun karşılamadığı
+gizlilik garantisi.** Kural gereği koşu burada durur ve Damla'yı bekler.
+
+### Kapatılanlar (hakem doğruladı)
+- `.wrangler/cache/wrangler-account.json` + `.claude/settings.json` geçmişten düştü
+- ikinci kişisel gmail (`KISISEL_ADRES_2_REDACTED`) 18 yerden silindi
+- 107 commit'in author/committer metadata'sı noreply'a çevrildi,
+  `git config --local user.email` set edildi ki tekrarlamasın
+- ölü ağırlık gitti: mockups/(24), bubbles/(14), vercel.json,
+  supabase-schema.sql, /api/read rotası, "flört tavsiyesi" placeholder'ı,
+  PROJECT.md — HEAD ağacı 113 → 68 dosya
+- README yazıldı, ölçüm tablosu kapılardan doğrulandı
+- altı kapı + parity yeşil kaldı, `engine` ve `web/js/time` hiç ellenmedi
+- yedekler: refs/backup/main, -pre2, -pre3, /tmp/s1-backup*.bundle
+
+### Açık kalan, Damla'nın kararını bekleyen
+1. **Force push.** History rewrite yapıldı, yerel main origin'den ayrıştı.
+   Push force ister, guard.json bunu reddediyor. **Push edilmedikçe eski
+   sızıntılı geçmiş GitHub'da yaşamaya devam ediyor** — yani S1'in sızıntı
+   temizliği henüz dışarıda geçerli değil.
+2. **KVKK silme yolu koptu.** Sızıntı temizliği `gizlilik.html`'deki
+   e-postayı sildi, ama sayfa hâlâ "sildirmek için e-posta atman yeterli"
+   diyor. Çalışan bir kanal gerekiyor (ayrı alias).
+
+### S3'e devredilen (S1'in işi değildi, hakem buldu)
+- `gizlilik.html:43` "Sohbetlerini saklamıyoruz" ve `:65` "silinecek kayıt
+  oluşmaz" — ikisi de yalan, `/api/itiraz` TTL'siz saklıyor
+- `worker.js:3-4` ve `wrangler.toml:5` "no content is ever stored" — yalan
+
+### S2'ye devredilen
+- `/api/itiraz` TTL'siz `corpus:` yazıyor, `SPIKER_OPEN` bayrağıyla korunmuyor
+- `RATE_LIMIT` KV hem hız sınırı hem korpus deposu — aynı namespace
+
+### S13/S14'e devredilen
+- `web/js/config.js:4` → `seviyorsevmiyor-api.damummyphus.workers.dev`.
+  Kişisel gmail'in local-part'ı her ziyaretçinin network sekmesinde.
+  Custom domain kapatır.
+- README `github.io` diyor, canonical/og:url/sitemap `noseydewdrop.com` diyor;
+  `web/` altında CNAME yok. İkisi de 200 dönüyor ama iki kanonik adres var.
+- `web/js/ocr.js:11` hâlâ CDN'den Tesseract çekiyor, gizlilik metninde geçmiyor
+- `.rabadon/handoff.md` HEAD ağacında, yerel klasör ağacını public'te yayınlıyor
+
+### Ayrıca bulundu — §0.8 ile çelişiyor
+`train/parity_check.py` çalışırken `train/parity_expected.json`'ı ÜZERİNE
+YAZIYOR. Yani kapı, karşılaştırdığı referansı kendisi üretiyor; Python tarafı
+bozulursa parity yine "OK" der. §0.8 "parity_expected.json çıktıya
+uydurulamaz" diyor — bugün tam olarak öyle oluyor.
