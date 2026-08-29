@@ -1,6 +1,8 @@
-// Parity harness (Node side): recompute numeric features + tone probabilities using the SAME
-// web/js modules the browser uses, and assert they match parity_expected.json from Python.
-// Run after parity_check.py. Exits non-zero on any mismatch beyond 1e-4.
+// Parity gate (Node side): recompute numeric features + tone probabilities using the SAME
+// web/js modules the browser uses, and assert they match the FROZEN parity_expected.json.
+// This gate only READS the reference — it is produced by train/parity_freeze.py and committed.
+// Run after parity_check.py. Exits non-zero on any mismatch beyond 1e-4, or if the
+// reference file is missing (silently regenerating it would defeat the gate).
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,8 +10,14 @@ import { numericVector } from '../web/js/features.js';
 import { setModel, scoreConversation } from '../web/js/model.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const expectedPath = path.join(here, 'parity_expected.json');
+if (!fs.existsSync(expectedPath)) {
+  console.error('PARITY FAIL: parity_expected.json missing. It is a FROZEN, committed reference. ' +
+    'Run "python3 train/parity_freeze.py" on purpose and commit the result.');
+  process.exit(1);
+}
 const model = JSON.parse(fs.readFileSync(path.join(here, '..', 'web', 'data', 'model.json'), 'utf-8'));
-const expected = JSON.parse(fs.readFileSync(path.join(here, 'parity_expected.json'), 'utf-8'));
+const expected = JSON.parse(fs.readFileSync(expectedPath, 'utf-8'));
 setModel(model);
 
 let maxDiff = 0;
