@@ -14,13 +14,26 @@ Two flows share one engine:
 
 The verdict is computed on the device by code in this repo. A small tone model
 (`web/data/model.json`, trained in `train/`) and a time-series engine (`web/js/time/`) produce every
-number and every flag. Chat text never leaves the browser.
+number and every flag, in both flows, with or without a network.
 
-The cloud layer is optional and gated behind a checkbox. When it runs, Llama receives the engine's
-**numbers**, not the messages, and rewrites the wording. It may not invent a figure: quotes are
-checked against the chat and digits from the model are rejected (`backend/worker.js`,
-`train/bulut_check.mjs`). With no consent, no key, or a dead Worker, the shipped phrasebook writes
-the same reading. Engine numbers are law; the cloud is a voice.
+The cloud layer only rewrites wording. It is opt-in, off by default, and allowed to fail: with no
+consent, no key, or a dead Worker, the shipped phrasebook writes the same reading. Engine numbers are
+law; the cloud is a voice. What it sends is not the same in the two flows:
+
+- **`web/zaman.html`** sends derived numbers only. No message text, no names, no dates as text
+  (`olgular()` in `web/js/zamanBulut.js`). A single digit anywhere in the model's answer rejects that
+  answer, so every figure on screen came from the engine (`backend/worker.js`,
+  `train/bulut_check.mjs`).
+- **`web/index.html`** sends the engine report **and the chat text itself**. `spikerDoc()` in
+  `web/js/app.js` builds the full transcript and posts it as `body.doc`, which the Worker truncates
+  at 6000 characters before handing it to Llama; the raw message strings also ride along inside
+  `okumalar[].mesaj`. It takes two ticked checkboxes to happen, but once ticked, the messages do
+  leave the device. The model may only restyle sentences: an evidence quote is dropped unless it
+  literally occurs in the chat, and any malformed field falls back to the on-device template.
+  Making this flow numbers-only, the way `zaman.html` already is, is open work tracked in
+  `CLAUDE.md`.
+
+`web/gizlilik.html` is the user-facing wording of this same split.
 
 ## Layout
 
@@ -43,7 +56,8 @@ python3 train/parity_check.py && node train/parity_check.mjs
 ```
 
 Measured by those gates: false positives 0% on null series and 0% under drift, power 75% on a real
-4x jump, date CI coverage 89.3% against a nominal 90%, 39.5k messages parsed in under a second.
+4x jump, date CI coverage 89.3% against a nominal 90%, 39.5k messages parsed in 1.3 s on the
+development machine.
 Parity keeps the Python trainer and the JS runtime within 1e-16 of each other.
 
 Retrain the tone model with `python3 train/train.py`, then ship `model.json` only if held-out
