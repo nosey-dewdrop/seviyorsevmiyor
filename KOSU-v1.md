@@ -975,6 +975,11 @@ DOKUNULABİLİR     : backend/worker.js, web/panel.html, web/index.html,
 ```
 
 ```
+S1.5'TEN DEVREDİLDİ
+- parity negatif testi sadece Python kolunu sabote ediyor. web/js/features.js
+  sapmasında parity_check.mjs kolunun kırmızı yandığı test edilmemiş.
+  CI'ya ikinci sabotaj vektörü (JS kolu) eklenecek
+
 S1'DEN DEVREDİLDİ (S13/S14 ortak)
 - web/js/config.js:4 → seviyorsevmiyor-api.damummyphus.workers.dev.
   Kişisel gmail'in local-part'ı her ziyaretçinin network sekmesinde.
@@ -1360,3 +1365,26 @@ düzeltecek faz doğru yerine taşındı.
 YAZIYOR. Yani kapı, karşılaştırdığı referansı kendisi üretiyor; Python tarafı
 bozulursa parity yine "OK" der. §0.8 "parity_expected.json çıktıya
 uydurulamaz" diyor — bugün tam olarak öyle oluyor.
+→ S1.5 fazı bundan doğdu, kapandı.
+
+## S1.5 — Kapı kendini doğrulamıyor — GEÇTİ
+ölçülen: negatif test 10/10 PASS, exit 0 · parity_expected.json sha256 kapı
+öncesi/sonrası aynı (5122f919…) · referans yokken py ve js kolu exit 1,
+sessizce üretmedi · freeze çıktısı commit'li referansla bit-aynı · altı kapı
++ parity yeşil (e2e 39524 mesaj 1346 ms)
+eşik: kasıtlı sapmada KIRMIZI · referans bit-aynı · referans yokken geçmiyor
+commit: 041380d (PUSH EDİLMEDİ)
+hakem notu: testin kendisi mutasyonla doğrulandı — eski self-writing
+parity_check.py geri konunca negatif test 3 assertion'da kırmızı yandı, yani
+hep-geçen bir test değil. Diff dört dosyada, kartın dışına çıkmadı.
+
+### S1.5'ten devredilen
+- `train/parity_negatif_check.mjs` sabotajı yalnızca `train/features.py`'yi
+  bozuyor. Python kapısı exit 1 verince JS kapısı hiç koşmuyor, yani
+  `web/js/features.js`'teki bir sapmada `parity_check.mjs` kolunun kırmızı
+  yandığı HİÇ test edilmiş değil. İkinci sabotaj vektörü (JS kolu) gerekiyor
+  → S13 (CI fazı)
+- `train/parity_check.py:14` kapı, referans üreticisi `parity_freeze`'den
+  `compute`/`SAMPLES` import ediyor. Yazma ayrıldı ama hesaplama yolu ortak;
+  `freeze` içindeki `infer()` bozulursa referans ve kapı aynı yönde kayar.
+  Bu turda zarar yok (referans commit'li ve donmuş), mimari koku olarak duruyor
