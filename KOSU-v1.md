@@ -349,6 +349,83 @@ DOKUNULABİLİR     : train/parity_check.py, train/parity_check.mjs,
 
 ---
 
+## S1.6 · "TEMİZLİK SADECE MAIN'E UYGULANDI"
+
+**Kullanıcı cümlesi.** Repoyu kim klonlarsa klonlasın, adresim orada değil.
+
+**30 Ağu, force push sonrası ölçüldü.** Rewrite yalnızca `main`'e uygulandı.
+`gh-pages` ayrı bir kök, main ile ortak atası yok, ve force push ona hiç
+dokunmadı. Uzaktaki gerçek:
+
+```
+gh-pages   69 commit, 69'unda da kişisel gmail author/committer metadata'sında
+           (62 birinci adres, 7 ikinci adres — tip commit eb5ecd2 dahil)
+           gizlilik.html:46 ve kosullar.html:72 → mailto: kişisel gmail
+           bu sadece geçmişte değil, gh-pages HEAD'inde CANLI:
+           github.io/seviyorsevmiyor/gizlilik.html 200 dönüyor ve adres sayfada
+main       2 sızıntı, ikisi de bu dosyada:
+           KOSU-v1.md:312  Cloudflare hesap ID'si literal (S1 kabul komutunda)
+           KOSU-v1.md:1326 ikinci gmail literal (temizlik notunda)
+           → S1'in kabul komutu, aradığı sırrı kendi metnine yazmış
+main       metadata temiz: 112/112 commit noreply
+```
+
+**Ayrıca bulundu, S1'in taramasının kaçırdığı.**
+
+```
+Supabase anon JWT  main geçmişinde (41ec9b3 ekliyor, f32534b siliyor) ve
+                   gh-pages'te. Proje ref xjtmqncfhuidctxgthhv, exp 2036.
+                   Paylaşılan damlahelloworld projesi — RLS açığı varsa tüm
+                   uygulamalar etkilenir. DENETİM AYRI İŞ, bu fazda değil
+damummyphus handle main HEAD'de 6 yerde, `@` olmadığı için S1'in grep'i
+                   kaçırdı: web/js/config.js:4 (çalışan workers.dev endpoint),
+                   backend/DEPLOY.md:33, bu dosyada 4 yer.
+                   KOSU-v1.md:282 ayrıca /Users/damummyphus/ mutlak yolu
+KV namespace id    facdf8b5b45d493b808c18fe9fa3e7a1, backend/wrangler.toml,
+                   main geçmişinde 5 commit (92ab940, 0a0b059, 5f51692)
+.rabadon/sessions/ 2416470 commit'inde bir oturum dosyası: Damla'nın ham
+                   prompt'u ve tam shell komutları
+```
+
+**Temiz çıkanlar** (bu iki dosya geçmişte hiç yok, ne main'de ne gh-pages'te):
+`.wrangler/cache/wrangler-account.json`, `.claude/settings.json`.
+
+**DOĞRULANMADI.** GitHub'ın force push sonrası bir süre erişilebilir tuttuğu
+unreachable objeler ölçülemedi — gerekirse GitHub Support'tan gc talebi.
+Fork sayısı çekilmedi; fork varsa eski objeler orada canlı kalır.
+
+**İş.**
+
+1. `gh-pages` geçmişi temizlenir: 69 commit'in author/committer metadata'sı
+   noreply'a çevrilir, içerikteki iki `mailto:` kişisel adresten çıkarılır.
+   gh-pages `web/`'ten üretilen bir yayın dalı — geçmişini korumak zorunlu
+   değil, tek commit'e düzleştirmek meşru bir çözümdür.
+2. `web/gizlilik.html` ve `web/kosullar.html`'deki kişisel adres kalkar.
+   **Yerine ne konacağı S3'ün işi** (KVKK silme kanalı, ayrı alias) — bu fazda
+   adres yalnızca çıkar, yerine "iletişim kanalı S3'te kurulacak" kalır.
+3. Bu dosyadaki iki literal sır maskelenir. S1'in kabul komutu, aradığı
+   deseni `.gitignore`'daki bir desen dosyasından okur; sır repoya yazılmaz.
+4. `git ls-files` içindeki `damummyphus` handle'ı taranır ve dokümanlardaki
+   geçişler temizlenir. `web/js/config.js:4` ve `backend/DEPLOY.md:33`
+   custom domain işi olduğu için S13/S14'e bırakılır, bu fazda sadece adıyla
+   listelenir.
+
+**DOKUNULMAZ.** `engine`, `web/js/time`, `train/`. gh-pages'e deploy edilmez;
+bu faz yalnızca geçmişi ve dosyaları düzeltir, yayın Damla'nın kararı.
+
+```
+KULLANICI CÜMLESİ : Taze klon aldım, hiçbir dalda adresim yok.
+KABUL KOMUTU      : node train/sizinti_check.mjs
+EŞİK              : TÜM dallarda (main + gh-pages) kişisel adres 0 ·
+                    author/committer noreply dışı commit 0 ·
+                    çalışma ağacında literal Cloudflare hesap ID'si 0 ·
+                    web/gizlilik.html ve web/kosullar.html'de kişisel adres 0
+DOKUNULABİLİR     : web/gizlilik.html, web/kosullar.html, KOSU-v1.md,
+                    .gitignore, train/sizinti_check.mjs, gh-pages dalı
+```
+
+---
+
 ## S2 · "ANAHTARIM SÖMÜRÜLMÜYOR"
 
 **Kullanıcı cümlesi.** Siteyi kullanmayan biri benim API bütçemi harcayamıyor.
@@ -390,10 +467,11 @@ birinde. Asıl sömürü riski açık CORS'tu ve bu fazda kapanıyor. Sayaç 100
 ```
 KULLANICI CÜMLESİ : Siteyi açmadan worker'a istek atmayı denedim, reddedildi.
 KABUL KOMUTU      : node backend/tests/origin_turnstile_check.mjs
-                    (yazılacak: yabancı origin 403, kendi origin 200,
-                     itiraz PUT'unda expirationTtl var mı)
-EŞİK              : yabancı origin = 403 · kendi origin = 200 ·
-                    TTL'siz KV yazımı = 0
+EŞİK              : yabancı origin = 403 · TTL'siz KV yazımı = 0 ·
+                    biletsiz /api/zaman = 403 (origin doğru olsa bile) ·
+                    biletsiz istekten çıkan Groq çağrısı = 0, bütçe harcayan
+                    HER rota sayılır (/api/zaman, /api/spiker, /api/itiraz) ·
+                    kabul testi bunu ayrı bir kapı olarak ölçer
 DOKUNULABİLİR     : backend/worker.js, backend/wrangler.toml, backend/tests/, web/js/api.js
 ```
 
@@ -1377,6 +1455,16 @@ commit: 041380d (PUSH EDİLMEDİ)
 hakem notu: testin kendisi mutasyonla doğrulandı — eski self-writing
 parity_check.py geri konunca negatif test 3 assertion'da kırmızı yandı, yani
 hep-geçen bir test değil. Diff dört dosyada, kartın dışına çıkmadı.
+
+## S2 — Worker sertleştirme — KART YANLIŞ (eşik zorlaştırıldı, faz tekrar koşar)
+ölçülen: 36/36 kapı yeşil · yabancı origin her rotada 403 · ACAO yıldız değil ·
+TTL'siz KV yazımı 0 (13 yazım tarandı) · secret sızıntısı 0 · secret yokken
+fail-closed 503 + eksik adı · birikimli 9/9 · deploy izi yok
+commit: d25f3f1
+hakem notu: test taklit değil, 4 mutasyonla kırmızı yandığı kanıtlandı. Ama
+`/api/zaman` bilet kapısının DIŞINDA: hakem sadece Origin başlığı uydurarak
+bilet olmadan 200 aldı ve Groq'a bir çağrı harcattı. Kartın kullanıcı cümlesi
+o rotada yalan; `zaman.html` canlıdaki ana akış.
 
 ### S1.5'ten devredilen
 - `train/parity_negatif_check.mjs` sabotajı yalnızca `train/features.py`'yi
