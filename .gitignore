@@ -9,3 +9,10 @@ backend/.wrangler/
 .env*
 
 .rabadon/state.json
+
+# rabadon runtime state (machine-local, not shared)
+.rabadon/net.json
+.rabadon/net.lock
+.rabadon/net.out
+.rabadon/state.json
+.rabadon/sessions/

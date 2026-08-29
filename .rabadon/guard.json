@@ -48,5 +48,6 @@
     "^train/parity_check\\.(py|mjs)$"
   ],
   "testCommand": "(python3\\s+train/parity_check\\.py|node\\s+train/parity_check\\.mjs)",
+  "check": "for t in parse timeline cpd e2e yazi bulut; do node train/${t}_check.mjs || exit 1; done; python3 train/parity_check.py && node train/parity_check.mjs",
   "generatedBy": "rabadon guard (claude code cli)"
 }

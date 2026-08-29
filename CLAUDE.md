@@ -1,5 +1,3 @@
-> ⚓ KÖK YASA (global ~/.claude/CLAUDE.md §0 geçerli): Boşluğu doldurmak için ÜRETME — önce Damla'yı anla, YAPMA dediğine gitme. Wrapper=flop (LLM çağrısını çıkarınca ölçüm/motor/benchmark kalmalı). Kanıtla, iddia etme. Emin değilsen sus/sor, yön uydurma. Asimetri: senin kaybın 0, Damla'nın her şeyi. Uyku/yorgunluk deme.
-
 # seviyorsevmiyor
 
 ## What it is
