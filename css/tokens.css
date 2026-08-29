@@ -1,0 +1,41 @@
+:root {
+  /* dark only — Damla 13 Tem gece: light mode kalktı.
+     15 Tem gece: mercan accent KALKTI (Damla: slopware duruyor) — nötr, vurgu bold+boşluk. */
+  --bg: #1a1a1e;
+  --surface: #232327;
+  --surface-2: #28282d;
+  --accent: #fafafa;         /* nötr — renk yok; vurgu beyaz + bold + boşluk */
+  --accent-soft: #c8c8ce;
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --ink-3: #8a8a92;
+  --ink-4: #55555c;
+  --line: #3a3a40;
+  --line-2: #4a4a52;
+
+  /* GERÇEK terminal (ANSI) renkleri — saf, parlak, cıvık değil */
+  --t-pembe: #ff5fd7;   /* bright magenta */
+  --t-mor: #af5fff;     /* bright purple */
+  --t-turuncu: #ff8700; /* bright orange */
+  --t-mavi: #00afff;    /* bright blue */
+  --t-yesil: #5fff5f;   /* bright green */
+
+  /* status only — never on body text (flag chips) */
+  --heat: #ff6b52;           /* red flag */
+  --calm: #3ddc8a;           /* green flag / healthy */
+  --cool: #8fb4d6;           /* cold / distance */
+  --link: #fafafa;           /* mercan KALKTI — link de nötr beyaz */
+
+  --r-card: 16px;
+  --r-box: 14px;
+  --r-ui: 12px;
+  --r-small: 8px;
+
+  --page: 1150px;
+  --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 30px rgba(0,0,0,0.35);
+
+  /* 15 Tem gece: JetBrains Mono — kalın gövdeli gerçek terminal fontu (Damla: "ince duruyor") */
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: var(--mono);
+  --disp: var(--mono);
+}

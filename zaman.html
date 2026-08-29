@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>seviyorsevmiyor · ne zaman değişti?</title>
+<meta name="description" content="bir whatsapp sohbetini dışa aktar, motor hangi tarihte değiştiğini söyler. analiz cihazında yapılır, hiçbir mesaj cihazından çıkmaz." />
+<meta name="robots" content="index,follow" />
+<link rel="icon" href="./favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" />
+<link rel="stylesheet" href="./css/tokens.css?v=72" />
+<link rel="stylesheet" href="./css/zaman.css?v=72" />
+</head>
+<body>
+<div class="wrap">
+  <header class="ust">
+    <a class="brand" href="./index.html">seviyorsevmiyor</a>
+    <span class="ust-not">bu sayfa sohbetin ne zaman değiştiğini arar.</span>
+  </header>
+
+  <section class="giris" id="giris">
+    <h1>bu sohbet ne zaman değişti?</h1>
+    <p class="ozet">
+      bir whatsapp sohbetini dışa aktarıp buraya bırak. motor cevap sürelerini, kimin başlattığını,
+      kimin bitirdiğini ve sessizlikleri zamana yayıp kırılma tarihini arar. hiçbir mesaj cihazından
+      çıkmaz, sunucuya gitmez, hesap istemez.
+    </p>
+
+    <div class="nasil">
+      <h2>sohbeti nasıl dışa aktarırsın?</h2>
+      <div class="adimlar">
+        <div class="kol">
+          <h3>iphone</h3>
+          <ol>
+            <li>whatsapp içinde sohbeti aç.</li>
+            <li>üstteki isme dokun.</li>
+            <li>aşağı in, <b>sohbeti dışa aktar</b>.</li>
+            <li><b>medya olmadan</b> seç.</li>
+            <li><b>dosyalara kaydet</b> de.</li>
+            <li>buraya o dosyayı bırak.</li>
+          </ol>
+        </div>
+        <div class="kol">
+          <h3>android</h3>
+          <ol>
+            <li>whatsapp içinde sohbeti aç.</li>
+            <li>sağ üstteki üç noktaya dokun.</li>
+            <li><b>diğer</b>, sonra <b>sohbeti dışa aktar</b>.</li>
+            <li><b>medya olmadan</b> seç.</li>
+            <li>kendine kaydet ya da gönder.</li>
+            <li>buraya o dosyayı bırak.</li>
+          </ol>
+        </div>
+      </div>
+      <p class="uyari">medya olmadan seç. fotoğraflı dosya çok büyük olur ve motorun zaten sadece yazıya ve saate ihtiyacı var.</p>
+    </div>
+
+    <label class="birak" id="birakAlan">
+      <input type="file" id="dosya" accept=".txt,.zip" hidden />
+      <span class="birak-ana">dosyayı buraya bırak</span>
+      <span class="birak-alt">.zip ya da .txt, cihazından çıkmaz</span>
+    </label>
+
+    <p class="sart">iki kişilik sohbet gerekir. en az 500 mesaj ve 60 gün olmalı, altında motor konuşmaz.</p>
+  </section>
+
+  <section class="calisiyor gizli" id="calisiyor">
+    <div class="cubuk"><span id="cubukDolu"></span></div>
+    <p class="cal-not" id="calNot">okunuyor</p>
+  </section>
+
+  <section class="sonuc gizli" id="sonuc"></section>
+
+  <footer class="alt">
+    <a href="./gizlilik.html">gizlilik</a>
+    <span class="sep">*</span>
+    <a href="./kosullar.html">koşullar</a>
+    <span class="sep">*</span>
+    <span>analiz cihazında yapılır</span>
+  </footer>
+</div>
+<script type="module" src="./js/zaman.js?v=72"></script>
+</body>
+</html>

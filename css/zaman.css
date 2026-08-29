@@ -1,0 +1,230 @@
+/* Time engine page. Inherits tokens.css: anthracite, neutral, JetBrains Mono, no accent colour.
+   Emphasis comes from weight and space, never from a coloured word or a pill. */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 20px 64px;
+}
+
+.gizli { display: none; }
+
+.ust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 34px;
+}
+.brand {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.ust-not { color: var(--ink-3); font-size: 13px; }
+
+h1 {
+  font-size: 30px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0 0 16px;
+}
+h2 { font-size: 18px; font-weight: 700; margin: 0 0 10px; letter-spacing: -0.02em; }
+h3 { font-size: 14px; font-weight: 700; margin: 0 0 8px; color: var(--ink-2); }
+
+.ozet { color: var(--ink-2); margin: 0 0 32px; max-width: 62ch; }
+
+.nasil {
+  border: 1px solid var(--line);
+  border-radius: var(--r-box);
+  padding: 20px;
+  background: var(--surface);
+  margin-bottom: 24px;
+}
+.adimlar { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.kol ol { margin: 0; padding-left: 18px; color: var(--ink-2); }
+.kol li { margin-bottom: 5px; }
+.kol b { color: var(--ink); }
+.uyari { color: var(--ink-3); font-size: 13px; margin: 16px 0 0; }
+
+.birak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 150px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--r-box);
+  cursor: pointer;
+  background: var(--surface);
+  transition: border-color 0.15s, background 0.15s;
+}
+.birak:hover, .birak.uzerinde { border-color: var(--ink-2); background: var(--surface-2); }
+.birak-ana { font-weight: 700; }
+.birak-alt { color: var(--ink-3); font-size: 13px; }
+
+.sart { color: var(--ink-3); font-size: 13px; margin: 14px 0 0; }
+
+.cubuk {
+  height: 3px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 60px 0 14px;
+}
+.cubuk span {
+  display: block;
+  height: 100%;
+  width: 2%;
+  background: var(--ink);
+  transition: width 0.25s ease;
+}
+.cal-not { color: var(--ink-3); font-size: 13px; margin: 0; text-align: center; }
+
+.kart {
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  padding: 26px;
+}
+.ust-etiket {
+  color: var(--ink-3);
+  font-size: 13px;
+  margin: 0 0 14px;
+  text-transform: none;
+}
+.tarih {
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0 0 16px;
+  line-height: 1.25;
+}
+.aralik { font-size: 14px; font-weight: 400; color: var(--ink-3); letter-spacing: 0; }
+
+.degisimler { margin: 0 0 18px; padding-left: 18px; }
+.degisimler li { margin-bottom: 6px; }
+
+.birlesik {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin: 0 0 18px;
+  color: var(--ink-2);
+}
+.kesinti { color: var(--ink-3); font-size: 13px; margin: 0 0 18px; }
+.ince { color: var(--ink-3); font-size: 13px; }
+
+.sayilar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--r-ui);
+  overflow: hidden;
+  margin: 20px 0;
+}
+.say {
+  background: var(--surface);
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.say b { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+.say span { color: var(--ink-3); font-size: 11px; line-height: 1.35; }
+
+.eksikler { margin: 0 0 12px; padding-left: 18px; color: var(--ink-2); }
+.eksikler b { color: var(--ink); }
+
+.nasil-okudum { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 14px; }
+.nasil-okudum summary { cursor: pointer; color: var(--ink-2); font-size: 13px; }
+.nasil-okudum ul { margin: 12px 0 0; padding-left: 18px; color: var(--ink-3); font-size: 13px; }
+.nasil-okudum li { margin-bottom: 5px; }
+
+.btn {
+  margin-top: 20px;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--bg);
+  background: var(--ink);
+  border: 0;
+  border-radius: var(--r-ui);
+  padding: 11px 18px;
+  cursor: pointer;
+}
+.btn:hover { background: var(--accent-soft); }
+
+.alt {
+  margin-top: 44px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-4);
+  font-size: 12px;
+}
+.alt a { color: var(--ink-3); text-decoration: none; }
+.alt a:hover { color: var(--ink); }
+.sep { margin: 0 8px; color: var(--ink-4); }
+
+@media (max-width: 620px) {
+  h1 { font-size: 25px; }
+  .tarih { font-size: 22px; }
+  .adimlar { grid-template-columns: 1fr; gap: 20px; }
+  .sayilar { grid-template-columns: repeat(2, 1fr); }
+}
+
+.acilis { color: var(--ink-2); margin: 0 0 10px; font-size: 15px; }
+
+/* archetype: a plain label with its own number under it, no pill, no badge, no colour */
+.arketip {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 16px 0;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ark-ad { font-size: 21px; font-weight: 700; letter-spacing: -0.03em; }
+.ark-kanit { color: var(--ink-3); font-size: 13px; }
+
+/* cloud block. always additive, never replaces the verdict above it */
+.bulut {
+  border: 1px solid var(--line);
+  border-radius: var(--r-ui);
+  padding: 16px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+.bulut.yazili { border-style: solid; background: var(--surface-2); }
+.bulut-not { margin: 0; color: var(--ink-2); font-size: 13px; }
+.bulut-satir { margin: 0; font-size: 15px; }
+.bulut-kalan { color: var(--ink-4); font-size: 12px; }
+.btn.ghost {
+  margin-top: 0;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line-2);
+}
+.btn.ghost:hover { background: var(--surface-2); }
