@@ -9,6 +9,9 @@ backend/.wrangler/
 .vercel
 .env*
 
+# leak gate patterns: the secret itself is never written into the repo
+train/.sizinti_patterns.json
+
 # machine-local editor/agent config (leaks absolute paths and account ids)
 .claude/
 

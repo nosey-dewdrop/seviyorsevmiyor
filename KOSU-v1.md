@@ -309,8 +309,10 @@ içerik üretilmeyecek, bu hattın devamı yazılacak.
 
 ```
 KULLANICI CÜMLESİ : Repoyu açtım, ne yaptığınızı anladım, kimsenin e-postası ortada değil.
-KABUL KOMUTU      : git log --all -p | grep -cE "KISISEL_ADRES_1_REDACTED|CF_ACCOUNT_ID_REDACTED" ; git ls-files | wc -l
-EŞİK              : 0  ve  git ls-files ≤ 120
+KABUL KOMUTU      : node train/sizinti_check.mjs ; git ls-files | wc -l
+EŞİK              : sizinti_check yeşil  ve  git ls-files ≤ 120
+NOT               : aranan desenler repoya yazılmayan desen dosyasından okunur
+                    (train/.sizinti_patterns.json, .gitignore'da). Sır burada yazılı değil.
 DOKUNULABİLİR     : repo geneli; engine ve web/js/time hariç
 ```
 
@@ -1401,7 +1403,7 @@ düzeltecek faz doğru yerine taşındı.
 
 ### Kapatılanlar (hakem doğruladı)
 - `.wrangler/cache/wrangler-account.json` + `.claude/settings.json` geçmişten düştü
-- ikinci kişisel gmail (`KISISEL_ADRES_2_REDACTED`) 18 yerden silindi
+- ikinci kişisel gmail (desen dosyasındaki ikinci adres) 18 yerden silindi
 - 107 commit'in author/committer metadata'sı noreply'a çevrildi,
   `git config --local user.email` set edildi ki tekrarlamasın
 - ölü ağırlık gitti: mockups/(24), bubbles/(14), vercel.json,
