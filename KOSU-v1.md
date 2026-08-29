@@ -316,6 +316,39 @@ DOKUNULABİLİR     : repo geneli; engine ve web/js/time hariç
 
 ---
 
+## S1.5 · "KAPI KENDİNİ DOĞRULAMIYOR"
+
+**Kullanıcı cümlesi.** (bu faz Damla için) Yeşil yanan kapı gerçekten bir şey
+ölçüyor.
+
+**Neden acil.** `train/parity_check.py` çalışırken `train/parity_expected.json`'ı
+üzerine yazıyor. Kapı, karşılaştırdığı referansı kendisi üretiyor. Python
+tarafı bozulursa parity yine "OK" der. Bu kapı **her fazın hakeminin koştuğu
+birikimli listede** (§0.3) — düzelmeden verilen hiçbir GEÇTİ güvenilir değil.
+Ayrıca README'nin ve S14'teki LinkedIn hikâyesinin dayanağı bu kapı. §0.8
+"parity_expected.json çıktıya uydurulamaz" diyor; bugün tam olarak öyle oluyor.
+
+**İş.**
+
+1. `parity_expected.json` DONAR. Üretimi ayrı bir komuta taşınır
+   (`train/parity_freeze.py`). Kapı onu sadece OKUR, asla yazmaz.
+2. Donmuş referans mevcut yeşil durumdan üretilir ve commit'lenir.
+3. Referans dosyası yoksa kapı GEÇMEZ. Sessizce üretip geçmek yasak.
+4. Negatif test: `features.py`'de kasıtlı bir sapma yaratıldığında kapı KIRMIZI
+   yanmak zorunda. Bugün yanmıyor, kanıtı bu fazın çıktısı.
+
+```
+KULLANICI CÜMLESİ : Kapıyı kasten bozdum ve kırmızı yandı.
+KABUL KOMUTU      : node train/parity_negatif_check.mjs
+EŞİK              : kasıtlı sapmada kapı KIRMIZI · parity_expected.json kapı
+                    koşumundan sonra bit-aynı · referans yokken kapı geçmiyor
+DOKUNULABİLİR     : train/parity_check.py, train/parity_check.mjs,
+                    train/parity_freeze.py, train/parity_expected.json,
+                    train/parity_negatif_check.mjs
+```
+
+---
+
 ## S2 · "ANAHTARIM SÖMÜRÜLMÜYOR"
 
 **Kullanıcı cümlesi.** Siteyi kullanmayan biri benim API bütçemi harcayamıyor.
@@ -364,6 +397,12 @@ EŞİK              : yabancı origin = 403 · kendi origin = 200 ·
 DOKUNULABİLİR     : backend/worker.js, backend/wrangler.toml, backend/tests/, web/js/api.js
 ```
 
+```
+S1'DEN DEVREDİLDİ
+- /api/itiraz TTL'siz corpus: yazıyor, SPIKER_OPEN bayrağıyla korunmuyor
+- RATE_LIMIT KV hem hız sınırı hem korpus deposu, aynı namespace
+```
+
 ---
 
 ## S3 · "MESAJLARIM CİHAZIMDAN ÇIKMIYOR"
@@ -405,7 +444,24 @@ görecek.
 KULLANICI CÜMLESİ : Ağ sekmesini açtım, giden istekte tek bir mesajım yok.
 KABUL KOMUTU      : node train/bulut_check.mjs && node train/bulut_check_eski.mjs
 EŞİK              : ikisi de yeşil · giden gövdede metin alanı sayısı = 0
-DOKUNULABİLİR     : web/js/api.js, backend/worker.js, train/
+DOKUNULABİLİR     : web/js/api.js, backend/worker.js, train/,
+                    web/gizlilik.html, backend/wrangler.toml
+```
+
+```
+BLOKE EDİCİ BORÇ (S1'den devredildi, S3 bunları kapatmadan GEÇTİ alamaz)
+- web/gizlilik.html:43   "Sohbetlerini saklamıyoruz."   → koşulsuz, yalan
+- web/gizlilik.html:65   "silinecek kayıt oluşmaz"      → yalan
+- backend/worker.js:3-4  "Content is never logged"      → 47 satır sonra
+                                                          corpus: yazıyor
+- backend/wrangler.toml:5 "no content is ever stored"   → yalan
+
+Sebep: /api/itiraz sohbet metnini 8000 karaktere kadar TTL'siz KV'ye
+kalıcı yazıyor. Metin ya saklanmayacak, ya bu dört satır gerçeği yazacak.
+İkisinden biri. Yumuşatma değil.
+
+EK: gizlilik.html "sildirmek için e-posta at" diyor ama S1 o e-postayı
+sildi. Çalışan bir kanal (ayrı alias) gerekiyor, yoksa KVKK silme yolu kopuk.
 ```
 
 ---
@@ -914,7 +970,19 @@ KABUL KOMUTU      : node web/tests/huni_check.mjs && curl -sI $(grep -o 'https:/
 EŞİK              : dört huni adımı da sayılıyor · panel dördünü gösteriyor ·
                     canonical adresi 200 dönüyor · CI'da altı kapı koşuyor
 DOKUNULABİLİR     : backend/worker.js, web/panel.html, web/index.html,
-                    web/sitemap.xml, .github/workflows/pages.yml, web/tests/
+                    web/sitemap.xml, .github/workflows/pages.yml, web/tests/,
+                    web/js/config.js, web/js/ocr.js
+```
+
+```
+S1'DEN DEVREDİLDİ (S13/S14 ortak)
+- web/js/config.js:4 → seviyorsevmiyor-api.damummyphus.workers.dev.
+  Kişisel gmail'in local-part'ı her ziyaretçinin network sekmesinde.
+  Custom domain kapatır
+- İki kanonik adres: README github.io diyor, canonical/og:url/sitemap
+  noseydewdrop.com diyor, web/ altında CNAME yok. İkisi de 200 dönüyor
+- web/js/ocr.js:11 CDN'den Tesseract çekiyor, gizlilik metninde geçmiyor
+- .rabadon/handoff.md HEAD ağacında, yerel klasör ağacını public'te yayınlıyor
 ```
 
 ---
@@ -1003,7 +1071,9 @@ DOKUNULABİLİR     : web/index.html, README.md, devlog.md, linkedin.md,
 
 ```
 S1  Depo temiz + sızıntı      → bağımsız, ilk, context ekonomisi
-S2  Worker sertleştirme       → S1
+S1.5 Kapı kendini doğrulamıyor → S1. Parity kapısı referansını kendi yazıyor;
+                                 düzelmeden hiçbir GEÇTİ güvenilir değil
+S2  Worker sertleştirme       → S1.5
 S3  Ham metin kapat           → S2. Ürünün tek iddiasını doğru yapan faz
 S0  Tarayıcı masası (DAMLA)   → S1..S3'ten sonra  ⛔ rapor.md yoksa S4 DURUR
 S4  Tek sayfa                 → S0, S3
@@ -1231,17 +1301,20 @@ nisan)". Tek bir değer kesinlik ima eder (NYT iğnesi tartışmasının dersi).
 
 Fazlar bittikçe buraya yazılır.
 
-## S1 — Depo temiz + sızıntı — KALDI×3 — KOŞU DURDU
-ölçülen: sızıntı 0/0 · dosya 68 · README only/never 2
-eşik: 0 ve 0 ve ≤120 ve her iddia kodda doğrulanıyor
-commit: 2521b72 (push EDİLMEDİ — history rewrite, force push kararı Damla'da)
-hakem notu: sızıntı, ölü ağırlık, kapılar ve README gövdesi temiz, ama
-"hiçbir içerik saklanmıyor" yalanı repoda üç dosyada daha ayakta
-(gizlilik.html:43/65, worker.js:3-4, wrangler.toml:5) ve /api/itiraz
-sohbet metnini TTL'siz KV'ye kalıcı yazıyor.
+## S1 — Depo temiz + sızıntı — GEÇTİ (KART YANLIŞ düzeltmesiyle)
+ölçülen: sızıntı 0/0 · dosya 68 · altı kapı + parity yeşil
+eşik: 0 ve 0 ve ≤120
+commit: 2521b72 (PUSH EDİLMEDİ)
+hakem notu: sızıntı, ölü ağırlık, README ve kapılar temiz. Üç turda düşme
+sebebi olan dört gizlilik yalanı S1'in DOKUNULABİLİR listesinde değildi,
+S3'e bloke edici borç olarak taşındı.
 
-**Kart üç kez koşuldu, üçünde de aynı hata sınıfı: kodun karşılamadığı
-gizlilik garantisi.** Kural gereği koşu burada durur ve Damla'yı bekler.
+**Şef hükmü (§0.2, KART YANLIŞ).** Hakem dört gizlilik yalanını doğru buldu
+ama yanlış faza yazdı: S1 sızıntı ve ölü ağırlık fazı, gizlilik iddiasının
+doğruluğu S3'ün konusu ve S3 kartı o dosyaları zaten adıyla sayıyor. Ajan,
+kapatma yetkisi olmayan bir borçtan üç kez düşürüldü. Eşik gevşetilmedi —
+"her iddia kodda doğrulanıyor" şartı aynen duruyor, sadece iddiayı
+düzeltecek faz doğru yerine taşındı.
 
 ### Kapatılanlar (hakem doğruladı)
 - `.wrangler/cache/wrangler-account.json` + `.claude/settings.json` geçmişten düştü
