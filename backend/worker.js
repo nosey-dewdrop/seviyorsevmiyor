@@ -1,21 +1,17 @@
-// Cloudflare Worker — mesajibirokusana API.
-// Two routes, one honesty rule: the on-device engine decides WHAT is true (verdict, counts,
-// flags); the cloud only makes the wording fresh and spots what slipped past. Content is never
-// logged; only per-IP rate counters live in KV.
+// Cloudflare Worker — seviyorsevmiyor API.
+// One honesty rule: the on-device engine decides WHAT is true (verdict, counts, flags); the cloud
+// only makes the wording fresh and spots what slipped past. Content is never logged; only per-IP
+// rate counters live in KV.
 //
 // /api/spiker : Groq (Llama) rewrites the engine's lines in the product voice and adds
 //               evidence-quoted "gözden kaçanlar" observations. Engine facts are law.
-// /api/read   : legacy Gemini full fallback for low-confidence chats (kept as-is, off by default).
+// /api/zaman  : the time engine's optional voice — receives numbers only, never messages.
 //
 // Deploy:  npx wrangler deploy
 // Secrets: npx wrangler secret put GROQ_API_KEY     (console.groq.com, free)
-//          npx wrangler secret put GEMINI_API_KEY   (only if /api/read is ever opened)
-//          npx wrangler secret put APP_TOKEN        (only for the tokened /api/read path)
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
-const GEMINI_MODEL = 'gemini-2.0-flash';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 export default {
   async fetch(request, env) {
@@ -82,19 +78,6 @@ export default {
           return json({ error: 'Daily capacity reached' }, 429);
         }
         return handleSpiker(request, env);
-      }
-
-      if (url.pathname === '/api/read') {
-        const hasToken = !!request.headers.get('x-app-token');
-        if (!hasToken) {
-          if (env.PUBLIC_READ !== 'on') return json({ error: 'Cloud read is not open yet' }, 403);
-          if (await limited(env, `min:${ip}`, 5, 120) || await limited(env, `day:${ip}`, 20, 90000)) {
-            return json({ error: 'Rate limit exceeded. Please wait.' }, 429);
-          }
-        } else if (request.headers.get('x-app-token') !== env.APP_TOKEN) {
-          return json({ error: 'Unauthorized' }, 401);
-        }
-        return handleRead(request, env);
       }
 
       return json({ error: 'Not found' }, 404);
@@ -416,42 +399,6 @@ function validateSpiker(out, readingCount, doc) {
   }
   if (!spiker.ton_line && !spiker.gozden_kacanlar.length) return null;
   return spiker;
-}
-
-// ---- /api/read — legacy Gemini full fallback (unchanged) ------------------------------------
-
-async function handleRead(request, env) {
-  const body = await request.json();
-  const doc = typeof body.doc === 'string' ? body.doc.slice(0, 8000) : '';
-  const me = body.me === 'B' ? 'B' : 'A';
-  if (!doc || doc.split('\n').length < 2) return json({ error: 'Invalid conversation' }, 400);
-
-  const prompt = `Sen bir Türkçe mesajlaşma alt-metni okuyucususun. Aşağıdaki sohbette "${me}" kullanıcının kendisidir.
-SADECE şu şemada, Türkçe, geçerli JSON döndür; başka hiçbir şey yazma:
-{"genel_ton":{"key":"flirty|friendly|cold|tense","label":"kısa etiket","line":"1 cümle"},
- "flort_sinyali":{"score":0-100,"reason":"1 cümle gerekçe"},
- "ilgi_dengesi":{"leans":"A|B|even","line":"kim daha çok istiyor, 1 cümle"},
- "mesaj_okumalari":[{"speaker":"A|B","text":"sohbetteki bir mesaj","read":"ne demek istenmiş, 1 cümle"}],
- "bayraklar":[{"type":"red|green","title":"kısa","line":"1 cümle"}],
- "kapanis":"tek vuruşluk hissel kapanış cümlesi"}
-Kural: uydurma yapma, sadece metinde olan sinyallere dayan. En fazla 3 mesaj_okumasi, en fazla 4 bayrak.
-Sohbet:
-${doc}`;
-
-  const res = await fetch(`${GEMINI_URL}?key=${env.GEMINI_API_KEY}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.4, responseMimeType: 'application/json' },
-    }),
-  });
-  const data = await res.json();
-  if (!res.ok) return json({ error: 'Upstream error' }, 502);
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  let reveal;
-  try { reveal = JSON.parse(text); } catch { return json({ error: 'Could not read this one' }, 502); }
-  return json({ source: 'cloud', reveal });
 }
 
 function json(data, status = 200) {

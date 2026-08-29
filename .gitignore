@@ -5,8 +5,12 @@ train/.venv/
 backend/.dev.vars
 *.log
 backend/.wrangler/
+.wrangler/
 .vercel
 .env*
+
+# machine-local editor/agent config (leaks absolute paths and account ids)
+.claude/
 
 .rabadon/state.json
 

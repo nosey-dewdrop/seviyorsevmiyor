@@ -1,4 +1,4 @@
-// v21 sahnesi (mockups/21-final.html portu): analiz anında yorum ORTADA daktilo gibi yazılır,
+// v21 sahnesi: analiz anında yorum ORTADA daktilo gibi yazılır,
 // bitince sol tarafa printable kart (terazi + barlar + ölçümler), sağ tarafa yorum paragrafları
 // oturur. Her yorum satırı tıklanabilir: altında "NEDEN BÖYLE OKUDUM?" + "BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?"
 // + rızalı bağış açılır. Karttaki her sayı gerçek sohbetten hesaplanır, elle sayı yazılmaz.

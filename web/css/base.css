@@ -52,7 +52,6 @@ button { font-family: inherit; cursor: pointer; }
 /* isme tıklayınca açılan developer flört tavsiyeleri */
 .dev-notu { margin-top: 10px; max-width: 480px; text-align: center; font-family: var(--mono); }
 .dev-notu p { font-size: 13.5px; line-height: 1.5; color: var(--ink-2); margin: 0 0 4px; }
-.dev-notu .dn-placeholder { color: var(--ink-4); font-size: 12px; }
 
 /* kocaman * papatyalar — kenarlarda, sönük, süs (Damla 15 Tem) */
 .papatyalar { position: fixed; inset: 0; pointer-events: none; z-index: 0; }

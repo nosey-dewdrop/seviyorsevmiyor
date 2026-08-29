@@ -12,8 +12,5 @@ id = "facdf8b5b45d493b808c18fe9fa3e7a1"
 # Spiker (Groq/Llama voice layer). "on" = live; flip to "off" as the kill switch.
 # Fuses in code: 6/min + 60/day per IP, 2000/day global.
 SPIKER_OPEN = "on"
-# Legacy Gemini full-fallback path; stays "off" until we ever need it.
-PUBLIC_READ = "off"
 
-# Secrets (never in this file): GROQ_API_KEY (+ GEMINI_API_KEY, APP_TOKEN if /api/read opens)
-# — set via `wrangler secret put`.
+# Secrets (never in this file): GROQ_API_KEY — set via `wrangler secret put`.

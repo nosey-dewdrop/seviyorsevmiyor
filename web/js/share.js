@@ -1,4 +1,4 @@
-// v21 kart (mockups/21-final.html portu): 1080x1920 story PNG, TEK yüzey (kutu içinde kutu yok).
+// v21 kart: 1080x1920 story PNG, TEK yüzey (kutu içinde kutu yok).
 // Terazi + barlar + eksenler + ölçümler kanvasa çizilir; karttaki her sayı gerçek hesaplanan
 // istatistiklerden gelir. Tamamı cihazda üretilir, sohbet hiçbir yere gitmez.
 

@@ -26,7 +26,6 @@ Açık işler:
 - LLAMA MİMARİ ÇELİŞKİSİ **eski akışta duruyor**: index.html hâlâ ham `doc` yolluyor. Yeni akışta
   çözüldü (sadece 326 baytlık sayı gider, isim/mesaj yok, `train/bulut_check.mjs` kanıtlıyor).
 - ocr.js hâlâ CDN'den Tesseract çekiyor (jszip yerele alındı, bu alınmadı).
-- FLÖRT TAVSİYESİ metni: brand'e tıkla → boş placeholder (index.html .dev-notu).
 - DOMAIN: share.js + og:url uzun github.io adresi yazıyor.
 
 16 Ağu NOTU: worker KAZARA deploy edildi (commit mesajındaki backtick zsh'de çalıştı, Version ID
@@ -46,4 +45,5 @@ Zaman motoru: `for t in parse timeline cpd e2e yazi bulut; do node train/${t}_ch
 Ton modeli: `python3 train/train.py`; verify `python3 train/parity_check.py && node train/parity_check.mjs`.
 Seed 268, held-out 72.2% (hard set). Ship model.json only if it improves; synth train-only, real held-out.
 
-Detay/tarihçe/arşiv + viral hamleler + roadmap → PROJECT.md.
+Repoyu ilk açan → README.md. Tarihçe → devlog.md. PROJECT.md 30 Ağu'da kaldırıldı: adı hâlâ
+"whatdoyoumean"dı ve Gemini şelalesini anlatıyordu; tek doğru kaynak bu dosya + KOSU-v1.md.
