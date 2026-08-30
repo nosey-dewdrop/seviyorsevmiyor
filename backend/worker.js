@@ -1,11 +1,13 @@
 // Cloudflare Worker — seviyorsevmiyor API.
 // One honesty rule: the on-device engine decides WHAT is true (verdict, counts, flags); the cloud
-// only makes the wording fresh and spots what slipped past. Content is never logged; only per-IP
-// rate counters live in KV.
+// only makes the wording fresh. No route of this worker accepts message text, forwards message
+// text or stores message text: every body is run through olguTemiz() first, which keeps numbers,
+// booleans and short enum keys and drops everything else. KV holds per-IP rate counters and the
+// numeric feature vectors of donated hard cases, all with a TTL.
 //
-// /api/spiker : Groq (Llama) rewrites the engine's lines in the product voice and adds
-//               evidence-quoted "gözden kaçanlar" observations. Engine facts are law.
+// /api/spiker : Groq (Llama) rewrites the engine's lines in the product voice, from the counts.
 // /api/zaman  : the time engine's optional voice — receives numbers only, never messages.
+// /api/itiraz : consented donation of a disputed reading — twelve model features, not the chat.
 //
 // Deploy:  npx wrangler deploy
 // Secrets: npx wrangler secret put GROQ_API_KEY     (console.groq.com, free)
@@ -14,9 +16,8 @@ const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const TURNSTILE_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
-// Every KV write carries a TTL. Nothing this worker stores is allowed to live forever, least of
-// all the donated conversations in `corpus:` — an indefinite retention period is a KVKK breach,
-// not a storage detail. Numbers are seconds.
+// Every KV write carries a TTL. Nothing this worker stores is allowed to live forever, and what
+// lands in `corpus:` is a feature vector plus a verdict key — no conversation. Numbers are seconds.
 const TTL = {
   corpus: 60 * 60 * 24 * 180,   // 180 days: long enough to retrain on, short enough to defend
   stat: 60 * 60 * 24 * 400,
@@ -97,9 +98,11 @@ export default {
         return handleZaman(request, env, ip, origin);
       }
 
-      // consented hard-case donation: user pressed "yanlış okudun" AND approved storing this
-      // one chat for training. The ONLY route that ever stores content — so it gets its own kill
-      // switch, its own retention window, and the ticket gate.
+      // consented hard-case donation: user pressed "yanlış okudun" AND approved donating this
+      // reading. What is stored is the numeric feature vector the model trains on plus the verdict
+      // that was disputed. The chat is not in the request and is not in KV. It keeps its own kill
+      // switch, its own retention window and the ticket gate anyway, because a donated row is
+      // still a donated row.
       if (url.pathname === '/api/itiraz') {
         if (env.ITIRAZ_OPEN !== 'on') return json({ error: 'Itiraz is not open' }, 403, origin);
         const red = await biletKapisi(env, request, origin);
@@ -111,15 +114,16 @@ export default {
           return json({ error: 'Rate limit exceeded' }, 429, origin);
         }
         const b = await request.json().catch(() => ({}));
-        const doc = typeof b.doc === 'string' ? b.doc.slice(0, 8000) : '';
-        if (!doc || b.onay !== true) return json({ error: 'Invalid request' }, 400, origin);
+        if (b.onay !== true) return json({ error: 'Invalid request' }, 400, origin);
+        // b.doc is deliberately not read. Old clients may still send one; it is dropped here and
+        // never reaches KV, so a stale cached page cannot reopen content storage on its own.
         const kayit = {
-          doc,
-          hukum: typeof b.hukum === 'string' ? b.hukum.slice(0, 40) : '',
-          karar: typeof b.karar === 'string' ? b.karar.slice(0, 10) : '',
+          olgu: olguTemiz(b.olgu),
+          hukum: anahtarTemiz(b.hukum),
+          karar: anahtarTemiz(b.karar),
           ts: Date.now(),
         };
-        // Donated content does not belong in the rate-limit namespace; the check above already
+        // Donated rows do not belong in the rate-limit namespace; the check above already
         // refused the request if CORPUS is absent. Every write carries the retention window.
         await korpusKV(env).put(`corpus:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
           JSON.stringify(kayit), { expirationTtl: TTL.corpus });
@@ -290,7 +294,21 @@ async function zamanKalan(env) {
 }
 
 // Facts must be a small, flat, numeric object. This is the wall that keeps chat text from leaving
-// the device even if a future client is careless about what it puts in the payload.
+// the device even if a future client is careless about what it puts in the payload. It is the
+// single wall for every route now, not just /api/zaman.
+//
+// The string rule used to be "at most 24 characters and no double space", which let a short
+// sentence through — "musait misin" is twelve characters with one space. A string field is now an
+// enum key or nothing: one token, no whitespace at all. Prose cannot be one token.
+//
+// The comma is in the set and the cap is 40 for one existing field: the time flow sends
+// `degisenler: "gecikme,sessizlik"`, a joined list of concept keys. A comma-joined list of tokens
+// is still not a sentence, because a sentence needs a space.
+function anahtarTemiz(v) {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  return /^[\p{L}\p{N}_,-]{1,40}$/u.test(t) ? t : null;
+}
 function olguTemiz(f) {
   if (!f || typeof f !== 'object' || Array.isArray(f)) return null;
   const out = {};
@@ -300,8 +318,11 @@ function olguTemiz(f) {
     if (!/^[a-zA-Z_]{1,24}$/.test(k)) continue;
     if (typeof v === 'number' && Number.isFinite(v)) out[k] = Math.round(v * 100) / 100;
     else if (typeof v === 'boolean') out[k] = v;
-    // strings are allowed only as short display names, never as content
-    else if (typeof v === 'string' && v.length <= 24 && !/\s{2,}/.test(v)) out[k] = v;
+    else {
+      // strings are allowed only as short enum keys, never as content
+      const a = anahtarTemiz(v);
+      if (a !== null) out[k] = a;
+    }
   }
   return Object.keys(out).length ? out : null;
 }
@@ -394,7 +415,7 @@ async function handleZaman(request, env, ip, origin) {
 
 // ---- /api/spiker — Llama is the mouth, never the judge -------------------------------------
 
-const SPIKER_SYSTEM = `sen "seviyorsevmiyor" sitesinin okuyucususun. cihazdaki motor bir sohbeti analiz etti ve sana raporunu verdi. iki görevin var: (1) raporun cümlelerini theyseeyourphotos tonunda yeniden yazmak, (2) sohbette gözden kaçanları yakalamak.
+const SPIKER_SYSTEM = `sen "seviyorsevmiyor" sitesinin okuyucususun. cihazdaki motor bir sohbeti analiz etti ve sana yalnızca SAYILARINI verdi. sohbetin kendisi sende yok ve hiç olmayacak. görevin: bu sayılara bakıp hükmü theyseeyourphotos tonunda anlatmak.
 
 TON — bu ürünün ruhu (theyseeyourphotos):
 - MESAFELİ, GÖZLEMCİ, biraz ÜRKÜTÜCÜ bir üçüncü gözsün. sohbeti dışarıdan izliyorsun ve gördüğünü soğukkanlılıkla söylüyorsun.
@@ -405,9 +426,10 @@ TON — bu ürünün ruhu (theyseeyourphotos):
 
 KANUN — asla çiğneme:
 1. motor raporu gerçektir. hüküm, yüzdeler, sayımlar ve bayraklar DEĞİŞMEZ; yeni sayı, yeni yüzde, yeni bayrak uydurma. raporla çelişen tek cümle yazma.
-2. her gözlem kanıta bağlanır: "kanit" alanına sohbetten KISA ve GERÇEK bir alıntı koy. alıntı bulamıyorsan o gözlemi yazma.
-3. hüküm gergin ise VEYA kırmızı bayrak varsa daha da ciddi ol. manipülasyon/gaslight gözlemleri HER ZAMAN ağır ve net dille yazılır. ama ton hep mesafeli-gözlemci kalır, asla "kanka" ya da şakacı olmaz.
-4. teşhis koyma, ihtimal dili kullan ama TEK yumuşatmayla: "gaslight kokusu var" evet, "sanki ... gibi görünüyor olabilir" diye üst üste yumuşatma YOK.
+2. RAKAM YAZMA. hiçbir sayı, yüzde, saat, tarih yazma. sayıları ekrana motor kendisi basıyor.
+3. ALINTI YAPMA. elinde mesaj yok. tırnak içinde tek kelime bile yazma, sohbetten bir cümle biliyormuş gibi yapma. kim ne dedi bilmiyorsun, sadece kaç mesaj ve kaç soru olduğunu biliyorsun.
+4. hüküm gergin ise VEYA kırmızı bayrak varsa daha da ciddi ol. ama ton hep mesafeli-gözlemci kalır, asla "kanka" ya da şakacı olmaz.
+5. teşhis koyma, ihtimal dili kullan ama TEK yumuşatmayla: "gaslight kokusu var" evet, "sanki ... gibi görünüyor olabilir" diye üst üste yumuşatma YOK.
 
 AĞIZ YASAKLARI (ihlal = çöp çıktı):
 - spor metaforu YOK: maç, gol, kale, saha, skor, hakem benzetmesi yasak.
@@ -416,42 +438,68 @@ AĞIZ YASAKLARI (ihlal = çöp çıktı):
 - aynı kelimeyi üst üste tekrar etme ("sanki... sanki... sanki" gibi tik yasak); her gözlemi farklı kur.
 - bayraklardan bahsederken "red flag" / "green flag" de ("kırmızı bayrak" deme, kimse öyle konuşmuyor).
 
-üslup referansı: the pudding'in spotify botu — veriyi ANLATMA, veriye TEPKİ ver. "oha. üç soru sormuşsun, sıfır geri gelmiş. iyi misin sen?" gibi kısa, kişisel, şoke olmuş arkadaş tepkisi.
+üslup referansı: the pudding'in spotify botu — veriyi ANLATMA, veriye TEPKİ ver. kısa, kişisel, şoke olmuş bir gözlemci tepkisi.
 
 İYİ örnekler (ağız bu):
 - ton, tek taraflı: "üzülerek söylüyorum: bu sohbeti tek başına sen taşıyorsun."
-- gözden kaçan: "sohbet boyunca hep kendini anlatmış; sana bir kez bile 'sen nasılsın' dememiş."
-- gözden kaçan, iyi işaret: "planı somutlaştıran hep o. anlattığı gibi biriyse iyi gibi."
-KÖTÜ örnekler (asla yazma): "bu maçta tek kale oynanıyor" (spor), "sanki seni suçlu hissettirmeye çalışıyor gibi görünüyor olabilir" (çift yumuşatma + tıraş), "hadi iyi günler" (ruhsuz veda).
-
-gözden_kacanlar için baktıkların (hepsi değil, sohbette gerçekten olanlar): hep kendini anlatıp karşıyı hiç sormamak; soru/yatırım dengesizliği ("sen de fazla kaptırmışsın"); suçluluk yükleme, savunmaya itme, küçük manipülasyon veya gaslight kalıpları; sözle davranışın çelişmesi (tatlı dil ama plan yok); gerçek iyi işaretler — planı somutlaştırma, halini sorma, özür, tutarlılık. iyiyi söylemekten korkma: "anlattığı gibi biriyse iyi gibi" de.
+- denge: "sen sorup duruyorsun, ondan geri gelen yok."
+- iyi işaret: "iki taraf da aynı ağırlıkta yazıyor. bu kadarı bile nadir."
+KÖTÜ örnekler (asla yazma): "bu maçta tek kale oynanıyor" (spor), "sanki seni suçlu hissettirmeye çalışıyor gibi görünüyor olabilir" (çift yumuşatma + tıraş), "hadi iyi günler" (ruhsuz veda), tırnak içinde sohbetten cümle vermek (elinde olmayan alıntı).
 
 SADECE geçerli JSON döndür, başka hiçbir şey yazma.`;
 
-function spikerUserPrompt(facts, doc) {
-  const n = Array.isArray(facts.okumalar) ? facts.okumalar.length : 0;
-  return `MOTOR RAPORU (kanun, değiştirilemez):
-${JSON.stringify(facts, null, 1)}
+// The report handed to the model is the SAME flat table of counts the time flow sends. The old
+// prompt pasted the conversation under a "SOHBET:" heading and asked for quoted evidence; there is
+// no conversation here to paste and no quote to ask for.
+function spikerUserPrompt(olgu) {
+  return `SOHBETİN SAYILARI (kanun, değiştirilemez):
+${JSON.stringify(olgu, null, 1)}
 
-SOHBET ("SEN:" satırları kullanıcının kendisi):
-${doc}
+alan adları: yuzde/pay alanları yüzde, "senin_" kullanıcı, "onun_" karşı taraf, red_flag_turu ve
+green_flag motorun saydığı bayraklar.
 
-ÇIKTI ŞEMASI — tüm alanlar türkçe:
+ÇIKTI ŞEMASI — tüm alanlar türkçe, hiçbirinde rakam ve tırnak yok:
 {"ton_line":"hükmü anlatan 1-2 cümle",
  "sinyal_reason":"flört sinyali yüzdesinin gerekçesi, 1 cümle",
  "denge_line":"kim daha çok istiyor, sayımlara sadık 1-2 cümle",
- "okumalar":[${n} adet string — rapordaki okumalarla AYNI SIRADA, her mesajın alt-metnini senin ağzınla söyle],
- "gozden_kacanlar":[2-4 adet {"baslik":"2-4 kelime","line":"gözlem, 1-2 cümle","kanit":"sohbetten kısa alıntı"}],
  "kapanis":"tek vuruşluk içten kapanış, 1 cümle"}`;
 }
 
+// The client already reduced the report to counts, but the client is the half an attacker
+// controls, so the reduction is repeated here on whatever arrived. `body.doc` is never read: a
+// stale cached page that still posts one gets its text dropped at this line.
+function spikerOlguSunucu(body) {
+  if (body && body.olgu) return olguTemiz(body.olgu);
+  const f = body && typeof body.facts === 'object' && body.facts ? body.facts : null;
+  if (!f) return null;
+  const h = f.hukum || {};
+  const fl = f.flort || {};
+  const s = f.sayim || {};
+  const bayraklar = Array.isArray(f.bayraklar) ? f.bayraklar : [];
+  const tur = (t) => bayraklar.filter((b) => b && b.tur === t).length;
+  return olguTemiz({
+    hukum_tur: h.tur,
+    flort_karar: fl.karar,
+    flort_yuzde: fl.yuzde,
+    sende_yuzde: fl.sende_yuzde,
+    onda_yuzde: fl.onda_yuzde,
+    toplam_mesaj: s.toplam_mesaj,
+    senin_mesajin: s.senin_mesajin,
+    onun_mesaji: s.onun_mesaji,
+    senin_sorun: s.senin_sorun,
+    onun_sorusu: s.onun_sorusu,
+    red_flag_turu: s.red_flag_turu,
+    green_flag: s.green_flag,
+    okuma_sayisi: Array.isArray(f.okumalar) ? f.okumalar.length : 0,
+    red_bayrak: tur('red'),
+    green_bayrak: tur('green'),
+  });
+}
+
 async function handleSpiker(request, env, origin) {
-  const body = await request.json();
-  const facts = body.facts;
-  const doc = typeof body.doc === 'string' ? body.doc.slice(0, 6000) : '';
-  if (!facts || typeof facts !== 'object' || !doc || doc.split('\n').length < 2) {
-    return json({ error: 'Invalid request' }, 400, origin);
-  }
+  const body = await request.json().catch(() => null);
+  const olgu = spikerOlguSunucu(body);
+  if (!olgu) return json({ error: 'Invalid request' }, 400, origin);
 
   const res = await fetch(GROQ_URL, {
     method: 'POST',
@@ -463,7 +511,7 @@ async function handleSpiker(request, env, origin) {
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: SPIKER_SYSTEM },
-        { role: 'user', content: spikerUserPrompt(facts, doc) },
+        { role: 'user', content: spikerUserPrompt(olgu) },
       ],
     }),
   });
@@ -473,9 +521,9 @@ async function handleSpiker(request, env, origin) {
   let out;
   try { out = JSON.parse(text); } catch { return json({ error: 'Could not read this one' }, 502, origin); }
 
-  const spiker = validateSpiker(out, Array.isArray(facts.okumalar) ? facts.okumalar.length : 0, doc);
+  const spiker = validateSpiker(out);
   if (!spiker) return json({ error: 'Could not read this one' }, 502, origin);
-  const serious = facts?.hukum?.tur === 'tense' || (facts?.sayim?.red_flag_turu || 0) >= 1;
+  const serious = olgu.hukum_tur === 'tense' || (olgu.red_flag_turu || 0) >= 1;
   postProcess(spiker, serious);
   return json({ source: 'groq', spiker }, 200, origin);
 }
@@ -496,51 +544,42 @@ function postProcess(spiker, serious) {
   spiker.sinyal_reason = fix(spiker.sinyal_reason);
   spiker.denge_line = fix(spiker.denge_line);
   spiker.kapanis = fix(spiker.kapanis);
-  if (spiker.okumalar) spiker.okumalar = spiker.okumalar.map(fix);
-  spiker.gozden_kacanlar = spiker.gozden_kacanlar.map((g) => ({
-    baslik: fix(g.baslik), line: fix(g.line), kanit: g.kanit,
-  }));
 }
 
 // The client merges these over its template lines; anything malformed is dropped so the
 // on-device templates always remain the floor.
-// A quote counts as real evidence only if it actually appears in the conversation. Llama
-// sometimes invents "kanit" strings (e.g. "sen de fazla kaptirmissin" that no one said); we
-// normalize both sides (lowercase TR, collapse whitespace, strip punctuation) and require the
-// quote to be a substring of the doc. A too-short "quote" (< 4 chars) is not evidence either.
-function quoteIsInDoc(quote, docNorm) {
-  if (!quote) return false;
-  const q = normForMatch(quote);
-  if (q.length < 4) return false;
-  return docNorm.includes(q);
-}
-function normForMatch(s) {
-  return trLower(String(s)).replace(/[^\p{L}\p{N} ]/gu, ' ').replace(/\s+/g, ' ').trim();
+//
+// Two fields the spiker used to return are gone on purpose, and neither can come back while the
+// conversation stays on the device:
+//   okumalar        — per-message rewrites. writing the subtext of a message requires the message.
+//   gozden_kacanlar — evidence-quoted observations. the old quoteIsInDoc() check could only tell a
+//                     real quote from an invented one by searching the doc. with no doc there is no
+//                     check, and an unverifiable quote is exactly the failure that check existed to
+//                     stop. so the observations are dropped rather than shipped unverified.
+// Both fields keep their on-device template values, because the client only overwrites what it is
+// handed and it is no longer handed these.
+//
+// A digit is refused for the same reason as in the time flow: every figure on screen is put there
+// by the engine, so a figure written by the model is a figure nothing measured. A quotation mark is
+// refused because the model has nothing to quote from.
+function satirTemiz(v, max) {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  if (!t || t.length > max) return null;
+  if (/[0-9٠-٩]/.test(t)) return null;
+  if (/["“”«»]/.test(t)) return null;
+  return t;
 }
 
-function validateSpiker(out, readingCount, doc) {
-  const str = (v, max) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null);
-  const docNorm = normForMatch(doc || '');
+function validateSpiker(out) {
+  if (!out || typeof out !== 'object') return null;
   const spiker = {
-    ton_line: str(out.ton_line, 300),
-    sinyal_reason: str(out.sinyal_reason, 300),
-    denge_line: str(out.denge_line, 400),
-    kapanis: str(out.kapanis, 300),
-    okumalar: null,
-    gozden_kacanlar: [],
+    ton_line: satirTemiz(out.ton_line, 300),
+    sinyal_reason: satirTemiz(out.sinyal_reason, 300),
+    denge_line: satirTemiz(out.denge_line, 400),
+    kapanis: satirTemiz(out.kapanis, 300),
   };
-  if (Array.isArray(out.okumalar) && out.okumalar.length === readingCount) {
-    const reads = out.okumalar.map((r) => str(r, 300));
-    if (reads.every(Boolean)) spiker.okumalar = reads;
-  }
-  if (Array.isArray(out.gozden_kacanlar)) {
-    spiker.gozden_kacanlar = out.gozden_kacanlar.slice(0, 4).map((g) => ({
-      baslik: str(g?.baslik, 60),
-      line: str(g?.line, 400),
-      kanit: str(g?.kanit, 200),
-    })).filter((g) => g.baslik && g.line && g.kanit && quoteIsInDoc(g.kanit, docNorm));
-  }
-  if (!spiker.ton_line && !spiker.gozden_kacanlar.length) return null;
+  if (!spiker.ton_line && !spiker.denge_line) return null;
   return spiker;
 }
 

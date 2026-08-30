@@ -1,11 +1,17 @@
-// Spiker client. Sends the ENGINE's verdict + counts (the law) plus the chat text to the
-// Worker; gets fresh wording and evidence-quoted "gözden kaçanlar" back. Any failure returns
-// null — the on-device template lines are always the floor, the product never breaks offline.
+// Spiker client. Sends the ENGINE's verdict and counts — numbers only. The chat text never
+// leaves this file's caller: it is turned into a flat table of counts here and the counts are
+// what travels. Any failure returns null; the on-device template lines are always the floor, so
+// the product never breaks offline.
 //
-// Every call that costs money or stores content now carries a ticket: the page solves an
-// invisible Turnstile challenge, the worker verifies it server side and hands back a five-minute
-// HMAC ticket. The widget by itself protects nothing, so the ticket is what the worker checks.
+// This is the file the privacy claim rests on. "mesajların cihazından çıkmaz" is a statement
+// about the request body, so every request body built below is built from numbers and short enum
+// keys, and train/bulut_check_eski.mjs measures the bodies rather than trusting this comment.
+//
+// Every call that costs money now carries a ticket: the page solves an invisible Turnstile
+// challenge, the worker verifies it server side and hands back a five-minute HMAC ticket. The
+// widget by itself protects nothing, so the ticket is what the worker checks.
 import { API_BASE } from './config.js?v=72';
+import { numericFeatures } from './features.js?v=72';
 
 // Public site key (NOT a secret — the secret half lives in wrangler as TURNSTILE_SECRET).
 // Cloudflare dash > Turnstile > add widget (Invisible) > copy the site key here.
@@ -129,8 +135,90 @@ export async function biletAl() {
 // Callers drop it so the next attempt solves a fresh challenge instead of replaying a bad ticket.
 export function biletDusur() { bilet = null; }
 
+// ---- the wall: chat text in, numbers out -----------------------------------------------------
+//
+// Both cloud routes of the old flow used to carry the conversation itself. They now carry a flat
+// object of counts built here. Two rules, both enforced by construction rather than by review:
+//
+//   1. an allowlist of field names. a new field cannot appear in the payload by accident, because
+//      only the names written below are ever read out of the report.
+//   2. every value is a number, a boolean, or a short enum key with no whitespace. a message is
+//      prose, and prose cannot survive that filter.
+
+// Rounded to two decimals so a float cannot smuggle a long tail of digits.
+function sayi(v) {
+  return typeof v === 'number' && Number.isFinite(v) ? Math.round(v * 100) / 100 : null;
+}
+// An enum key is one token: letters, digits and underscore, nothing else, at most 24 characters.
+// "flort_yok" passes. Any sentence, any quote, any name with a space does not.
+function anahtar(v) {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  return /^[\p{L}\p{N}_-]{1,24}$/u.test(t) ? t : null;
+}
+function say(v) { return Array.isArray(v) ? v.length : null; }
+
+// Drop every field the filters above rejected, so the payload has no null holes to inspect.
+function temizle(obj) {
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) if (v !== null && v !== undefined) out[k] = v;
+  return out;
+}
+
+/**
+ * The engine report (app.js spikerFacts) minus every string that came from the conversation.
+ * `okumalar` carries the raw message text and `bayraklar`/`denge` carry generated sentences, so
+ * those are reduced to counts: the spiker is told HOW MANY readings and flags there are, never
+ * what anyone wrote.
+ */
+export function spikerOlgu(facts) {
+  const f = facts && typeof facts === 'object' ? facts : {};
+  const h = f.hukum || {};
+  const fl = f.flort || {};
+  const s = f.sayim || {};
+  const bayraklar = Array.isArray(f.bayraklar) ? f.bayraklar : [];
+  const tur = (t) => bayraklar.filter((b) => anahtar(b && b.tur) === t).length;
+  return temizle({
+    hukum_tur: anahtar(h.tur),
+    flort_karar: anahtar(fl.karar),
+    flort_yuzde: sayi(fl.yuzde),
+    sende_yuzde: sayi(fl.sende_yuzde),
+    onda_yuzde: sayi(fl.onda_yuzde),
+    toplam_mesaj: sayi(s.toplam_mesaj),
+    senin_mesajin: sayi(s.senin_mesajin),
+    onun_mesaji: sayi(s.onun_mesaji),
+    senin_sorun: sayi(s.senin_sorun),
+    onun_sorusu: sayi(s.onun_sorusu),
+    red_flag_turu: sayi(s.red_flag_turu),
+    green_flag: sayi(s.green_flag),
+    okuma_sayisi: say(f.okumalar),
+    red_bayrak: tur('red'),
+    green_bayrak: tur('green'),
+  });
+}
+
+/**
+ * What a donated hard case is now: the twelve numeric features the tone model actually trains on,
+ * plus the verdict that was disputed. The conversation stays on the device.
+ *
+ * features.js speaks "A:" / "B:", the reveal screen speaks "SEN:" / "O:", so the labels are mapped
+ * before extraction. Only the twelve ratios come back out; the doc itself is never returned.
+ */
+export function itirazOlgu(doc) {
+  if (typeof doc !== 'string' || !doc.trim()) return null;
+  const abDoc = doc.replace(/^SEN:/gm, 'A:').replace(/^O:/gm, 'B:');
+  const f = numericFeatures(abDoc);
+  const out = {};
+  for (const [k, v] of Object.entries(f)) {
+    const n = sayi(v);
+    if (n !== null) out[k] = n;
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 // Consented hard-case donation ("yanlış okudun" + bağış onayı) — the flywheel that grows OUR
-// engine so the LLM share shrinks over time.
+// engine so the LLM share shrinks over time. It donates the feature vector, not the chat: the
+// model trains on those twelve numbers anyway, so the text was never the part worth keeping.
 export async function itirazGonder(doc, hukum, karar) {
   try {
     const t = await biletAl();
@@ -138,14 +226,22 @@ export async function itirazGonder(doc, hukum, karar) {
     const res = await fetch(`${API_BASE}/api/itiraz`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-app-token': t },
-      body: JSON.stringify({ doc, hukum, karar, onay: true }),
+      body: JSON.stringify({
+        olgu: itirazOlgu(doc),
+        hukum: anahtar(hukum),
+        karar: anahtar(karar),
+        onay: true,
+      }),
     });
     if (res.status === 403) bilet = null;
     return res.ok;
   } catch { return false; }
 }
 
-export async function spikerRead(facts, doc) {
+// The caller still hands over the conversation as a second argument; it is deliberately not read.
+// Removing the parameter would only move the question to app.js, which this phase may not touch —
+// so the fact that nothing here consumes it is the thing the gate measures.
+export async function spikerRead(facts) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), 7000);
   try {
@@ -154,7 +250,7 @@ export async function spikerRead(facts, doc) {
     const res = await fetch(`${API_BASE}/api/spiker`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-app-token': token },
-      body: JSON.stringify({ facts, doc }),
+      body: JSON.stringify({ olgu: spikerOlgu(facts) }),
       signal: ctl.signal,
     });
     if (res.status === 403) bilet = null;

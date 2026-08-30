@@ -2,22 +2,25 @@ name = "seviyorsevmiyor-api"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
-# KV for per-IP rate counters only (no content is ever stored here).
+# KV for per-IP rate counters and daily totals. No message text reaches this worker at all, so
+# none can be written here: every route runs its body through olguTemiz() first.
 # Namespace title is MESAJ_RATE_LIMIT (account already had a generic RATE_LIMIT from another worker).
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
 id = "facdf8b5b45d493b808c18fe9fa3e7a1"
 
-# Donated conversations (/api/itiraz) must NOT share a namespace with rate counters: different
-# data, different retention, different blast radius. Create it once and uncomment:
+# Donated readings (/api/itiraz) must NOT share a namespace with rate counters: different
+# data, different retention, different blast radius. A donated row is the twelve numeric model
+# features plus the disputed verdict key — the conversation stays on the device and is not in the
+# request body at all. Create the namespace once and uncomment:
 #   npx wrangler kv namespace create CORPUS
 # [[kv_namespaces]]
 # binding = "CORPUS"
 # id = "<paste the id wrangler prints>"
 #
 # THIS BINDING IS MISSING RIGHT NOW, so /api/itiraz is closed in production: it answers
-# 503 {"eksik":["CORPUS"]} instead of writing donated chats into the rate-counter namespace.
-# The worker used to fall back to RATE_LIMIT silently, which is how content ended up in the wrong
+# 503 {"eksik":["CORPUS"]} instead of writing donated rows into the rate-counter namespace.
+# The worker used to fall back to RATE_LIMIT silently, which is how donations ended up in the wrong
 # place with nobody able to see it. Uncomment the block above to reopen donations.
 
 [vars]

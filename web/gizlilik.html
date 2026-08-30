@@ -4,18 +4,18 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Gizlilik · seviyorsevmiyor</title>
-<meta name="description" content="seviyorsevmiyor gizlilik ve aydınlatma metni. analiz cihazında yapılır, sohbetler saklanmaz; bulut yorum katmanı yalnızca açık onayla çalışır." />
+<meta name="description" content="seviyorsevmiyor gizlilik ve aydınlatma metni. analiz cihazında yapılır, mesajların cihazından çıkmaz; buluta yalnızca sayılar gider, o da açık onayla." />
 <meta name="robots" content="index,follow" />
 <link rel="canonical" href="https://seviyorsevmiyor.noseydewdrop.com/gizlilik.html" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seviyorsevmiyor.noseydewdrop.com/gizlilik.html" />
 <meta property="og:title" content="Gizlilik · seviyorsevmiyor" />
-<meta property="og:description" content="analiz cihazında yapılır, sohbetler saklanmaz; bulut yorum katmanı yalnızca açık onayla çalışır." />
+<meta property="og:description" content="analiz cihazında yapılır, mesajların cihazından çıkmaz; buluta yalnızca sayılar gider, o da açık onayla." />
 <meta property="og:site_name" content="seviyorsevmiyor" />
 <meta property="og:locale" content="tr_TR" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content="Gizlilik · seviyorsevmiyor" />
-<meta name="twitter:description" content="analiz cihazında yapılır, sohbetler saklanmaz; bulut yorum katmanı yalnızca açık onayla çalışır." />
+<meta name="twitter:description" content="analiz cihazında yapılır, mesajların cihazından çıkmaz; buluta yalnızca sayılar gider, o da açık onayla." />
 <link rel="stylesheet" href="./css/tokens.css?v=72" />
 <link rel="stylesheet" href="./css/base.css?v=72" />
 <style>
@@ -38,9 +38,9 @@
 
   <main class="doc">
     <h1>Gizlilik ve Aydınlatma Metni</h1>
-    <p class="muted">Son güncelleme: 13 Temmuz 2026</p>
+    <p class="muted">Son güncelleme: 30 Ağustos 2026</p>
 
-    <p class="lead">Kısası: hüküm, yüzdeler ve sayımlar her zaman <b>cihazında</b> hesaplanır. Yalnızca <b>sen onay verirsen</b>, yorum cümlelerinin yazılması için o tek sohbet buluttaki spikere gönderilir. Sohbetlerini saklamıyoruz.</p>
+    <p class="lead">Kısası: analiz <b>cihazında</b> yapılır. <b>Mesajlarının metni cihazından çıkmaz.</b> Buluta giden tek şey, cihazında hesaplanmış sayılardır: kaç mesaj, kaç soru, yüzdeler. O da yalnızca <b>sen onay verirsen</b> gider. Sohbet metnini saklamıyoruz, çünkü sunucularımıza hiç ulaşmıyor.</p>
 
     <h2>Veri sorumlusu</h2>
     <p>Bu hizmet nosey-dewdrop tarafından sunulur. İletişim ve KVKK başvuruları: <a href="https://github.com/nosey-dewdrop/seviyorsevmiyor/issues" target="_blank" rel="noopener">github.com/nosey-dewdrop/seviyorsevmiyor/issues</a>. Bu metin 6698 sayılı KVKK ve GDPR çerçevesinde hazırlanmıştır.</p>
@@ -49,20 +49,21 @@
     <ul>
       <li><b>Cihaz üzerinde analiz (varsayılan):</b> Yapıştırdığın veya yüklediğin sohbet metni tarayıcında işlenir. Kendi istatistiksel modelimiz orada çalışır; bu metin sunucularımıza gönderilmez, saklanmaz.</li>
       <li><b>Ekran görüntüsü:</b> Fotoğraftan metin çıkarımı (OCR) da cihazında yapılır; görsel yüklenmez.</li>
-      <li><b>Bulut yorum katmanı, "canlı spiker" (yalnızca onayla):</b> Onay kutusunu işaretlersen, o sohbetin metni ve cihazda hesaplanan analiz raporu, yorum cümlelerinin yazılması için bir yapay zeka sağlayıcısına (Groq üzerinde Llama modeli; sunucular yurt dışında) bizim aracımız üzerinden iletilir. Aracı, IP adresini geçici hız sınırı sayacı dışında saklamaz ve sohbet içeriğini loglamaz. Hüküm ve sayılar buluta gitse de gitmese de cihazında hesaplanır.</li>
-      <li><b>Saklama:</b> Sohbetlerin kalıcı olarak saklanmaz; tek istisna aşağıdaki gönüllü itiraz bağışıdır. Tercihler ve kayıt defteri (kişi adı + sinyal yüzdesi, sohbet metni değil) yalnızca kendi tarayıcının localStorage'ında tutulur.</li>
-      <li><b>İtiraz bağışı (yalnızca onayla):</b> "bence yanlış okudun" dedikten sonra istersen o tek sohbeti motorun eğitimi için bağışlayabilirsin. Yalnızca bu durumda sohbet metni ve verilen hüküm saklanır ve modelin eğitiminde kullanılır. Bağışlamadan da itiraz edebilirsin. Bağışını sildirmek için e-posta atman yeterli.</li>
+      <li><b>Bulut yorum katmanı, "canlı spiker" (yalnızca onayla):</b> Onay kutusunu işaretlersen, cihazında hesaplanan <b>sayılar</b> yorum cümlelerinin yazılması için bir yapay zeka sağlayıcısına (Groq üzerinde Llama modeli; sunucular yurt dışında) bizim aracımız üzerinden iletilir. Giden istekte mesaj metni, isim, tarih ya da alıntı yoktur; yalnızca sayılar, evet/hayır değerleri ve "flort_var" gibi kısa etiketler bulunur. Aracımız gelen isteği aynı kurala göre bir kez daha süzer: metne benzeyen her alanı atar. Sağlayıcı sohbeti hiç görmediği için modelin ürettiği cümlelerde sohbetten alıntı da bulunmaz. Aracı, IP adresini geçici hız sınırı sayacı dışında saklamaz.</li>
+      <li><b>Saklama:</b> Sunucularımızda sohbet metni saklanmaz; metin oraya hiç ulaşmaz. Sunucuda tutulanlar: içeriksiz günlük sayaçlar, geçici IP hız sınırı sayaçları ve aşağıdaki gönüllü bağışın sayıları. Hepsinin bir saklama süresi vardır. Tercihler ve kayıt defteri (kişi adı + sinyal yüzdesi, sohbet metni değil) yalnızca kendi tarayıcının localStorage'ında tutulur.</li>
+      <li><b>İtiraz bağışı (yalnızca onayla):</b> "bence yanlış okudun" dedikten sonra istersen o okumayı motorun eğitimi için bağışlayabilirsin. Bu bağış <b>sohbetin metni değildir</b>: cihazında hesaplanan on iki sayıdan (soru oranı, kalp sayısı, ortalama mesaj uzunluğu gibi) ve itiraz ettiğin hükümden oluşur. Model zaten bu sayılarla eğitiliyor, metinle değil. Bağışlanan satırlar en fazla 180 gün saklanır ve sonunda kendiliğinden silinir. Bağışlamadan da itiraz edebilirsin.</li>
       <li><b>Sayaçlar:</b> Ürünü iyileştirmek için içeriksiz, kimliksiz günlük toplamlar tutulur (kaç analiz yapıldı, kaç paylaşım tıklandı gibi). Sohbet içeriği, isim ya da kalıcı IP kaydı içermez.</li>
     </ul>
 
     <h2>Başkasına ait sohbetler</h2>
-    <p>Yüklediğin sohbette karşı taraf sen değilsin. Bu kişinin verisini işlemek için bu sohbeti paylaşma hakkına sahip olduğunu beyan etmiş olursun. Lütfen tanımadığın kişilerin özel yazışmalarını yükleme. İçerik cihazında kaldığı sürece bu bilgi cihazından çıkmaz; buluta gönderdiğinde de kimlik bilgisi (isim, telefon) taşımaman senin sorumluluğundadır.</p>
+    <p>Yüklediğin sohbette karşı taraf sen değilsin. Bu kişinin verisini işlemek için bu sohbeti paylaşma hakkına sahip olduğunu beyan etmiş olursun. Lütfen tanımadığın kişilerin özel yazışmalarını yükleme. Sohbet metni cihazından çıkmadığı için o kişinin yazdıkları da bize ya da bir yapay zeka sağlayıcısına ulaşmaz.</p>
 
     <h2>Çerezler ve takip</h2>
     <p>Reklam veya üçüncü taraf takip çerezi kullanmıyoruz. Yalnızca uygulamanın çalışması için tarayıcı depolaması (localStorage) kullanılır.</p>
 
     <h2>Haklarınız</h2>
-    <p>KVKK madde 11 ve GDPR kapsamında; işlenen verilere erişme, düzeltme, silme ve itiraz haklarına sahipsin. Cihazda tutulan veriyi tarayıcı verini temizleyerek istediğin an silebilirsin. Bulut analizinde içerik saklanmadığı için ayrıca silinecek bir kayıt oluşmaz. Talepler için yukarıdaki e-postaya yazabilirsin.</p>
+    <p>KVKK madde 11 ve GDPR kapsamında; işlenen verilere erişme, düzeltme, silme ve itiraz haklarına sahipsin. Cihazda tutulan veriyi tarayıcı verini temizleyerek istediğin an silebilirsin. Sunucuda seninle ilişkilendirilebilecek bir sohbet kaydı yoktur, çünkü sohbet metni sunucuya hiç gitmez.</p>
+    <p>Başvuru kanalı: <a href="https://github.com/nosey-dewdrop/seviyorsevmiyor/issues" target="_blank" rel="noopener">github.com/nosey-dewdrop/seviyorsevmiyor/issues</a> adresinde bir konu açabilirsin. Depo herkese açıktır ve konu açmak için GitHub hesabı yeterlidir. Bağışladığın satırı sildirmek istiyorsan bağış anını (tarih ve yaklaşık saat) yazman yeterlidir; kayıtlar zaman damgasıyla anahtarlanır. Bağış satırı sohbet metni içermediği için başvurunda bize sohbetini göndermene gerek yoktur, göndermeni de istemeyiz. Konular herkese görünür olduğundan başvurunda özel bilgi paylaşma.</p>
 
     <h2>Çocuklar</h2>
     <p>Hizmet 18 yaş altı için tasarlanmamıştır.</p>
