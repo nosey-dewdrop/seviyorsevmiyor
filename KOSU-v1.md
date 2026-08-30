@@ -1495,6 +1495,35 @@ hakem notu: test taklit değil, 4 mutasyonla kırmızı yandığı kanıtlandı.
 bilet olmadan 200 aldı ve Groq'a bir çağrı harcattı. Kartın kullanıcı cümlesi
 o rotada yalan; `zaman.html` canlıdaki ana akış.
 
+## S2 — Worker sertleştirme — GEÇTİ (ikinci tur, sıkı eşikle)
+ölçülen: 76/76 kapı yeşil · hakemin kendi probe'u: biletsiz `/api/zaman`,
+`/api/spiker`, `/api/itiraz` üçü de **403, groq_delta=0, turnstile_delta=0** ·
+sahte uzak-gelecek bilet de 403 · TTL'siz KV yazımı 0 (13 yazım) · secret
+sızıntısı 0 · birikimli 10/10 · deploy izi yok
+eşik: yabancı origin 403 · TTL'siz KV 0 · biletsiz /api/zaman 403 ·
+biletsiz istekten Groq çağrısı 0, bütçe harcayan her rota ayrı kapı
+commit: 743e06b
+hakem notu: delik kapandı — önceki tur `200 groq 1` veriyordu, şimdi
+`403 groq 0`. Test hep-geçen değil, üç mutasyonun üçünde de kırmızı yandı ve
+TTL mutasyonunda artık TypeError'la çökmeden manşet kapısını koşup suçluyu
+adıyla basıyor. İstemci bilet alamayınca isteği HİÇ kurmuyor, sessizce
+biletsiz gitmiyor.
+
+### S2'den devredilen
+- **`/api/stats` ölçülmemiş bir kota yüzeyi.** Biletsiz, rate-limit'siz, istek
+  başına 84 KV okuma (14 gün × 6 olay). Hakem ölçtü: aynı IP'den 50 istek =
+  4200 okuma, hiçbiri reddedilmedi. Groq'a dokunmadığı için S2'nin eşiğini
+  kırmıyor, ama Origin uydurulabilir olduğundan ~1200 istek Cloudflare
+  free-tier günlük KV okuma kotasını (100k) bitirir ve **tüm site ölür**
+  → S13, ayrı kapı olarak
+- **Bulut yolunun sessiz düşüşü.** Bilet alınamayınca `zaman.js:92`
+  `yer.innerHTML = ''` yapıyor: buton gösterilip tıklandıktan SONRA blok
+  tamamen siliniyor, tek kelime açıklama yok. Adıyla söyleme sadece
+  `console.error`'a gidiyor, ziyaretçi konsola bakmaz. §0.7 "sessiz default
+  yok" ve "her reddin bir sonraki adımı vardır" ihlali → S9 (şablon motoru)
+- `backend/wrangler.toml:41` yorumu `/api/zaman`'ı saymıyor, oysa kod artık
+  onu da kapatıyor. Doküman sapması, davranış doğru
+
 ### S1.5'ten devredilen
 - `train/parity_negatif_check.mjs` sabotajı yalnızca `train/features.py`'yi
   bozuyor. Python kapısı exit 1 verince JS kapısı hiç koşmuyor, yani
