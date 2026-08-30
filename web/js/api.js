@@ -149,12 +149,22 @@ export function biletDusur() { bilet = null; }
 function sayi(v) {
   return typeof v === 'number' && Number.isFinite(v) ? Math.round(v * 100) / 100 : null;
 }
-// An enum key is one token: letters, digits and underscore, nothing else, at most 24 characters.
-// "flort_yok" passes. Any sentence, any quote, any name with a space does not.
-function anahtar(v) {
+// An enum slot carries a value from a closed list, not "any short token". Length said nothing
+// about content: `zurnabalik_kanarya_7719` is a legal token and an illegal verdict. The lists below
+// are the engine's own vocabularies (reveal.js TONE_TR, reveal.js flört kararı), and backend/
+// worker.js holds the identical lists, because the server may not trust this file to have run.
+const ENUM_DEGERLER = {
+  hukum: ['flirty', 'friendly', 'cold', 'tense', 'onesided'],
+  hukum_tur: ['flirty', 'friendly', 'cold', 'tense', 'onesided'],
+  karar: ['var', 'yok', 'tek'],
+  flort_karar: ['var', 'yok', 'tek'],
+};
+function anahtar(alan, v) {
   if (typeof v !== 'string') return null;
+  const izin = ENUM_DEGERLER[alan];
+  if (!izin) return null;
   const t = v.trim();
-  return /^[\p{L}\p{N}_-]{1,24}$/u.test(t) ? t : null;
+  return izin.includes(t) ? t : null;
 }
 function say(v) { return Array.isArray(v) ? v.length : null; }
 
@@ -177,10 +187,11 @@ export function spikerOlgu(facts) {
   const fl = f.flort || {};
   const s = f.sayim || {};
   const bayraklar = Array.isArray(f.bayraklar) ? f.bayraklar : [];
-  const tur = (t) => bayraklar.filter((b) => anahtar(b && b.tur) === t).length;
+  // flag kinds are counted, not carried, so this compares rather than sanitises
+  const tur = (t) => bayraklar.filter((b) => b && b.tur === t).length;
   return temizle({
-    hukum_tur: anahtar(h.tur),
-    flort_karar: anahtar(fl.karar),
+    hukum_tur: anahtar('hukum_tur', h.tur),
+    flort_karar: anahtar('flort_karar', fl.karar),
     flort_yuzde: sayi(fl.yuzde),
     sende_yuzde: sayi(fl.sende_yuzde),
     onda_yuzde: sayi(fl.onda_yuzde),
@@ -228,8 +239,8 @@ export async function itirazGonder(doc, hukum, karar) {
       headers: { 'content-type': 'application/json', 'x-app-token': t },
       body: JSON.stringify({
         olgu: itirazOlgu(doc),
-        hukum: anahtar(hukum),
-        karar: anahtar(karar),
+        hukum: anahtar('hukum', hukum),
+        karar: anahtar('karar', karar),
         onay: true,
       }),
     });

@@ -239,7 +239,7 @@ function gerekceBox(g, doc, r) {
     const ok = await itirazGonder(doc, r.genel_ton.key, r.flort_sinyali.karar);
     bagis.remove();
     box.appendChild(el('span', 'bagis-not', ok
-      ? 'geldi, motor bundan öğrenecek. sağ ol. isim geçiyorsa bir dahakine silsen iyi olur.'
+      ? 'geldi, motor bundan öğrenecek. sağ ol. giden şey sohbetin değil, ondan çıkan sayılar.'
       : 'şu an gitmedi ama itirazın not edildi.'));
   });
   box.appendChild(document.createElement('br'));

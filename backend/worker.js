@@ -119,8 +119,8 @@ export default {
         // never reaches KV, so a stale cached page cannot reopen content storage on its own.
         const kayit = {
           olgu: olguTemiz(b.olgu),
-          hukum: anahtarTemiz(b.hukum),
-          karar: anahtarTemiz(b.karar),
+          hukum: anahtarTemiz('hukum', b.hukum),
+          karar: anahtarTemiz('karar', b.karar),
           ts: Date.now(),
         };
         // Donated rows do not belong in the rate-limit namespace; the check above already
@@ -297,17 +297,44 @@ async function zamanKalan(env) {
 // the device even if a future client is careless about what it puts in the payload. It is the
 // single wall for every route now, not just /api/zaman.
 //
-// The string rule used to be "at most 24 characters and no double space", which let a short
-// sentence through — "musait misin" is twelve characters with one space. A string field is now an
-// enum key or nothing: one token, no whitespace at all. Prose cannot be one token.
+// The string rule used to ask how LONG a value was: up to 40 characters, no whitespace. That is a
+// question about shape, and shape says nothing about content. `zurnabalik_kanarya_7719` is a legal
+// value under every length rule and under no value rule, so twenty-four enum slots at forty
+// characters each were roughly 960 bytes of caller-chosen text per request, riding unaudited into
+// the Groq prompt and, on /api/itiraz, into a KV row with a 180-day life. The real client never put
+// anything but engine enums there; the server had no way to tell, which is the whole problem.
 //
-// The comma is in the set and the cap is 40 for one existing field: the time flow sends
-// `degisenler: "gecikme,sessizlik"`, a joined list of concept keys. A comma-joined list of tokens
-// is still not a sentence, because a sentence needs a space.
-function anahtarTemiz(v) {
+// So the question is now "is this one of OUR values?" and the answer is a closed list. A value that
+// is not on its field's list drops the field. The lists are the engine's own vocabularies:
+//   hukum / hukum_tur    web/js/reveal.js  TONE_TR
+//   karar / flort_karar  web/js/reveal.js  flört kararı
+//   degisenler           web/js/time/signals.js series keys, with the _A/_B side stripped
+// web/js/api.js carries the same lists and train/bulut_check_eski.mjs compares the two files, so
+// they cannot drift apart quietly.
+const ENUM_DEGERLER = {
+  hukum: ['flirty', 'friendly', 'cold', 'tense', 'onesided'],
+  hukum_tur: ['flirty', 'friendly', 'cold', 'tense', 'onesided'],
+  karar: ['var', 'yok', 'tek'],
+  flort_karar: ['var', 'yok', 'tek'],
+};
+// The time flow sends `degisenler: "gecikme,sessizlik"`, a joined list. Each part is checked
+// against the list, and the value that survives is rebuilt from the parts rather than echoed back,
+// so a repeated part cannot inflate the field past six concepts.
+const KAVRAMLAR = ['gecikme', 'baslatma', 'bitiren', 'uzunluk', 'gece', 'sessizlik'];
+
+function anahtarTemiz(alan, v) {
   if (typeof v !== 'string') return null;
   const t = v.trim();
-  return /^[\p{L}\p{N}_,-]{1,40}$/u.test(t) ? t : null;
+  if (!t || t.length > 200) return null;
+  if (alan === 'degisenler') {
+    const parca = [...new Set(t.split(','))].filter(Boolean);
+    if (!parca.length || parca.some((p) => !KAVRAMLAR.includes(p))) return null;
+    return parca.join(',');
+  }
+  const izin = ENUM_DEGERLER[alan];
+  // A string slot with no list behind it cannot be checked, so it is not a slot: drop it.
+  if (!izin) return null;
+  return izin.includes(t) ? t : null;
 }
 function olguTemiz(f) {
   if (!f || typeof f !== 'object' || Array.isArray(f)) return null;
@@ -319,8 +346,8 @@ function olguTemiz(f) {
     if (typeof v === 'number' && Number.isFinite(v)) out[k] = Math.round(v * 100) / 100;
     else if (typeof v === 'boolean') out[k] = v;
     else {
-      // strings are allowed only as short enum keys, never as content
-      const a = anahtarTemiz(v);
+      // strings are allowed only as a value from that field's closed list, never as content
+      const a = anahtarTemiz(k, v);
       if (a !== null) out[k] = a;
     }
   }

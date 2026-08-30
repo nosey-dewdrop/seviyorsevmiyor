@@ -123,10 +123,13 @@ await blok('tek kelimelik mesaj da gecmiyor', async () => {
   const json = JSON.stringify(spikerOlgu(kotu));
   ok('tek kelimelik mesaj yuke girmiyor', !json.includes('yogunum'), json);
   ok('okuma sayisi hala gidiyor', JSON.parse(json).okuma_sayisi === 1, json);
-  // hukum_tur is an allowlisted enum slot: whatever the engine puts there travels. That is the
-  // one place a single word can ride along, so it is stated out loud rather than left implied.
-  ok('enum yuvasi tek kelime tasiyabiliyor (bilinen ve tek delik)',
-    JSON.parse(json).hukum_tur === 'ozledim', json);
+  // This used to be the one known hole: hukum_tur accepted whatever the engine put there, so a
+  // single word could ride along. The slot now takes a value from a closed list, so the smuggled
+  // word drops instead of travelling, and the reading it belonged to loses the field rather than
+  // gaining a passenger.
+  ok('enum yuvasina sokusturulan kelime istemcide dusuyor',
+    !('hukum_tur' in JSON.parse(json)), json);
+  ok('gercek hukum degeri hala geciyor', spikerOlgu(FACTS).hukum_tur === 'tense');
 });
 
 await blok('istemci itiraz yuku', async () => {
@@ -289,6 +292,89 @@ await blok('sunucu: olgu icine mesaj sokusturulursa', async () => {
     JSON.stringify(yuk));
 });
 
+// ---- 2b. the enum slots: the server checks the VALUE, not the length ---------------------------
+//
+// Before this, a string field only had to look like a key: up to forty characters, no whitespace.
+// Twenty-four such slots is roughly 960 bytes per request that nothing on the server ever read,
+// and three routes carried it — two into the Groq prompt, one into a KV row with a 180-day life.
+// The real client only ever put engine enums there, which is exactly why nobody noticed.
+//
+// The token below is not a message, on purpose. The point is not "is this prose?" but "did the
+// server accept a value it has no list for?". Each of the three routes is measured on its own,
+// and each one is paired with the legitimate value, so a gate that simply drops everything fails.
+
+const KACAK = 'zurnabalik_kanarya_7719';
+
+await blok('enum yuvasi 1/3: hukum_tur, tek token (spiker -> groq)', async () => {
+  const env = makeEnv();
+  const bilet = await biletAl(env);
+  const n = groqCagrilari().length;
+  await call('/api/spiker', env, {
+    token: bilet, body: { olgu: { hukum_tur: KACAK, toplam_mesaj: 6, senin_sorun: 2 } },
+  });
+  ok('groq yine de arandi (sadece o alan dustu)', groqCagrilari().length === n + 1);
+  const cagri = groqCagrilari().at(-1);
+  ok('kacak deger groq a ulasmadi', !cagri.govde.includes(KACAK), cagri.govde.slice(0, 400));
+  const yuk = groqYuku(cagri);
+  ok('hukum_tur alani yukten tamamen dustu', yuk && !('hukum_tur' in yuk), JSON.stringify(yuk));
+  ok('ayni istekteki sayilar hala gidiyor', yuk && yuk.toplam_mesaj === 6, JSON.stringify(yuk));
+});
+
+await blok('enum yuvasi 1/3 karsiti: gercek hukum degeri geciyor', async () => {
+  const env = makeEnv();
+  const bilet = await biletAl(env);
+  await call('/api/spiker', env, { token: bilet, body: { olgu: { hukum_tur: 'tense', toplam_mesaj: 6 } } });
+  const yuk = groqYuku(groqCagrilari().at(-1));
+  ok('listedeki deger gecti', yuk && yuk.hukum_tur === 'tense', JSON.stringify(yuk));
+});
+
+await blok('enum yuvasi 2/3: degisenler, virgullu liste (zaman -> groq)', async () => {
+  const env = makeEnv();
+  const bilet = await biletAl(env);
+  const n = groqCagrilari().length;
+  await call('/api/zaman', env, {
+    token: bilet, body: { olgu: { degisenler: 'zurnabalik,kanarya,7719', gun: 30, mesaj: 400 } },
+  });
+  ok('groq yine de arandi (sadece o alan dustu)', groqCagrilari().length === n + 1);
+  const cagri = groqCagrilari().at(-1);
+  ok('kacak liste groq a ulasmadi', !cagri.govde.includes('zurnabalik') && !cagri.govde.includes('kanarya'),
+    cagri.govde.slice(0, 400));
+  ok('parcali kacak da gecmedi', !cagri.govde.includes('7719'), cagri.govde.slice(0, 400));
+});
+
+await blok('enum yuvasi 2/3 karsiti: gercek kavram listesi geciyor', async () => {
+  const env = makeEnv();
+  const bilet = await biletAl(env);
+  await call('/api/zaman', env, {
+    token: bilet, body: { olgu: { degisenler: 'gecikme,sessizlik', gun: 30 } },
+  });
+  const cagri = groqCagrilari().at(-1);
+  ok('motorun kendi kavramlari gecti', cagri.govde.includes('gecikme,sessizlik'), cagri.govde.slice(0, 400));
+  // one bad part poisons the whole field: a list is accepted or refused, never half-kept
+  const env2 = makeEnv();
+  const bilet2 = await biletAl(env2);
+  await call('/api/zaman', env2, {
+    token: bilet2, body: { olgu: { degisenler: `gecikme,${KACAK}`, gun: 30 } },
+  });
+  const c2 = groqCagrilari().at(-1);
+  ok('tek kotu parca butun alani dusuruyor',
+    !c2.govde.includes(KACAK) && !c2.govde.includes('degisenler'), c2.govde.slice(0, 400));
+});
+
+await blok('enum yuvasi 3/3: hukum, KV yolu (itiraz -> 180 gunluk satir)', async () => {
+  const env = makeEnv();
+  const bilet = await biletAl(env);
+  const res = await call('/api/itiraz', env, {
+    token: bilet,
+    body: { olgu: itirazOlgu(DOC), hukum: KACAK, karar: KACAK, onay: true },
+  });
+  ok('itiraz 200', res.status === 200, `status ${res.status}`);
+  const hepsi = JSON.stringify(env.CORPUS.writes) + JSON.stringify(env.RATE_LIMIT.writes);
+  ok('kacak deger KV ye yazilmadi', !hepsi.includes(KACAK), hepsi.slice(0, 400));
+  const kayit = JSON.parse(env.CORPUS.writes.find((w) => w.key.startsWith('corpus:')).deger);
+  ok('hukum alani null olarak kaldi', kayit.hukum === null && kayit.karar === null, JSON.stringify(kayit));
+});
+
 await blok('sunucu: itiraz bagisi KV ye ne yaziyor', async () => {
   const env = makeEnv();
   const bilet = await biletAl(env);
@@ -358,6 +444,52 @@ await blok('gizlilik iddiasi kodla ayni seyi soyluyor', async () => {
   ok('wrangler artik icerik saklamadigini dogru gerekceyle soyluyor',
     t.includes('No message text reaches this worker at all') && !t.includes('no content is ever stored here'),
     'wrangler.toml');
+});
+
+// The privacy claim is not only on the privacy page. The most-read copy of it is the consent
+// checkbox, and it is read at the exact moment the visitor agrees to something — so a stale
+// sentence there is worse than a stale sentence anywhere else. It used to say the chat is uploaded
+// while four other lines on the same page said the chat never leaves.
+await blok('onay aninda soylenen cumle de kodla ayni', async () => {
+  const h = oku('web/index.html');
+  const u = oku('web/js/ui.js');
+
+  const kutu = h.match(/id="cloudConsentBox"[^]*?<\/label>/);
+  ok('bulut onay kutusu bulundu', !!kutu);
+  const metin = kutu ? kutu[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+  ok('onay kutusu sohbetin gonderildigini soylemiyor',
+    !/bu sohbet[,]? .*gönderilir/.test(metin) && !/sohbet.*buluta gönderilir/.test(metin), metin);
+  ok('onay kutusu ne gittigini soyluyor', /sayım/.test(metin) && /mesajların gitmez/.test(metin), metin);
+
+  // the page's own four unconditional claims (description, og, twitter, schema) have to survive
+  // this edit: the checkbox was changed BECAUSE it disagreed with them, so removing them instead
+  // would satisfy "the page is consistent" the wrong way round.
+  const iddia = (h.match(/mesajların cihazından çıkmaz/g) || []).length;
+  ok('sayfa dort yerde hala mesajin cikmadigini soyluyor', iddia >= 4, String(iddia));
+
+  // the donation success line described deleting names from a chat that is no longer sent
+  ok('bagis basari metni artik isim silmeyi onermiyor', !u.includes('isim geçiyorsa'), 'ui.js');
+  ok('bagis basari metni ne gittigini soyluyor', u.includes('giden şey sohbetin değil'), 'ui.js');
+
+  // copy law: no em dash, questions end in "?"
+  const yeni = [metin, ...u.split('\n').filter((l) => l.includes('giden şey sohbetin değil'))].join(' ');
+  ok('yeni kopyada em dash yok', !yeni.includes('—'), yeni);
+});
+
+// The client filters enum values and the server filters them again. Two lists mean two places to
+// forget, so they are compared instead of trusted: an engine that grows a sixth verdict has to
+// grow it in both files or this fails.
+await blok('istemci ve sunucu ayni kapali listeyi kullaniyor', async () => {
+  const cikar = (src, ad) => {
+    const m = src.match(new RegExp(`const ${ad} = \\{[^]*?\\n\\};`));
+    return m ? m[0].replace(/\s+/g, ' ') : null;
+  };
+  const a = cikar(oku('web/js/api.js'), 'ENUM_DEGERLER');
+  const w = cikar(oku('backend/worker.js'), 'ENUM_DEGERLER');
+  ok('iki dosyada da ENUM_DEGERLER var', !!a && !!w, `api=${!!a} worker=${!!w}`);
+  ok('iki liste birebir ayni', a === w, `\n    api:    ${a}\n    worker: ${w}`);
+  ok('liste motorun sozlugunu tasiyor',
+    !!a && a.includes('onesided') && a.includes('tense') && a.includes('tek'), String(a));
 });
 
 console.log('');
