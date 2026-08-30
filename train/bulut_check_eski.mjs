@@ -17,7 +17,7 @@
 //   - a client that posts the raw chat anyway gets it dropped at the server wall
 //   - the privacy page's claims and the code's behaviour say the same thing
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import worker from '../backend/worker.js';
 import { spikerOlgu, itirazOlgu } from '../web/js/api.js';
 
@@ -426,9 +426,41 @@ await blok('gizlilik iddiasi kodla ayni seyi soyluyor', async () => {
   const w = oku('backend/worker.js');
   const t = oku('backend/wrangler.toml');
 
-  const kacamak = ['genellikle', 'çoğunlukla', 'genelde', 'gerekmedikçe', 'kural olarak', 'prensip olarak'];
-  const bulunan = kacamak.filter((k) => g.toLowerCase().includes(k));
-  ok('gizlilik metninde kacamak kelime yok', bulunan.length === 0, bulunan.join(', '));
+  // The weasel scan used to read gizlilik.html only, so a hedged copy of the same claim sat in
+  // index.html's schema.org featureList while the gate stayed green. The claim is made on every
+  // surface, so every surface is read: visible text plus meta / ld+json fields.
+  const KACAMAK = [
+    'genellikle', 'çoğunlukla', 'genelde', 'gerekmedikçe', 'kural olarak', 'prensip olarak',
+    'varsayılan olarak', 'normalde', 'nadiren', 'çoğu zaman', 'çoğu durumda',
+    'mümkün olduğunca', 'gerektiğinde',
+  ];
+  // kosullar.html and panel.html are out of this phase's reach: a hit there is reported as
+  // inherited debt and must not turn the gate red, because fixing it is not this phase's work.
+  const DEVREDILEN = new Set(['kosullar.html', 'panel.html']);
+
+  const okunacakMetin = (src) => src
+    .replace(/<!--[^]*?-->/g, ' ')
+    .replace(/<script(?![^>]*application\/ld\+json)[^>]*>[^]*?<\/script>/gi, ' ')
+    .replace(/<style[^>]*>[^]*?<\/style>/gi, ' ')
+    // keep the fields a reader still sees even though they live in attributes
+    .replace(/<[^>]+>/g, (etiket) => {
+      const alan = etiket.match(/(?:content|alt|title|placeholder|aria-label)="[^"]*"/gi) || [];
+      return ` ${alan.join(' ')} `;
+    })
+    .toLowerCase();
+
+  const sayfalar = readdirSync(new URL('web/', KOK)).filter((f) => f.endsWith('.html')).sort();
+  ok('kapi web altindaki tum sayfalari tariyor', sayfalar.length >= 5, sayfalar.join(', '));
+  for (const sayfa of sayfalar) {
+    const metin = okunacakMetin(oku(`web/${sayfa}`));
+    const bulunan = KACAMAK.filter((k) => metin.includes(k));
+    if (DEVREDILEN.has(sayfa)) {
+      if (bulunan.length) console.log(`??  ${sayfa} kacamak kelime tasiyor (devredilen, kapi kirmizi yanmaz)\n    ${bulunan.join(', ')}`);
+      else console.log(`ok  ${sayfa} kacamak kelime yok (devredilen dosya, yine de temiz)`);
+      continue;
+    }
+    ok(`${sayfa} icinde kacamak kelime yok`, bulunan.length === 0, bulunan.join(', '));
+  }
 
   ok('gizlilik metni iddiayi kosulsuz kuruyor', g.includes('Mesajlarının metni cihazından çıkmaz.'));
   ok('gizlilik metni artik olmayan bir e-postaya atif yapmiyor',
