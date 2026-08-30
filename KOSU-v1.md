@@ -1579,6 +1579,59 @@ Canlı altbilgi "v71 · 16 Ağu" diyor ama JS `?v=72` — etiket güncellenmemi�
 
 ---
 
+## S5 — 10 mesajla da bir şey aldım — GEÇTİ
+**Ürün sahibi kusuru canlıda gördü, faz ondan doğdu.** 68 mesaj / 11 günlük
+gerçek bir sohbette ürün sadece "500 gerekiyor, daha uzun bir sohbet dene"
+diyordu. Damla'nın hükmü: "11 gün flört ettiysem 11 güne bakacaksın."
+
+ölçülen (hakemin BAĞIMSIZ probe'u, kendi üreticisiyle):
+68 mesaj ekranı → 4 okuma satırı (2'si bulgu: "Kerem 8,2 kat daha geç
+dönüyor", "konuşmaları çoğunlukla Damla bitiriyor, mesaj payından %31 fazla")
++ arketip "bekleten" + **13 sayım kalemi** · reddetme cümlesi YOK ·
+`class="tarih"` YOK · boş ekran YOK
+FP (200 tekrar, null seri): 68'de beş çıkarımın beşi de **0/200** ·
+250 ve 500'de en yüksek %0.5 · hiçbiri %5'e yaklaşmıyor
+GÜÇ (ekili desen): gecikme 10x **%100**, gecikme 3x **%86** (68 mesajda) ·
+başlatma/bitiren 68'de %14/%10, 250'de %98/%96 · gece 68'de %36
+tarih katmanı: 11 güne sıkıştırılmış 5000 mesajda 0 nokta · e2e ekilen
+2 Nisan → bulunan 3 Nisan, **1 gün sapma korundu** · 1200 mesaj/164 günlük
+kırılma 0.6 gün sapmayla bulundu
+commit: f854065
+hakem notu: asıl hata `analyze.js:36` erken return'dü, 68 mesajda summary,
+latency, lastWord hiç hesaplanmıyordu. Kaldırıldı, `gateOverall` →
+`gateChangePoint` oldu ve yalnız CPD/tarih katmanını kapatıyor. Testler
+ZAYIFLAMADI, güçlendi: `e2e_check` eskiden `if (res.ok) fails++` ile kısa
+sohbetin reddedilmesini ŞART koşuyordu, yani kusuru kilitliyordu.
+
+### S5'in düzelttiği uydurma
+`honesty.js:6` `anyTimeClaim: {messages: 500, days: 60}` — tek commit'te elle
+yazılmış, kalibrasyonsuz, testsiz. Yerine `changePoint: {messages: 250,
+days: 42}` ve gerekçesi koda yazıldı. **42 DOĞRULANDI**: `cpd.js:220`
+`minSpanDays=21`, `cpd.js:249` iki yanı da ayrı geçiriyor, 21×2 aritmetik.
+
+### S5'ten devredilen
+- **`honesty.js:20-23`'teki gerekçe cümlesi olgusal olarak YANLIŞ.**
+  "120 mesaj/120 günde 50 sohbetin 1'inde bir seri MIN_EVENTS=60'ı geçiyor"
+  diyor. Hakem ölçtü: **50/50 sohbette** geçiyor (`gece_A`, medyan 62).
+  1/50 rakamı doğru ama sebebi başka — bağlayan `MIN_EVENTS` değil,
+  `NEED.night = 30`. Sonuç doğru, mekanizma açıklaması yanlış.
+  **Damla bunu dışarıda söyleyecekse (post, pitch) önce düzeltilmeli**
+- **250 sayısının ayırt edici ölçümü yok.** Hakem 250'yi tamamen kaldırdı,
+  hiçbir şey değişmedi — 42 gün kapısı zaten tutuyor. 200 ya da 150 de aynı
+  sonucu verirdi. Zararsız ama bir ölçümden TÜRETİLMEDİ, sadece bir ölçümle
+  çelişmediği gösterildi. Fark bu, ve `cpd.js:219` standardı değil
+- **KARAR GEREKİYOR:** 11 günlük ekranda bir takvim tarihi görünüyor —
+  "en uzun sessizlik, 9 mart" (`zamanYazi.js:322`, bu diffte YENİ).
+  Uydurma DEĞİL, hakem ham veriyi elle taradı, dakikası dakikasına doğru.
+  Çıkarım değil ölçülmüş olgu. Ama Damla "kısa sohbette hiçbir takvim günü
+  görünmesin" istiyorsa bu satır kalkmalı
+- `gece` gücü 68'de %36, `bitiren` %10 — o satırlar az veride çoğu zaman
+  "fark yok" diyecek. Susmuyorlar ama bulgu da vermiyorlar
+- **Gerçek WhatsApp export'unda HİÇ koşulmadı.** Hem kapı hem hakem sentetik
+  üreticiyle ölçtü. İki farklı üretici aynı sonucu verdi ama ikisi de aynı
+  varsayımları paylaşıyor olabilir → **DOĞRULANMADI**, S0 kapatacak
+- `KOSU-v1.md:670` hâlâ eski eşikleri listeliyor (10/30/100/150/500)
+
 ## S3.6 — Tıkladım ve bir şey oldu — GEÇTİ
 ölçülen: hakem 15 ayrı başarısızlık senaryosu denedi (bilet yok, fetch reject,
 403, 429, 500, bozuk JSON, boş gövde, bilinmeyen sebep, doğrulamadan elenme,
