@@ -1500,6 +1500,71 @@ hakem notu: test taklit değil, 4 mutasyonla kırmızı yandığı kanıtlandı.
 bilet olmadan 200 aldı ve Groq'a bir çağrı harcattı. Kartın kullanıcı cümlesi
 o rotada yalan; `zaman.html` canlıdaki ana akış.
 
+## DEPLOY ÖNCESİ KONTROL LİSTESİ (30 Ağu, ölçülerek çıkarıldı)
+
+Canlı şu an `275afbb`, yerel main 5+ commit ileride. **S2 ve S3'ün tamamı
+canlıda yok.** Deploy edilecekse sıra ve tuzaklar:
+
+```
+1. ALLOWED_ORIGINS  backend/wrangler.toml sadece github.io içeriyor.
+                    seviyorsevmiyor.noseydewdrop.com LİSTEDE YOK.
+                    Bu haliyle deploy = custom domain'den gelen her bulut
+                    isteği CORS'a takılır. Canonical adres o, sitemap onu
+                    gösteriyor. ÖNCE DÜZELT
+2. TURNSTILE_SITEKEY web/js/api.js boş. Cloudflare > Turnstile > Invisible
+                    widget'tan site key alınıp yazılacak (public, secret değil)
+3. secret'lar       npx wrangler secret put TURNSTILE_SECRET
+                    npx wrangler secret put BILET_SECRET  (openssl rand -hex 32)
+                    Secret'sız worker deploy edilirse /api/bilet 503 döner ve
+                    İKİ AKIŞIN DA bulut yarısı anında ölür
+4. CORPUS           npx wrangler kv namespace create CORPUS, id'yi toml'a.
+                    Yoksa /api/itiraz 503 (güvenli yön, ama bağış çarkı kapalı)
+5. sürüm bump       for f in web/js/*.js; do sed -i '' -E 's/\?v=[0-9]+/?v=73/g'
+                    "$f"; done + footer. v61 bug'ı: bump'sız deploy eski JS'i
+                    cache'te dondurur, dinamik import dahil
+6. SIRA             önce secret, sonra npx wrangler deploy, en son web/.
+                    Frontend main'e push ile OTOMATİK (~17 sn), worker ELLE
+```
+
+Ayrıca ölçüldü: `gh-pages` dalı **ölü kalıntı**, Pages `main`'den build ediyor.
+Canlı altbilgi "v71 · 16 Ağu" diyor ama JS `?v=72` — etiket güncellenmemiş.
+`web/js/bubbles.js` canlıda 404, zararsız, referansı yok.
+`panel.html` canlıda 200 ve linksiz, herkese açık.
+
+---
+
+## S3 — Ham metin kapat — GEÇTİ (üçüncü tur)
+**Ürünün ana iddiası artık doğru. "Cihazından çıkmaz" cümlesi yazılabilir.**
+ölçülen: bulut_check 12/12 · bulut_check_eski 60/60 · giden gövde spiker 255
+bayt, itiraz 229 bayt, zaman 326 bayt — **üçünde de metin alanı 0** ·
+hakemin 18 kaçak varyantının 18'i düştü, meşru değerler geçiyor · kapı
+`readdirSync` ile tüm `web/*.html`'i tarıyor, 6 mutasyonla ispatlandı,
+13 kaçamak kelimenin 13'ü yakalandı · KVKK kanalı 200 · birikimli 11/11
+eşik: ikisi de yeşil · metin alanı 0 · HER yüzeydeki gizlilik cümlesi kodla
+uyuşuyor · enum yuvasında uzunluk değil DEĞER kontrolü · KVKK kanalı çalışıyor
+commit: 5813961 → e8ee757 → 902bba6
+hakem notu: duvar gerçek, istemciye güvenilmiyor. Sunucu tarafı allowlist üç
+turda da kırılamadı — Kiril harfi, dizi, obje, enum benzeri token, boşluksuz
+uzun cümle, iki değerin birleşimi, hepsi düştü. Karşıt kontrol de geçti:
+duvar her şeyi düşürmüyor, meşru enum'lar ulaşıyor, ürün bozulmadı.
+
+### S3'ten devredilen
+- **Kapının Türkçe büyük harf körlüğü.** `GENELLİKLE` (U+0130) kapıdan geçiyor;
+  JS `.toLowerCase()` `İ`'yi `i`+birleşen nokta olarak açıyor. Ürün kopyası
+  küçük harf olduğu için bugün açık değil, ama kapı yanlış güven veriyor.
+  Düzeltme: lowercase öncesi `İ→i`, `I→ı` normalizasyonu → S13
+- Etiketle bölünmüş kelime kaçıyor (`<b>genel</b>likle`). Kasıtlı atlatma,
+  kazara oluşmaz. Düşük öncelik → S13
+- `zaman.html` kapıda KIRMIZI yakıyor ama hiçbir kartın DOKUNULABİLİR
+  listesinde değil. Bugün temiz; ileride oraya kaçamak kelime girerse kapı
+  düzeltme yetkisi olmayan bir dosyayı işaret eder → kart yazarken dikkat
+- `web/kosullar.html:46` `<h2>Hizmet ne yapar</h2>` soru formunda, "?" yok
+- `gizlilik.html:52` "flort_var gibi kısa etiketler" — o değer artık kapalı
+  listede yok (`karar` → var/yok/tek). "gibi" dediği için yalan değil, bayat
+- Kapalı listeler motorun sözlüğünden TÜRETİLMİYOR, elle kopyalanmış.
+  `reveal.js` TONE_TR'ye yeni ton eklenirse iki liste de bayatlar, kapı yeşil
+  kalır, alan sessizce düşer. Gizlilik açığı değil, sessiz ürün bozulması → S13
+
 ## S3 — Ham metin kapat — KART YANLIŞ (eşik zorlaştırıldı, faz tekrar koşar)
 ölçülen: bulut_check 12 madde + bulut_check_eski 44 madde yeşil, ikisi exit 0 ·
 hakemin kendi probe'u: 9 kötü niyetli istemci varyantı (doc, facts+doc, text,
