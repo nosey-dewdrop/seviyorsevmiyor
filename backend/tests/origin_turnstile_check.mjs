@@ -33,7 +33,7 @@ const FOREIGN = 'https://kotu-site.example';
 // asked about /api/spiker.
 const PARALI_YOLLAR = [
   { yol: '/api/zaman', govde: { olgu: { gun: 30, mesaj: 400, kirilma_var: true } } },
-  { yol: '/api/spiker', govde: { facts: { okumalar: [] }, doc: null } },   // doc filled below
+  { yol: '/api/spiker', govde: { sohbet: null, onay: true } },              // sohbet filled below
   { yol: '/api/itiraz', govde: { doc: null, hukum: 'flort_yok', karar: 'yanlis', onay: true } },
 ];
 
@@ -82,16 +82,14 @@ let turnstileCalls = 0;
 let groqCalls = 0;
 
 const DOC = 'SEN: bugun musait misin\nO: bakariz\nSEN: tamam o zaman\nO: hmm';
-PARALI_YOLLAR[1].govde.doc = DOC;
+PARALI_YOLLAR[1].govde.sohbet = DOC;
 PARALI_YOLLAR[2].govde.doc = DOC;
 
+// Two short lines, one of them quoting a sentence that really is in DOC, so the worker's output
+// filter cannot reject this for the wrong reason. What that filter does on a BAD answer is measured
+// in train/llm_yol_check.mjs; here it only has to let a good one through.
 const SPIKER_JSON = JSON.stringify({
-  ton_line: 'cevaplari kisa.',
-  sinyal_reason: 'karsilik az.',
-  denge_line: 'sen uzaniyorsun.',
-  okumalar: [],
-  gozden_kacanlar: [{ baslik: 'tek tarafli', line: 'sohbeti sen tasiyorsun.', kanit: 'bakariz' }],
-  kapanis: 'bu kadar.',
+  satirlar: ['"bakariz" kapiyi kapatiyor.', 'plan kuran hep ayni taraf.'],
 });
 
 // Three digit-free lines, so a legitimate /api/zaman call comes back ok:true rather than being
@@ -268,11 +266,12 @@ await blok('gecerli bilet + spiker', async () => {
   const env = makeEnv();
   const bilet = await biletAl(env);
   const g = groqCalls;
-  const res = await call('/api/spiker', env, { token: bilet, body: { facts: { okumalar: [] }, doc: DOC } });
+  const res = await call('/api/spiker', env, { token: bilet, body: { sohbet: DOC, onay: true } });
   const d = await res.json();
   ok('gecerli bilet + kendi origin = 200', res.status === 200, `status ${res.status} ${JSON.stringify(d)}`);
   ok('gecerli istek Groq a ulasti', groqCalls === g + 1);
-  ok('spiker govdesi geldi', !!d.spiker?.ton_line, JSON.stringify(d).slice(0, 200));
+  ok('spiker govdesi geldi', Array.isArray(d.spiker?.satirlar) && d.spiker.satirlar.length > 0,
+    JSON.stringify(d).slice(0, 200));
 });
 
 await blok('gecerli bilet + zaman', async () => {
@@ -301,21 +300,67 @@ await blok('zaman-kalan biletsiz okunur', async () => {
   ok('zaman-kalan gercek sayi veriyor', d.kalan === d.gunluk, JSON.stringify(d));
 });
 
-// ---- 3. missing secrets fail closed, by name -----------------------------------------------------
+// ---- 3. missing secrets: fail closed by name, EXCEPT the one case the product needs open ------
+//
+// The rule changed on 30 Ağu with the flow itself. TURNSTILE_SECRET is one half of a pair: the
+// other half is TURNSTILE_SITEKEY in web/js/api.js, and with the site key empty there is no
+// challenge for the page to solve. Demanding a ticket in that state does not protect /api/spiker,
+// it closes it — which is the state the live site actually shipped in, with the main flow dark.
+//
+// So the ticket gate now switches itself on WITH the secret, and only on /api/spiker:
+//   TURNSTILE_SECRET set   -> ticket demanded on every budget route (measured in section 2b above)
+//   TURNSTILE_SECRET unset -> /api/bilet, /api/itiraz and /api/zaman still 503 by name, and
+//                             /api/spiker runs ticketless behind the origin allowlist and quotas.
+// BILET_SECRET is unchanged: with a ticket gate active, a missing signing key is a 503 by name.
 
-for (const ad of ['TURNSTILE_SECRET', 'BILET_SECRET']) {
-  for (const yol of ['/api/bilet', '/api/spiker', '/api/itiraz', '/api/zaman']) {
-    await blok(`${ad} yok ${yol}`, async () => {
-      const env = makeEnv({ [ad]: undefined });
-      const g = groqCalls;
-      const res = await call(yol, env, { body: { turnstile: 'x' } });
-      const d = await res.json();
-      ok(`${ad} yoksa ${yol} 503 ve adiyla soyluyor`,
-        res.status === 503 && d.eksik?.includes(ad), `status ${res.status} ${JSON.stringify(d)}`);
-      ok(`${ad} yokken ${yol} Groq cagirmadi`, groqCalls === g, `${groqCalls - g} cagri`);
-    });
-  }
+for (const yol of ['/api/bilet', '/api/itiraz', '/api/zaman']) {
+  await blok(`TURNSTILE_SECRET yok ${yol}`, async () => {
+    const env = makeEnv({ TURNSTILE_SECRET: undefined });
+    const g = groqCalls;
+    const res = await call(yol, env, { body: { turnstile: 'x' } });
+    const d = await res.json();
+    ok(`TURNSTILE_SECRET yoksa ${yol} 503 ve adiyla soyluyor`,
+      res.status === 503 && d.eksik?.includes('TURNSTILE_SECRET'), `status ${res.status} ${JSON.stringify(d)}`);
+    ok(`TURNSTILE_SECRET yokken ${yol} Groq cagirmadi`, groqCalls === g, `${groqCalls - g} cagri`);
+  });
 }
+
+for (const yol of ['/api/bilet', '/api/spiker', '/api/itiraz', '/api/zaman']) {
+  await blok(`BILET_SECRET yok ${yol}`, async () => {
+    const env = makeEnv({ BILET_SECRET: undefined });
+    const g = groqCalls;
+    const res = await call(yol, env, { body: { turnstile: 'x' } });
+    const d = await res.json();
+    ok(`BILET_SECRET yoksa ${yol} 503 ve adiyla soyluyor`,
+      res.status === 503 && d.eksik?.includes('BILET_SECRET'), `status ${res.status} ${JSON.stringify(d)}`);
+    ok(`BILET_SECRET yokken ${yol} Groq cagirmadi`, groqCalls === g, `${groqCalls - g} cagri`);
+  });
+}
+
+await blok('TURNSTILE_SECRET yok /api/spiker: bilet istenmiyor ama kapi bos kalmiyor', async () => {
+  const env = makeEnv({ TURNSTILE_SECRET: undefined });
+  const g = groqCalls;
+  // no ticket header at all, and it has to work: this is production today
+  const res = await call('/api/spiker', env, { body: { sohbet: DOC, onay: true } });
+  ok('biletsiz spiker 200 (sitekey yokken yol acik)', res.status === 200, `status ${res.status}`);
+  ok('istek gercekten Groq a ulasti', groqCalls === g + 1, `${groqCalls - g} cagri`);
+
+  // ...but only the doors that were never about tickets are still doing the work
+  const g2 = groqCalls;
+  const yabanci = await call('/api/spiker', env, { origin: FOREIGN, body: { sohbet: DOC, onay: true } });
+  ok('bilet kalksa da yabanci origin hala 403', yabanci.status === 403, `status ${yabanci.status}`);
+  const onaysiz = await call('/api/spiker', env, { body: { sohbet: DOC } });
+  ok('bilet kalksa da onaysiz istek 400', onaysiz.status === 400, `status ${onaysiz.status}`);
+  ok('bu iki ret Groq a hic gitmedi', groqCalls === g2, `${groqCalls - g2} cagri`);
+
+  // and the quota is what bounds a stranger now, so it has to actually bite
+  let ret = 0;
+  for (let i = 0; i < 12; i++) {
+    const r = await call('/api/spiker', env, { body: { sohbet: DOC, onay: true }, ip: '198.51.100.5' });
+    if (r.status === 429) ret++;
+  }
+  ok('biletsiz yolda kota hala reddediyor (tek IP dakikada 6)', ret > 0, `${ret} ret / 12 istek`);
+});
 
 // ---- 4. itiraz: ticket, kill switch, retention ----------------------------------------------------
 
@@ -384,7 +429,7 @@ await blok('TTL taramasi', async () => {
   await call('/api/zaman-kalan', env, {});
   await call('/api/zaman', env, { token: bilet, body: { olgu: { gun: 30, mesaj: 400, kirilma_var: true } } });
   await call('/api/itiraz', env, { token: bilet, body: { doc: DOC, onay: true } });
-  await call('/api/spiker', env, { token: bilet, body: { facts: { okumalar: [] }, doc: DOC } });
+  await call('/api/spiker', env, { token: bilet, body: { sohbet: DOC, onay: true } });
 
   const toplam = env.RATE_LIMIT.writes.length + env.CORPUS.writes.length;
   const kotu = ttlsizYazimlar(env);

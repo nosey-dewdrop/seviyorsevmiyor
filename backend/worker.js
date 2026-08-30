@@ -1,13 +1,25 @@
 // Cloudflare Worker — seviyorsevmiyor API.
-// One honesty rule: the on-device engine decides WHAT is true (verdict, counts, flags); the cloud
-// only makes the wording fresh. No route of this worker accepts message text, forwards message
-// text or stores message text: every body is run through olguTemiz() first, which keeps numbers,
-// booleans and short enum keys and drops everything else. KV holds per-IP rate counters and the
-// numeric feature vectors of donated hard cases, all with a TTL.
 //
-// /api/spiker : Groq (Llama) rewrites the engine's lines in the product voice, from the counts.
-// /api/zaman  : the time engine's optional voice — receives numbers only, never messages.
+// /api/spiker : THE CONVERSATION ARRIVES HERE. With the visitor's explicit consent, the chat is
+//               forwarded to Groq (Llama), which reads it and returns a short reading. Nothing is
+//               stored: the text lives in this request and dies with it, no KV write touches it.
+// /api/zaman  : the time engine's optional voice — derived numbers only, never messages.
 // /api/itiraz : consented donation of a disputed reading — twelve model features, not the chat.
+//
+// Why /api/spiker changed (30 Ağu, product owner's call): the old design sent fifteen counts and
+// asked a model to voice them. A model handed fifteen numbers can only write templates, and the
+// counter behind those numbers was inventing verdicts out of word frequencies. So the text goes,
+// and what guards it is CONSENT plus a hard output filter, not a shape filter on the request body.
+//
+// Three things this route refuses, and each of them is measured by train/llm_yol_check.mjs:
+//   1. onay !== true            -> 400, and no call is made. Consent is the gate, not the checkbox.
+//   2. a figure in the output   -> rejected. Every number on screen is put there by the engine.
+//   3. an unverifiable quote    -> rejected. A quotation is searched for in the chat that was sent
+//                                 with this very request; a URL or an export system line is never
+//                                 an allowed quotation even when it does appear.
+//
+// KV holds per-IP rate counters and the numeric feature vectors of donated hard cases, all with a
+// TTL. The conversation is in none of them.
 //
 // Deploy:  npx wrangler deploy
 // Secrets: npx wrangler secret put GROQ_API_KEY     (console.groq.com, free)
@@ -150,8 +162,14 @@ export default {
 
       if (url.pathname === '/api/spiker') {
         if (env.SPIKER_OPEN !== 'on') return json({ error: 'Spiker is not open yet' }, 403, origin);
-        const red = await biletKapisi(env, request, origin);
-        if (red) return red;
+        // The ticket gate turns itself on with the secret. With TURNSTILE_SECRET unset there is no
+        // challenge for the page to solve, so demanding a ticket would not protect this route, it
+        // would close it — which is exactly the state the site shipped in. The origin allowlist
+        // above and the three quotas below are unaffected and still apply either way.
+        if (env.TURNSTILE_SECRET) {
+          const red = await biletKapisi(env, request, origin);
+          if (red) return red;
+        }
         // Fuses: per-IP per-minute, per-IP per-day, and a global daily cap on the free key.
         if (await limited(env, `smin:${ip}`, 6, 120) || await limited(env, `sday:${ip}`, 60, 90000)) {
           return json({ error: 'Rate limit exceeded. Please wait.' }, 429, origin);
@@ -337,9 +355,11 @@ async function zamanKalan(env) {
   return Math.max(0, ZAMAN_GUNLUK - used);
 }
 
-// Facts must be a small, flat, numeric object. This is the wall that keeps chat text from leaving
-// the device even if a future client is careless about what it puts in the payload. It is the
-// single wall for every route now, not just /api/zaman.
+// Facts must be a small, flat, numeric object. This is the wall on the two routes that still carry
+// nothing but numbers: /api/zaman (the time flow) and /api/itiraz (a donated row that lives in KV
+// for months). /api/spiker is deliberately NOT behind it any more — that route carries the chat on
+// purpose now, and what guards it is consent plus the output filter further down, not this shape
+// test.
 //
 // The string rule used to ask how LONG a value was: up to 40 characters, no whitespace. That is a
 // question about shape, and shape says nothing about content. `zurnabalik_kanarya_7719` is a legal
@@ -350,16 +370,15 @@ async function zamanKalan(env) {
 //
 // So the question is now "is this one of OUR values?" and the answer is a closed list. A value that
 // is not on its field's list drops the field. The lists are the engine's own vocabularies:
-//   hukum / hukum_tur    web/js/reveal.js  TONE_TR
-//   karar / flort_karar  web/js/reveal.js  flört kararı
-//   degisenler           web/js/time/signals.js series keys, with the _A/_B side stripped
+//   hukum       web/js/reveal.js  TONE_TR
+//   karar       web/js/reveal.js  flört kararı
+//   degisenler  web/js/time/signals.js series keys, with the _A/_B side stripped
 // web/js/api.js carries the same lists and train/bulut_check_eski.mjs compares the two files, so
-// they cannot drift apart quietly.
+// they cannot drift apart quietly. The `hukum_tur` / `flort_karar` slots are gone with the spiker
+// payload that used them: a list nothing sends is a list nobody maintains.
 const ENUM_DEGERLER = {
   hukum: ['flirty', 'friendly', 'cold', 'tense', 'onesided'],
-  hukum_tur: ['flirty', 'friendly', 'cold', 'tense', 'onesided'],
   karar: ['var', 'yok', 'tek'],
-  flort_karar: ['var', 'yok', 'tek'],
 };
 // The time flow sends `degisenler: "gecikme,sessizlik"`, a joined list. Each part is checked
 // against the list, and the value that survives is rebuilt from the parts rather than echoed back,
@@ -484,105 +503,189 @@ async function handleZaman(request, env, ip, origin) {
   return json({ ok: true, satirlar, kalan: kalan - 1, gunluk: ZAMAN_GUNLUK }, 200, origin);
 }
 
-// ---- /api/spiker — Llama is the mouth, never the judge -------------------------------------
+// ---- /api/spiker — the model reads the conversation, the filter reads the model ---------------
+//
+// The prompt below is short on purpose. The old one was two screens of voice law wrapped around a
+// table of fifteen numbers, and what came back was fifteen blocks of prose the product owner threw
+// out on sight ("iğrenç, çok uzun"). What is asked for now is five sentences about a chat the model
+// can actually see.
 
-const SPIKER_SYSTEM = `sen "seviyorsevmiyor" sitesinin okuyucususun. cihazdaki motor bir sohbeti analiz etti ve sana yalnızca SAYILARINI verdi. sohbetin kendisi sende yok ve hiç olmayacak. görevin: bu sayılara bakıp hükmü theyseeyourphotos tonunda anlatmak.
+const SPIKER_MAKS_BAYT = 14_000;   // one reading's worth of chat; larger bodies are refused
+const SPIKER_MAKS_SATIR = 5;       // lines the model may return
+const SPIKER_MAKS_CUMLE = 6;       // sentences across all of them, the hard ceiling
 
-TON — bu ürünün ruhu (theyseeyourphotos):
-- MESAFELİ, GÖZLEMCİ, biraz ÜRKÜTÜCÜ bir üçüncü gözsün. sohbeti dışarıdan izliyorsun ve gördüğünü soğukkanlılıkla söylüyorsun.
-- "kanka", "aga", "reis" gibi samimi hitap YOK. dost ağzı YOK. sen kullanıcının arkadaşı değilsin, onu gözlemleyen sessiz bir bakışsın.
-- kullanıcıya "sen" diye seslenmek AZ; ağırlıkla KARŞI TARAF hakkında konuş ("cevapları buz gibi", "o uzanan taraf", "geri çekiliyor").
-- cümleler KISA, düz, kesin. süs yok, emoji yok, ":D" yok. rahatsız edici ölçüde sakin.
-- örnek ton: "cevapları buz gibi. konuşmayı bitirmek için yazıyor, sürdürmek için değil." / "sen uzanıyorsun, o sadece orada."
+const SPIKER_SYSTEM = `sen bir sohbetin alt metnini okuyan mesafeli bir gözlemcisin. sohbetin kendisi sana veriliyor. "SEN:" kullanıcının yazdıkları, "O:" karşı tarafın yazdıkları.
 
-KANUN — asla çiğneme:
-1. motor raporu gerçektir. hüküm, yüzdeler, sayımlar ve bayraklar DEĞİŞMEZ; yeni sayı, yeni yüzde, yeni bayrak uydurma. raporla çelişen tek cümle yazma.
-2. RAKAM YAZMA. hiçbir sayı, yüzde, saat, tarih yazma. sayıları ekrana motor kendisi basıyor.
-3. ALINTI YAPMA. elinde mesaj yok. tırnak içinde tek kelime bile yazma, sohbetten bir cümle biliyormuş gibi yapma. kim ne dedi bilmiyorsun, sadece kaç mesaj ve kaç soru olduğunu biliyorsun.
-4. hüküm gergin ise VEYA kırmızı bayrak varsa daha da ciddi ol. ama ton hep mesafeli-gözlemci kalır, asla "kanka" ya da şakacı olmaz.
-5. teşhis koyma, ihtimal dili kullan ama TEK yumuşatmayla: "gaslight kokusu var" evet, "sanki ... gibi görünüyor olabilir" diye üst üste yumuşatma YOK.
+görevin: en çok beş kısa satır yazmak. her satır sohbette GÖSTEREBİLECEĞİN bir şeye dayanacak.
 
-AĞIZ YASAKLARI (ihlal = çöp çıktı):
-- spor metaforu YOK: maç, gol, kale, saha, skor, hakem benzetmesi yasak.
-- cinsiyetli ağız YOK: "moruk/reis/aslanım" erkek-erkek havası da, "canım/tatlım/cicim" kız-kız havası da yasak. herkese aynı nötr, samimi dil.
-- ai tıraşı YOK: terapi jargonu, ders verme, dolgu cümle, ruhsuz veda ("hadi iyi günler" tarzı) yasak. her cümle gerçek bir arkadaşın iki saniyede söyleyeceği kadar kısa ve içten.
-- aynı kelimeyi üst üste tekrar etme ("sanki... sanki... sanki" gibi tik yasak); her gözlemi farklı kur.
-- bayraklardan bahsederken "red flag" / "green flag" de ("kırmızı bayrak" deme, kimse öyle konuşmuyor).
+ton:
+- mesafeli, soğukkanlı, dışarıdan bakan üçüncü göz. teselli yok, öğüt yok, şaka yok.
+- küçük harfle yaz. kısa cümle kur. süs yok, metafor yok, slogan yok.
+- "kanka", "aga", "reis", "dostum", "moruk" gibi hitap yasak.
+- uzun çizgi kullanma.
+- soru cümlesi kurarsan "?" ile bitir.
 
-üslup referansı: the pudding'in spotify botu — veriyi ANLATMA, veriye TEPKİ ver. kısa, kişisel, şoke olmuş bir gözlemci tepkisi.
+kanun, hepsi zorunlu:
+- RAKAM YAZMA. yüzde, skor, puan, saat, tarih, sayı yazma. ekrandaki bütün sayıları motor kendisi basıyor, senin yazdığın sayı hiçbir şeyin ölçümü değil.
+- UYDURMA. sohbette olmayan bir olayı, niyeti ya da kişiyi anlatma.
+- ÇELİŞME. aynı okumada birbirini dışlayan iki şey söyleme.
+- TEKRARLAMA. aynı hükmü ikinci bir cümleyle yeniden kurma.
+- ALINTI yapacaksan sohbette BİREBİR geçen bir cümleyi çift tırnak içine al. bağlantı, dosya adı, "çıkartma dahil edilmedi" gibi sistem satırı ya da senin kurduğun bir cümle alıntı değildir.
+- teşhis koyma, tanı koyma, akıl verme.
 
-İYİ örnekler (ağız bu):
-- ton, tek taraflı: "üzülerek söylüyorum: bu sohbeti tek başına sen taşıyorsun."
-- denge: "sen sorup duruyorsun, ondan geri gelen yok."
-- iyi işaret: "iki taraf da aynı ağırlıkta yazıyor. bu kadarı bile nadir."
-KÖTÜ örnekler (asla yazma): "bu maçta tek kale oynanıyor" (spor), "sanki seni suçlu hissettirmeye çalışıyor gibi görünüyor olabilir" (çift yumuşatma + tıraş), "hadi iyi günler" (ruhsuz veda), tırnak içinde sohbetten cümle vermek (elinde olmayan alıntı).
+çıktı: yalnızca geçerli json, başka hiçbir şey yazma.
+{"satirlar":["...","..."]}
+en az iki, en çok beş satır. her satır tek cümle.`;
 
-SADECE geçerli JSON döndür, başka hiçbir şey yazma.`;
-
-// The report handed to the model is the SAME flat table of counts the time flow sends. The old
-// prompt pasted the conversation under a "SOHBET:" heading and asked for quoted evidence; there is
-// no conversation here to paste and no quote to ask for.
-function spikerUserPrompt(olgu) {
-  return `SOHBETİN SAYILARI (kanun, değiştirilemez):
-${JSON.stringify(olgu, null, 1)}
-
-alan adları: yuzde/pay alanları yüzde, "senin_" kullanıcı, "onun_" karşı taraf, red_flag_turu ve
-green_flag motorun saydığı bayraklar.
-
-ÇIKTI ŞEMASI — tüm alanlar türkçe, hiçbirinde rakam ve tırnak yok:
-{"ton_line":"hükmü anlatan 1-2 cümle",
- "sinyal_reason":"flört sinyali yüzdesinin gerekçesi, 1 cümle",
- "denge_line":"kim daha çok istiyor, sayımlara sadık 1-2 cümle",
- "kapanis":"tek vuruşluk içten kapanış, 1 cümle"}`;
+function spikerUserPrompt(sohbet) {
+  return `sohbet:\n${sohbet}\n\nşimdi en çok beş satır yaz.`;
 }
 
-// The client already reduced the report to counts, but the client is the half an attacker
-// controls, so the reduction is repeated here on whatever arrived. `body.doc` is never read: a
-// stale cached page that still posts one gets its text dropped at this line.
-function spikerOlguSunucu(body) {
-  if (body && body.olgu) return olguTemiz(body.olgu);
-  const f = body && typeof body.facts === 'object' && body.facts ? body.facts : null;
-  if (!f) return null;
-  const h = f.hukum || {};
-  const fl = f.flort || {};
-  const s = f.sayim || {};
-  const bayraklar = Array.isArray(f.bayraklar) ? f.bayraklar : [];
-  const tur = (t) => bayraklar.filter((b) => b && b.tur === t).length;
-  return olguTemiz({
-    hukum_tur: h.tur,
-    flort_karar: fl.karar,
-    flort_yuzde: fl.yuzde,
-    sende_yuzde: fl.sende_yuzde,
-    onda_yuzde: fl.onda_yuzde,
-    toplam_mesaj: s.toplam_mesaj,
-    senin_mesajin: s.senin_mesajin,
-    onun_mesaji: s.onun_mesaji,
-    senin_sorun: s.senin_sorun,
-    onun_sorusu: s.onun_sorusu,
-    red_flag_turu: s.red_flag_turu,
-    green_flag: s.green_flag,
-    okuma_sayisi: Array.isArray(f.okumalar) ? f.okumalar.length : 0,
-    red_bayrak: tur('red'),
-    green_bayrak: tur('green'),
-  });
+// ---- the output filter ------------------------------------------------------------------------
+
+// Turkish-aware fold. `'İ'.toLowerCase()` is `i` + U+0307 in JS, which makes a quotation that is
+// really in the chat look like one that is not. Same normalisation as train/tr_kucult.mjs.
+function trKucult(s) {
+  return String(s).replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase();
+}
+// Punctuation and spacing are not content: a quote that differs from the chat only by a trailing
+// full stop is still that line. Everything else must match.
+function normalize(s) {
+  return trKucult(s).replace(/[.,!?;:…]+/g, ' ').replace(/["“”«»']/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// A link is never a quotation, whoever pasted it. The live failure was a Spotify URL held up as
+// "gerçek bir soru".
+const BAGLANTI = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|io|co|me|tr|app|link|gl)\b)/i;
+
+// Export system lines. They are in the chat, so "is it in the doc" says yes about all of them; they
+// are still nobody's sentence.
+const SISTEM_SATIRI = [
+  'dahil edilmedi', 'omitted', 'bu mesaj silindi', 'this message was deleted',
+  'uçtan uca şifreli', 'end-to-end encrypted', 'güvenlik kodu değişti', 'medya yok',
+  'bir çıkartma', 'sticker', 'gif', 'canlı konum', 'live location',
+];
+
+const AGIZ_YASAK = /(kanka|aga|reis|dostum|moruk|birader|canım|tatlım|cicim)/i;
+
+// Mutually exclusive readings. Narrow on purpose: this is not a general contradiction detector, it
+// is the four collisions the live output actually produced in one reading (walling off AND looking
+// after, flirting AND not flirting, one-sided AND even, warm AND ice-cold). A pair that fires means
+// the whole reading is thrown away, because there is no way to tell which half was right.
+const CELISKI = [
+  [/(duvar ör|konuyu kapat|geri çekil|kaçın)/i, /(kolluy|halini sor|merak ed|ilgilen)/i],
+  [/(flört var|flörtleş|yakınlaş)/i, /(flört yok|arkadaş(ça|lık)|romantik değil)/i],
+  [/(tek taraf|tek başına taşı|karşılıksız)/i, /(eşit|karşılıklı|iki taraf da aynı)/i],
+  [/(buz gibi|soğuk|mesafeli duruyor)/i, /(sıcak|samimi|yakın duruyor)/i],
+];
+
+// Every "…" run in a line. Single quotes are not treated as quotation marks: in Turkish an
+// apostrophe is a suffix separator (`Ayşe'nin`), so reading them as quotes would reject ordinary
+// sentences. A line is refused outright if it opens a double quote it never closes.
+function alintilar(satir) {
+  const out = [];
+  const re = /["“«]([^"”»]{1,200})["”»]/g;
+  let m;
+  while ((m = re.exec(satir)) !== null) out.push(m[1].trim());
+  return out;
+}
+function tirnakDengeli(satir) {
+  const n = (satir.match(/["“”«»]/g) || []).length;
+  return n % 2 === 0;
+}
+
+function alintiGecerli(alinti, sohbetNorm) {
+  const t = alinti.trim();
+  if (t.length < 6) return false;                       // "ok" is not evidence
+  if (BAGLANTI.test(t)) return false;
+  const dt = trKucult(t);
+  if (SISTEM_SATIRI.some((s) => dt.includes(trKucult(s)))) return false;
+  const n = normalize(t);
+  return n.length >= 6 && sohbetNorm.includes(n);
+}
+
+function cumleSay(satir) {
+  return satir.split(/(?<=[.!?])\s+/).map((c) => c.trim()).filter(Boolean).length;
+}
+
+/**
+ * Returns the accepted lines, or null. Null is a whole rejected reading: a reading that is repaired
+ * field by field is a reading nobody measured.
+ */
+function spikerGecerli(ham, sohbet) {
+  if (!ham || typeof ham !== 'object') return null;
+  const dizi = Array.isArray(ham.satirlar) ? ham.satirlar : null;
+  if (!dizi || dizi.length < 1 || dizi.length > SPIKER_MAKS_SATIR) return null;
+
+  const sohbetNorm = normalize(sohbet);
+  const temiz = [];
+  const gorulen = [];
+  let cumle = 0;
+
+  for (const s of dizi) {
+    if (typeof s !== 'string') return null;
+    // A list marker is `1.` / `2)` / `- ` / `* ` FOLLOWED BY A SPACE. The old strip was a character
+    // class, so it also ate the leading digit of "3 mesajda bir konu kapanıyor" and handed the
+    // invented figure straight past the digit rule below.
+    const t = s.trim().replace(/^(?:[-*•]|\d{1,2}[.)])\s+/, '').trim();
+    if (!t || t.length > 200) return null;
+    if (AGIZ_YASAK.test(t)) return null;
+    if (t.includes('—')) return null;
+    if (!tirnakDengeli(t)) return null;
+
+    // quotations first: a verified quotation is allowed to carry the chat's own digits, an
+    // unverified one is the failure this check exists for.
+    const alinti = alintilar(t);
+    for (const a of alinti) if (!alintiGecerli(a, sohbetNorm)) return null;
+    const disi = alinti.reduce((acc, a) => acc.split(a).join(' '), t);
+    if (/[0-9٠-٩]/.test(disi)) return null;          // a figure of the model's own
+    if (BAGLANTI.test(disi)) return null;
+
+    cumle += cumleSay(t);
+    if (cumle > SPIKER_MAKS_CUMLE) return null;
+
+    const n = normalize(t);
+    if (!n) return null;
+    // repetition: the same sentence again, or one sentence swallowed whole by another
+    if (gorulen.some((g) => g === n || g.includes(n) || n.includes(g))) return null;
+    gorulen.push(n);
+    temiz.push(t);
+  }
+  if (temiz.length < 1) return null;
+
+  const hepsi = temiz.join(' ');
+  for (const [a, b] of CELISKI) if (a.test(hepsi) && b.test(hepsi)) return null;
+
+  return temiz;
 }
 
 async function handleSpiker(request, env, origin) {
   const body = await request.json().catch(() => null);
-  const olgu = spikerOlguSunucu(body);
-  if (!olgu) return json({ error: 'Invalid request' }, 400, origin);
 
+  // THE CONSENT GATE. It is asked before anything is read out of the body and before a single byte
+  // leaves this worker. A request without it is a bug or an attack, and either way it is a 400.
+  if (!body || body.onay !== true) return json({ error: 'Onay yok' }, 400, origin);
+
+  const sohbet = typeof body.sohbet === 'string' ? body.sohbet : '';
+  if (!sohbet.trim()) return json({ error: 'Invalid request' }, 400, origin);
+  if (sohbet.length > SPIKER_MAKS_BAYT) return json({ error: 'Conversation too large' }, 413, origin);
+  if (!env.GROQ_API_KEY) {
+    return json({ error: 'Sunucu yapilandirilmadi', eksik: ['GROQ_API_KEY'] }, 503, origin);
+  }
+
+  // The chat is a local of this function. It is put in one prompt, and no KV write below or above
+  // this line touches it.
   const res = await fetch(GROQ_URL, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${env.GROQ_API_KEY}` },
     body: JSON.stringify({
       model: GROQ_MODEL,
-      temperature: 0.8,
-      max_tokens: 1200,
+      temperature: 0.7,
+      max_tokens: 400,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: SPIKER_SYSTEM },
-        { role: 'user', content: spikerUserPrompt(olgu) },
+        { role: 'user', content: spikerUserPrompt(sohbet) },
       ],
     }),
   });
@@ -592,66 +695,9 @@ async function handleSpiker(request, env, origin) {
   let out;
   try { out = JSON.parse(text); } catch { return json({ error: 'Could not read this one' }, 502, origin); }
 
-  const spiker = validateSpiker(out);
-  if (!spiker) return json({ error: 'Could not read this one' }, 502, origin);
-  const serious = olgu.hukum_tur === 'tense' || (olgu.red_flag_turu || 0) >= 1;
-  postProcess(spiker, serious);
-  return json({ source: 'groq', spiker }, 200, origin);
-}
-
-// The LLM does not fully obey the voice law, so we enforce it in code: playful screens are
-// lowercase (TR-aware), and the "sanki" filler tic is stripped after its first use. Evidence
-// quotes are never touched.
-function trLower(s) { return s.replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase(); }
-function postProcess(spiker, serious) {
-  let sankiSeen = false;
-  const fix = (s) => {
-    if (!s) return s;
-    let t = serious ? s : trLower(s);
-    t = t.replace(/\bsanki\b[ ,]*/gi, (m) => (sankiSeen ? '' : (sankiSeen = true, m)));
-    return t.replace(/\s{2,}/g, ' ').trim();
-  };
-  spiker.ton_line = fix(spiker.ton_line);
-  spiker.sinyal_reason = fix(spiker.sinyal_reason);
-  spiker.denge_line = fix(spiker.denge_line);
-  spiker.kapanis = fix(spiker.kapanis);
-}
-
-// The client merges these over its template lines; anything malformed is dropped so the
-// on-device templates always remain the floor.
-//
-// Two fields the spiker used to return are gone on purpose, and neither can come back while the
-// conversation stays on the device:
-//   okumalar        — per-message rewrites. writing the subtext of a message requires the message.
-//   gozden_kacanlar — evidence-quoted observations. the old quoteIsInDoc() check could only tell a
-//                     real quote from an invented one by searching the doc. with no doc there is no
-//                     check, and an unverifiable quote is exactly the failure that check existed to
-//                     stop. so the observations are dropped rather than shipped unverified.
-// Both fields keep their on-device template values, because the client only overwrites what it is
-// handed and it is no longer handed these.
-//
-// A digit is refused for the same reason as in the time flow: every figure on screen is put there
-// by the engine, so a figure written by the model is a figure nothing measured. A quotation mark is
-// refused because the model has nothing to quote from.
-function satirTemiz(v, max) {
-  if (typeof v !== 'string') return null;
-  const t = v.trim();
-  if (!t || t.length > max) return null;
-  if (/[0-9٠-٩]/.test(t)) return null;
-  if (/["“”«»]/.test(t)) return null;
-  return t;
-}
-
-function validateSpiker(out) {
-  if (!out || typeof out !== 'object') return null;
-  const spiker = {
-    ton_line: satirTemiz(out.ton_line, 300),
-    sinyal_reason: satirTemiz(out.sinyal_reason, 300),
-    denge_line: satirTemiz(out.denge_line, 400),
-    kapanis: satirTemiz(out.kapanis, 300),
-  };
-  if (!spiker.ton_line && !spiker.denge_line) return null;
-  return spiker;
+  const satirlar = spikerGecerli(out, sohbet);
+  if (!satirlar) return json({ error: 'Could not read this one' }, 502, origin);
+  return json({ source: 'groq', spiker: { satirlar: satirlar.map(trKucult) } }, 200, origin);
 }
 
 function json(data, status = 200, origin = '') {

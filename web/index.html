@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>seviyorsevmiyor · flört var mı, yok mu?</title>
-<meta name="description" content="sohbeti bırak. flört var mı, yok mu, kim daha çok istiyor: net bir okuma. analiz cihazında yapılır, mesajların cihazından çıkmaz." />
+<meta name="description" content="sohbeti bırak. flört var mı, yok mu, kim daha çok istiyor: net bir okuma. hüküm ve sayılar cihazında hesaplanır. canlı yorumu istersen, onay verdiğinde sohbetin metni buluta gider." />
 <link rel="canonical" href="https://seviyorsevmiyor.noseydewdrop.com/" />
 <meta name="theme-color" content="#1a1a1a" />
 <link rel="icon" href="./favicon.svg?v=37" type="image/svg+xml" />
@@ -12,7 +12,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://seviyorsevmiyor.noseydewdrop.com/" />
 <meta property="og:title" content="seviyorsevmiyor · flört var mı, yok mu?" />
-<meta property="og:description" content="sohbeti bırak. flört var mı, yok mu, kim daha çok istiyor: net bir okuma. analiz cihazında yapılır, mesajların cihazından çıkmaz." />
+<meta property="og:description" content="sohbeti bırak. flört var mı, yok mu, kim daha çok istiyor: net bir okuma. hüküm ve sayılar cihazında hesaplanır. canlı yorumu istersen, onay verdiğinde sohbetin metni buluta gider." />
 <meta property="og:site_name" content="seviyorsevmiyor" />
 <meta property="og:locale" content="tr_TR" />
 <meta property="og:image" content="https://seviyorsevmiyor.noseydewdrop.com/og.png?v=32" />
@@ -20,7 +20,7 @@
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="seviyorsevmiyor · flört var mı, yok mu?" />
-<meta name="twitter:description" content="sohbeti bırak. flört var mı, yok mu: net bir okuma. analiz cihazında yapılır, mesajların cihazından çıkmaz." />
+<meta name="twitter:description" content="sohbeti bırak. flört var mı, yok mu: net bir okuma. hüküm cihazında çıkar. canlı yorumu istersen, onay verdiğinde sohbetin metni buluta gider." />
 <meta name="twitter:image" content="https://seviyorsevmiyor.noseydewdrop.com/og.png?v=32" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -34,14 +34,14 @@
   "@type": "WebApplication",
   "name": "seviyorsevmiyor",
   "url": "https://seviyorsevmiyor.noseydewdrop.com/",
-  "description": "sohbeti bırak. flört var mı, yok mu, kim daha çok istiyor: net bir okuma. analiz cihazında yapılır, mesajların cihazından çıkmaz.",
+  "description": "sohbeti bırak. flört var mı, yok mu, kim daha çok istiyor: net bir okuma. hüküm ve sayılar cihazında hesaplanır. canlı yorumu istersen, onay verdiğinde sohbetin metni buluta gider.",
   "applicationCategory": "LifestyleApplication",
   "operatingSystem": "Web",
   "browserRequirements": "Requires JavaScript",
   "inLanguage": "tr",
   "isAccessibleForFree": true,
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
-  "featureList": "cihaz üzerinde istatistiksel analiz; sohbet metni cihazdan çıkmaz; bulut yorum katmanı yalnızca açık onayla çalışır",
+  "featureList": "cihaz üzerinde istatistiksel analiz; hüküm ve sayılar cihazda hesaplanır; canlı yorum katmanı için onay verdiğinde sohbetin metni buluta gider, onay yoksa gitmez",
   "author": { "@type": "Person", "name": "nosey-dewdrop", "url": "https://github.com/nosey-dewdrop" }
 }
 </script>
@@ -127,7 +127,7 @@
 
     <label class="consent hidden" id="cloudConsent">
       <input type="checkbox" id="cloudConsentBox" />
-      <span>yorumları canlı spiker yazsın: buluta yalnızca sayımlar gider, mesajların gitmez ve saklanmaz (<a href="./gizlilik.html">gizlilik</a>). işaretlemezsen yorumları da cihazın yazar.</span>
+      <span>yorumları canlı spiker yazsın: onay verirsen bu sohbetin metni buluta gider ve orada okunur (Groq üzerinde Llama, sunucular yurt dışında). metin bizde saklanmaz, istek biter bitmez silinir (<a href="./gizlilik.html">gizlilik</a>). işaretlemezsen tek karakter gitmez, yorumları da cihazın yazar.</span>
     </label>
 
     <div class="row">
@@ -139,20 +139,20 @@
   <section class="reveal" id="reveal"></section>
 
   <div class="altgrup">
-  <div class="quota">bedava, sınır yok, hesap yok. hüküm senin cihazında çıkar; canlı yorumu istersen bulut yazar.</div>
+  <div class="quota">bedava, sınır yok, hesap yok. hüküm senin cihazında çıkar; canlı yorumu istersen sohbeti buluta sen gönderirsin.</div>
 
   <details class="nasil">
     <summary>bu nasıl yapıldı ve verilerin nasıl korunuyor?</summary>
     <p>iki model kullandım. önce kendi eğittiğim küçük bir dil modeli sohbetin istatistiğini çıkarıyor: kim başlatmış, kim daha çok yazmış, sorular dengeli mi, kaç kuru cevap var. bu hep senin cihazında oluyor, mesajın hiçbir yere gitmiyor.</p>
-    <p>sonra bu istatistiği llama'ya yorumlatıyorum. yani yorumu yazan llama, ama okuduğu şey mesajların değil, çıkan sayılar. hüküm ve sayılar zaten hep sende kalıyor.</p>
+    <p>canlı spikeri işaretlersen ikinci bir katman açılıyor: sohbetin metni buluta gidiyor ve llama onu okuyup en fazla beş satır yazıyor. bunu bilerek böyle yaptım, çünkü sayıları okuyan bir model şablon cümleden başka bir şey kuramıyordu. sunucu, llama'nın yazdığı satırlarda tırnak içine aldığı her cümleyi senin sohbetinde birebir arıyor: bulamazsa okumayı tümden atıyor, uydurma alıntı ekrana çıkmıyor. metin bizde saklanmıyor. işaretlemezsen istek hiç kurulmuyor.</p>
     <p>küçük modeli kendi ellerimle, tek tek sohbet etiketleyerek eğittim, hâlâ eğitiyorum. istersen sen de "yanlış okudun" deyip sohbetini bağışlayabilirsin, model onunla büyüyor. bağışlamazsan hiçbir şey saklanmıyor.</p>
   </details>
   </div>
 
   <footer class="site-foot">
-    <div class="links"><a class="l-giz" href="./gizlilik.html">gizlilik</a><span class="sep">*</span><a class="l-kos" href="./kosullar.html">koşullar</a><span class="sep">*</span><a class="badge-inline" href="./gizlilik.html">analiz cihazında yapılır, mesajların çıkmaz</a></div>
+    <div class="links"><a class="l-giz" href="./gizlilik.html">gizlilik</a><span class="sep">*</span><a class="l-kos" href="./kosullar.html">koşullar</a><span class="sep">*</span><a class="badge-inline" href="./gizlilik.html">hüküm cihazında, canlı yorum ancak onayınla bulutta</a></div>
     <span class="disclaimer">bu okuma otomatik bir tahmindir; kesin bir yargı ya da tavsiye değildir, eğlence amaçlıdır.</span>
-    <span>hüküm ve sayılar cihazında. canlı spiker yorumu sadece senin onayınla bulutta.</span>
+    <span>hüküm ve sayılar cihazında. canlı spiker yorumunu istersen, onay verdiğinde sohbetin metni buluta gider; onay yoksa gitmez.</span>
     <span class="imza"><a href="https://github.com/nosey-dewdrop" target="_blank" rel="noopener">@nosey-dewdrop</a> · v75 · 30 Ağu</span>
   </footer>
 </div>

@@ -2,8 +2,13 @@ name = "seviyorsevmiyor-api"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
-# KV for per-IP rate counters and daily totals. No message text reaches this worker at all, so
-# none can be written here: every route runs its body through olguTemiz() first.
+# KV for per-IP rate counters and daily totals.
+#
+# Message text DOES reach this worker now: /api/spiker receives the conversation with the visitor's
+# explicit consent and forwards it to Groq. It is never written here. The chat is a local of
+# handleSpiker(), it is put into one prompt, and the request ends; no KV key in this file or in
+# worker.js holds a character of it. What lives here is counters, and /api/zaman and /api/itiraz
+# still go through olguTemiz(), so the two routes that DO write to KV still carry numbers only.
 # Namespace title is MESAJ_RATE_LIMIT (account already had a generic RATE_LIMIT from another worker).
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
@@ -41,7 +46,15 @@ ITIRAZ_OPEN = "on"
 #   TURNSTILE_SECRET  — Cloudflare dash > Turnstile > widget > secret key
 #   BILET_SECRET      — any long random string, signs our own short-lived tickets
 #                       e.g. openssl rand -hex 32
-# TURNSTILE_SECRET or BILET_SECRET missing => /api/bilet, /api/spiker and /api/itiraz return 503
-# listing the missing name. Nothing stays quietly open.
 #
-# The Turnstile SITE key (public, not a secret) goes in web/js/api.js as TURNSTILE_SITEKEY.
+# The ticket gate switches itself on with TURNSTILE_SECRET:
+#   TURNSTILE_SECRET set    => /api/spiker, /api/itiraz and /api/zaman all demand a valid ticket,
+#                              and a missing BILET_SECRET makes them 503 by name.
+#   TURNSTILE_SECRET unset  => /api/bilet, /api/itiraz and /api/zaman still 503 by name, but
+#                              /api/spiker runs without a ticket. There is no challenge for the
+#                              page to solve without a site key, so a ticket demand would close the
+#                              main flow rather than protect it. The origin allowlist and the three
+#                              quotas (6/min and 60/day per IP, 900/day global) stay on regardless.
+#
+# The Turnstile SITE key (public, not a secret) goes in web/js/api.js as TURNSTILE_SITEKEY. Fill it
+# in there and set TURNSTILE_SECRET here and the gate turns on at both ends with no code change.

@@ -3,7 +3,7 @@
 // oturur. Her yorum satırı tıklanabilir: altında "NEDEN BÖYLE OKUDUM?" + "BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?"
 // + rızalı bağış açılır. Karttaki her sayı gerçek sohbetten hesaplanır, elle sayı yazılmaz.
 
-import { ping, itirazGonder, biletAl, spikerRead } from './api.js?v=75';
+import { ping, itirazGonder, biletAl, spikerRead, BILET_GEREKLI } from './api.js?v=75';
 import { deflectedPlans } from './balance.js?v=75';
 
 // Guarded so train/bos_ekran_check.mjs can import the real spikerDene / spikerKapaliMetni below
@@ -16,15 +16,18 @@ const REDUCED = typeof window !== 'undefined' && window.matchMedia
 // The visitor ticks "canlı spiker" and spikerRead returns null; app.js used to skip the merge with
 // `if (sp)` and show the shipped template lines with nothing on screen saying so. The box they
 // ticked did nothing and no one told them. Same rule as the time flow: the cause is named.
-export const SPIKER_SEBEPLER = ['bilet_yok', 'ag_hatasi'];
+export const SPIKER_SEBEPLER = ['onay_yok', 'bilet_yok', 'ag_hatasi'];
 
 const SPIKER_KAPALI = {
+  onay_yok: 'canlı spiker çalışmadı çünkü buluta gönderme onayı verilmedi. onay olmadan sohbetin '
+    + 'tek karakteri bile cihazından çıkmaz, o yüzden istek hiç kurulmadı. yorum cümlelerini '
+    + 'cihazındaki şablon yazdı. hüküm ve sayılar zaten cihazda hesaplanıyordu, onlar değişmedi.',
   bilet_yok: 'canlı spikeri işaretledin ama bulut yolu şu an kapalı: bu sürümde doğrulama anahtarı '
     + 'tanımlı değil, o yüzden istek hiç gönderilmedi. yukarıdaki yorum cümlelerini cihazındaki '
     + 'şablon yazdı. hüküm ve sayılar zaten cihazda hesaplanıyordu, onlar değişmedi.',
-  ag_hatasi: 'canlı spikeri işaretledin, istek gitti ama bulut cevap dönmedi. yorum cümlelerini bu '
-    + 'yüzden cihazın kendi şablonu yazdı. sohbeti tekrar okutursan spiker yeniden denenir. hüküm '
-    + 've sayılar buluttan gelmiyordu, onlar aynı.',
+  ag_hatasi: 'canlı spikeri işaretledin, istek gitti ama bulut kabul edilebilir bir okuma dönmedi. '
+    + 'yorum cümlelerini bu yüzden cihazın kendi şablonu yazdı. sohbeti tekrar okutursan spiker '
+    + 'yeniden denenir. hüküm ve sayılar buluttan gelmiyordu, onlar aynı.',
 };
 
 export function spikerKapaliMetni(sebep) {
@@ -32,15 +35,25 @@ export function spikerKapaliMetni(sebep) {
 }
 
 /**
- * Ask for the ticket first, so "no ticket" and "no answer" stop being the same null.
- * deps exists for the gate; the defaults are the real client.
+ * Three outcomes, three named causes, so "nothing happened" is never shown as a template line with
+ * no explanation next to it.
+ *
+ * The consent check is asked FIRST and asked here as well as inside spikerRead, because this is the
+ * layer that has to be able to say WHY nothing was sent. deps exists for the gate; the defaults are
+ * the real client.
+ *
+ * @param {{sohbet: string, onay: boolean}} istek
  */
-export async function spikerDene(facts, deps = {}) {
+export async function spikerDene(istek, deps = {}) {
   const bilet = deps.bilet || biletAl;
   const oku = deps.oku || spikerRead;
-  const token = await bilet();
-  if (!token) return { sp: null, sebep: 'bilet_yok' };
-  const sp = await oku(facts);
+  const biletGerekli = deps.biletGerekli === undefined ? BILET_GEREKLI : deps.biletGerekli;
+  if (!istek || istek.onay !== true) return { sp: null, sebep: 'onay_yok' };
+  if (biletGerekli) {
+    const token = await bilet();
+    if (!token) return { sp: null, sebep: 'bilet_yok' };
+  }
+  const sp = await oku(istek);
   if (!sp) return { sp: null, sebep: 'ag_hatasi' };
   return { sp, sebep: null };
 }
@@ -176,11 +189,18 @@ function buildParagraphs(r, st) {
     });
   }
 
-  for (const g of (r.gozden_kacanlar || [])) {
+  // The cloud reading. `gozden_kacanlar` is gone with the old flow: it was a title, a sentence and
+  // a separate "kanıt" field, and the reveal drew all three, which is how one observation became
+  // three lines saying the same thing. What comes back now is a short list of plain sentences, and
+  // every quotation inside them was searched for in this very conversation on the server before it
+  // was allowed through.
+  for (const s of (r.spikerSatirlar || [])) {
     P.push({
-      html: `<b>gözden kaçan: ${esc(g.baslik)}.</b> ${esc(g.line)} <span class="kanit">kanıt: "${esc(g.kanit)}"</span>`,
+      html: esc(s),
       g: {
-        neden: `spiker bu gözlemi şu satıra dayandırdı: "${g.kanit}". sayılar cihazda hesaplandı, cümleyi onayınla spiker yazdı.`,
+        neden: 'bu satırı bulut spikeri yazdı: onay verdiğin için sohbetin metni ona gitti, yani '
+          + 'sözlüğe değil sohbetin kendisine bakıyor. alıntı yaptıysa o cümle sohbette birebir '
+          + 'geçiyor, sunucu göndermeden önce arayıp doğruladı.',
         alt: 'spiker yorumu tek okumadır. sayılarla çelişirse sayılara inan, onlar cihazda sayıldı.',
       },
     });
@@ -251,7 +271,11 @@ function buildKart(r, st, okumaNo, senAgir, onIndir) {
     ? `${st.senSoru} soruna ${st.oSoru} soru döndü, cevapların %${st.kuruOran}'i kuru. yükü taşıyan ${senAgir ? 'sensin' : 'karşı taraf'}.`
     : `${st.senSoru} soru sordun, karşı taraftan bu yazışmada dönüş yok. yük tümüyle sende.`;
   kart.appendChild(el('p', 'kisa', kisaCumle));
-  kart.appendChild(el('p', 'dip', 'cihazda hesaplandı · mesajlar hiçbir yere gitmedi'));
+  // The card is the part that gets screenshotted, so its footer says what actually happened in THIS
+  // reading rather than a slogan that is only true half the time.
+  kart.appendChild(el('p', 'dip', r.spiker
+    ? 'sayılar cihazda hesaplandı · yorumu onayınla bulut okudu'
+    : 'cihazda hesaplandı · mesajlar hiçbir yere gitmedi'));
 
   const indir = el('button', 'indir', 'kartı indir');
   indir.type = 'button';
@@ -358,7 +382,8 @@ export async function playReveal(root, r, messages, me) {
         : `ton modeli %${n.modelConf} güvenle "${n.modelTone}" dedi.`,
       `${n.redKinds} red flag türü, ${n.greens} green flag sayıldı. her cümle sayılan bir sinyale bağlı, hiçbir şey uydurulmadı.`,
       r.spiker
-        ? 'hüküm ve sayılar cihazında hesaplandı. yorum cümlelerini onayınla bulut yazdı, içerik saklanmadı.'
+        ? 'hüküm ve sayılar cihazında hesaplandı. sohbetin metni, onayını verdiğin için buluta gitti '
+          + 've orada okundu; sunucuda saklanmadı, istek biter bitmez silindi.'
         : 'hepsi cihazında hesaplandı. mesajların hiçbir yere gitmedi.',
     ];
     const det = el('details', 'howread');

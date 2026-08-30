@@ -1,25 +1,27 @@
-// What leaves the device on the OLD flow (index.html: paste a chat -> flört hükmü).
-// Run: node train/bulut_check_eski.mjs
+// What leaves the device on the OLD flow (index.html: paste a chat -> flört hükmü), and whether the
+// page says the same thing the code does. Run: node train/bulut_check_eski.mjs
 //
-// train/bulut_check.mjs asks this question of the time flow. This file asks it of the flow that
-// was still shipping the conversation itself: /api/spiker carried up to 6000 characters of chat in
-// the request body, and /api/itiraz wrote up to 8000 characters of it into KV. The page said
-// "mesajların cihazından çıkmaz" the whole time.
+// THIS FILE USED TO MEASURE THE OPPOSITE THING. It was written when /api/spiker carried fifteen
+// counts and the site said "mesajların cihazından çıkmaz" on four surfaces. That design is gone
+// (30 Ağu, product owner's call): the chat is sent, because a model handed fifteen numbers can only
+// write templates and the counter behind those numbers was inventing verdicts.
+//
+// So the question changed. It is no longer "did any text get out". It is:
+//
+//   - is the thing that DOES leave exactly the thing the visitor agreed to send, and nothing more?
+//   - do the routes that still promise numbers only still keep that promise?
+//   - does every published page say what actually happens, without a hedge word?
+//
+// The consent gate itself and the model's output filter are measured next door in
+// train/llm_yol_check.mjs, with mutations. This file is the payload-shape and copy half.
 //
 // Nothing is reimplemented here. The real client module builds the payloads and the real worker
 // module handles the requests; the only fakes are the outside world (KV, Turnstile, Groq), because
 // a gate that mimics the code stays green while the code rots.
-//
-// Measured, not asserted in prose:
-//   - the outgoing body has zero text fields (a text field = a string with whitespace, or > 40 chars)
-//   - no word of the fixture conversation appears anywhere in what reaches Groq
-//   - no word of it appears in anything written to KV
-//   - a client that posts the raw chat anyway gets it dropped at the server wall
-//   - the privacy page's claims and the code's behaviour say the same thing
 
 import { readFileSync, readdirSync } from 'node:fs';
 import worker from '../backend/worker.js';
-import { spikerOlgu, itirazOlgu } from '../web/js/api.js';
+import { itirazOlgu } from '../web/js/api.js';
 import { kacamakBul } from './tr_kucult.mjs';
 
 let fails = 0;
@@ -36,8 +38,8 @@ const oku = (p) => readFileSync(new URL(p, KOK), 'utf8');
 
 // ---- the fixture conversation ----------------------------------------------------------------
 //
-// Deliberately full of rare tokens. If any of them turns up in a request body or a KV value, it
-// could only have come from the chat.
+// Deliberately full of rare tokens. If any of them turns up in a KV value or in a payload that is
+// supposed to be numeric, it could only have come from the chat.
 
 const DOC = [
   'SEN: bugun musaitsin degil mi',
@@ -49,25 +51,6 @@ const DOC = [
 ].join('\n');
 
 const SOHBET_KELIMELERI = ['musaitsin', 'bakariz', 'ozledim', 'gercekten', 'kerem', 'yogunum', 'versene'];
-
-// The exact shape app.js:spikerFacts() hands to spikerRead(). Message text lives in `okumalar`,
-// generated sentences live in `cumle`/`baslik`/`kapanis`; both used to travel.
-const FACTS = {
-  hukum: { tur: 'tense', etiket: 'gergin', cumle: 'bu sohbeti tek basina sen tasiyorsun.', gerekce: 'kerem yogunum demis.' },
-  flort: { karar: 'yok', yuzde: 18, sende_yuzde: 31, onda_yuzde: 4 },
-  sayim: {
-    toplam_mesaj: 6, senin_mesajin: 3, onun_mesaji: 3,
-    senin_sorun: 2, onun_sorusu: 0, red_flag_turu: 1, green_flag: 0,
-  },
-  denge: { cumle: 'sen uzaniyorsun, o sadece orada.' },
-  okumalar: [
-    { mesaj: 'bugun musaitsin degil mi', okuma: 'plan kurmaya calisiyor.' },
-    { mesaj: 'bakariz', okuma: 'kapiyi acik birakip kapatiyor.' },
-    { mesaj: 'seni ozledim gercekten', okuma: 'acik bir yakinlik hamlesi.' },
-  ],
-  bayraklar: [{ tur: 'red', baslik: 'surekli erteleme' }, { tur: 'green', baslik: 'hizli cevap' }],
-  kapanis: 'bu kadari bile yeterince acik.',
-};
 
 // ---- the measurement -------------------------------------------------------------------------
 //
@@ -94,44 +77,11 @@ function sohbetIzi(metin) {
   return SOHBET_KELIMELERI.filter((k) => d.includes(k));
 }
 
-// ---- 1. the client half: the report goes in, counts come out ---------------------------------
-
-await blok('istemci spiker yuku', async () => {
-  const olgu = spikerOlgu(FACTS);
-  const json = JSON.stringify(olgu);
-  console.log('\ncihazdan cikan tam yuk (spiker):');
-  console.log('  ' + json);
-  console.log(`  boyut: ${json.length} bayt\n`);
-
-  ok('spiker yukunde metin alani = 0', metinAlanlari(olgu).length === 0, metinAlanlari(olgu).join(', '));
-  ok('spiker yukunde sohbetten tek kelime yok', sohbetIzi(json).length === 0, sohbetIzi(json).join(', '));
-  ok('spiker yukunde uretilmis cumle de yok',
-    !json.includes('tasiyorsun') && !json.includes('uzaniyorsun') && !json.includes('erteleme'), json);
-  ok('sayimlar gercekten tasindi (yuk bos degil)',
-    olgu.toplam_mesaj === 6 && olgu.senin_sorun === 2 && olgu.okuma_sayisi === 3
-    && olgu.red_bayrak === 1 && olgu.green_bayrak === 1, json);
-  ok('hukum kisa anahtar olarak gecti', olgu.hukum_tur === 'tense' && olgu.flort_karar === 'yok', json);
-  ok('spiker yuku 600 baytin altinda', json.length < 600, `${json.length} bayt`);
-});
-
-// A single-token message is the hard case for any "no whitespace" rule, so it is asked directly:
-// the allowlist must drop it because `okumalar` is never descended into, not because it happened
-// to contain a space.
-await blok('tek kelimelik mesaj da gecmiyor', async () => {
-  const kotu = JSON.parse(JSON.stringify(FACTS));
-  kotu.okumalar = [{ mesaj: 'yogunum', okuma: 'x' }];
-  kotu.hukum.tur = 'ozledim';           // a message word smuggled into an enum slot
-  const json = JSON.stringify(spikerOlgu(kotu));
-  ok('tek kelimelik mesaj yuke girmiyor', !json.includes('yogunum'), json);
-  ok('okuma sayisi hala gidiyor', JSON.parse(json).okuma_sayisi === 1, json);
-  // This used to be the one known hole: hukum_tur accepted whatever the engine put there, so a
-  // single word could ride along. The slot now takes a value from a closed list, so the smuggled
-  // word drops instead of travelling, and the reading it belonged to loses the field rather than
-  // gaining a passenger.
-  ok('enum yuvasina sokusturulan kelime istemcide dusuyor',
-    !('hukum_tur' in JSON.parse(json)), json);
-  ok('gercek hukum degeri hala geciyor', spikerOlgu(FACTS).hukum_tur === 'tense');
-});
+// ---- 1. the donation payload: still numbers, and only numbers ---------------------------------
+//
+// /api/spiker reads a chat and forgets it. /api/itiraz writes a row into KV that lives for months,
+// so it is a different promise and it did not change: what is donated is the twelve features the
+// model actually trains on.
 
 await blok('istemci itiraz yuku', async () => {
   const olgu = itirazOlgu(DOC);
@@ -149,19 +99,39 @@ await blok('istemci itiraz yuku', async () => {
     Object.values(olgu).some((v) => v > 0), json);
 });
 
+// ---- 2. the client source: which body carries what --------------------------------------------
+//
+// Read as source rather than driven, and labelled as such: the point is which FIELD NAMES each
+// request body is built from. The spiker body is supposed to carry the chat now, and exactly two
+// fields; the donation body is supposed to carry no chat at all. Both directions are asked, so a
+// gate that simply says "no doc anywhere" cannot pass by being blind.
+
 await blok('istemci kaynak kontrolu', async () => {
   const src = oku('web/js/api.js');
   const govdeler = [...src.matchAll(/body:\s*JSON\.stringify\(([^]*?)\)\s*,\n/g)].map((m) => m[1]);
   ok('api.js en az uc istek govdesi kuruyor', govdeler.length >= 3, String(govdeler.length));
-  // `doc` as a KEY of the body object, shorthand or explicit. `itirazOlgu(doc)` is the opposite of
-  // a finding: it is the chat being consumed on the device instead of being posted.
-  const docTasiyan = govdeler.filter((g) => /(^|[,{\s])doc\s*[,:}]/.test(g));
-  ok('hicbir istek govdesinde doc alani yok', docTasiyan.length === 0, docTasiyan.join(' | '));
-  ok('spikerRead ham doc parametresi almiyor',
-    /export async function spikerRead\(facts\)/.test(src), 'imza degismemis');
+
+  const spikerGovde = govdeler.find((g) => /sohbet/.test(g));
+  ok('spiker govdesi sohbeti tasiyor (yeni gercek)', !!spikerGovde, govdeler.join(' | '));
+  ok('spiker govdesi sadece sohbet ve onay tasiyor',
+    !!spikerGovde && /sohbet:/.test(spikerGovde) && /onay:\s*true/.test(spikerGovde)
+    && !/olgu|facts|isim|ad:/.test(spikerGovde), String(spikerGovde));
+
+  // The donation body is the one that must still be free of the chat. `itirazOlgu(doc)` is the
+  // opposite of a finding: it is the chat being consumed on the device instead of being posted.
+  const itirazGovde = govdeler.find((g) => /itirazOlgu/.test(g));
+  ok('itiraz govdesi bulundu', !!itirazGovde, govdeler.join(' | '));
+  ok('itiraz govdesinde doc alani yok',
+    !!itirazGovde && !/(^|[,{\s])doc\s*[,:}]/.test(itirazGovde) && !/sohbet/.test(itirazGovde),
+    String(itirazGovde));
+
+  ok('spikerRead artik sohbet + onay aliyor',
+    /export async function spikerRead\(istek\)/.test(src), 'imza degismemis');
+  ok('riza kapisi api.js te tek satir ve yerinde',
+    /if \(!onay\) return null;/.test(src), 'RIZA KAPISI satiri yok');
 });
 
-// ---- 2. the server half: drive the real worker ------------------------------------------------
+// ---- 3. the server half: drive the real worker ------------------------------------------------
 
 const OWN = 'https://nosey-dewdrop.github.io';
 
@@ -187,17 +157,10 @@ function makeEnv() {
   };
 }
 
-// Everything the worker sends out is recorded, so "no message reached Groq" is a measurement of
-// the actual outbound request rather than a reading of the source.
+// Everything the worker sends out is recorded, so "no message reached Groq on the numeric routes"
+// is a measurement of the actual outbound request rather than a reading of the source.
 const disCagrilar = [];
-const SPIKER_JSON = JSON.stringify({
-  ton_line: 'cevaplari buz gibi.',
-  sinyal_reason: 'karsilik yok denecek kadar az.',
-  denge_line: 'sen uzaniyorsun, o sadece orada.',
-  okumalar: ['bunu yazmamaliydi', 'kapiyi kapatiyor', 'acik bir hamle'],
-  gozden_kacanlar: [{ baslik: 'tek tarafli', line: 'sohbeti sen tasiyorsun.', kanit: 'bakariz' }],
-  kapanis: 'bu kadar.',
-});
+const ZAMAN_METIN = 'cevaplar kisalmis.\nbekleme suresi uzamis.\nbaslatan taraf degismis.';
 globalThis.fetch = async (url, init) => {
   const u = String(url);
   disCagrilar.push({ u, govde: String(init?.body || '') });
@@ -205,7 +168,7 @@ globalThis.fetch = async (url, init) => {
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   }
   if (u.includes('api.groq.com')) {
-    return new Response(JSON.stringify({ choices: [{ message: { content: SPIKER_JSON } }] }), { status: 200 });
+    return new Response(JSON.stringify({ choices: [{ message: { content: ZAMAN_METIN } }] }), { status: 200 });
   }
   throw new Error(`beklenmeyen dis cagri: ${u}`);
 };
@@ -224,112 +187,20 @@ async function biletAl(env) {
   return (await res.json()).bilet;
 }
 
-// The JSON block the worker pastes into the user turn. The surrounding prompt is our own prose and
-// is supposed to be prose; the payload is the part that came from the visitor's device.
-// The payload is pretty-printed by the worker, so it is the first block that starts at column zero
-// and closes at column zero. The output schema further down the prompt is our own text.
-function groqYuku(cagri) {
-  const g = JSON.parse(cagri.govde);
-  const kullanici = g.messages.find((m) => m.role === 'user').content;
-  const m = kullanici.match(/^\{[^]*?^\}/m);
-  return m ? JSON.parse(m[0]) : null;
-}
-
-await blok('sunucu: temiz istemciden spiker', async () => {
-  const env = makeEnv();
-  const bilet = await biletAl(env);
-  const n = groqCagrilari().length;
-  const res = await call('/api/spiker', env, { token: bilet, body: { olgu: spikerOlgu(FACTS) } });
-  const d = await res.json();
-  ok('temiz spiker istegi 200', res.status === 200, `status ${res.status} ${JSON.stringify(d)}`);
-  ok('groq gercekten arandi', groqCagrilari().length === n + 1);
-
-  const cagri = groqCagrilari().at(-1);
-  ok('groq a giden istekte sohbetten tek kelime yok', sohbetIzi(cagri.govde).length === 0,
-    sohbetIzi(cagri.govde).join(', '));
-  const yuk = groqYuku(cagri);
-  ok('groq a giden yukte metin alani = 0', yuk && metinAlanlari(yuk).length === 0,
-    JSON.stringify(metinAlanlari(yuk || {})));
-});
-
-// The worker is not allowed to trust the client. A page cached before this phase still posts
-// `{facts, doc}` with the whole conversation in it; the wall has to hold for that request too.
-await blok('sunucu: eski istemci ham sohbet yollarsa', async () => {
-  const env = makeEnv();
-  const bilet = await biletAl(env);
-  const n = groqCagrilari().length;
-  const res = await call('/api/spiker', env, { token: bilet, body: { facts: FACTS, doc: DOC } });
-  const d = await res.json();
-  ok('eski govde hala 200 (eski sayfa kirilmiyor)', res.status === 200, `status ${res.status}`);
-  ok('eski govde de groq a ulasti', groqCagrilari().length === n + 1);
-
-  const cagri = groqCagrilari().at(-1);
-  const iz = sohbetIzi(cagri.govde);
-  ok('ham doc yollansa bile groq a tek kelime gitmedi', iz.length === 0, iz.join(', '));
-  const yuk = groqYuku(cagri);
-  ok('eski govdeden turetilen yukte metin alani = 0', yuk && metinAlanlari(yuk).length === 0,
-    JSON.stringify(metinAlanlari(yuk || {})));
-  ok('eski govdeden sayimlar dogru turetildi',
-    yuk && yuk.toplam_mesaj === 6 && yuk.okuma_sayisi === 3 && yuk.red_bayrak === 1, JSON.stringify(yuk));
-  ok('cevapta uydurma alinti yok', !d.spiker?.gozden_kacanlar, JSON.stringify(d.spiker));
-  ok('cevapta mesaj bazli okuma yok', !d.spiker?.okumalar, JSON.stringify(d.spiker));
-});
-
-// The same wall, asked of the field a careless future client is most likely to add.
-await blok('sunucu: olgu icine mesaj sokusturulursa', async () => {
-  const env = makeEnv();
-  const bilet = await biletAl(env);
-  const n = groqCagrilari().length;
-  await call('/api/spiker', env, {
-    token: bilet,
-    body: { olgu: { toplam_mesaj: 6, ilk_mesaj: 'seni ozledim gercekten', son_mesaj: 'yogunum simdi' } },
-  });
-  ok('bir groq cagrisi oldu', groqCagrilari().length === n + 1);
-  const cagri = groqCagrilari().at(-1);
-  const iz = sohbetIzi(cagri.govde);
-  ok('sokusturulan mesaj alanlari sunucuda dusuruldu', iz.length === 0, iz.join(', '));
-  const yuk = groqYuku(cagri);
-  ok('geriye sadece sayi kaldi', yuk && metinAlanlari(yuk).length === 0 && yuk.toplam_mesaj === 6,
-    JSON.stringify(yuk));
-});
-
-// ---- 2b. the enum slots: the server checks the VALUE, not the length ---------------------------
+// ---- 3b. the enum slots: the server checks the VALUE, not the length ---------------------------
 //
-// Before this, a string field only had to look like a key: up to forty characters, no whitespace.
-// Twenty-four such slots is roughly 960 bytes per request that nothing on the server ever read,
-// and three routes carried it — two into the Groq prompt, one into a KV row with a 180-day life.
-// The real client only ever put engine enums there, which is exactly why nobody noticed.
+// A string field used to only have to look like a key: up to forty characters, no whitespace.
+// Twenty-four such slots is roughly 960 bytes per request that nothing on the server ever read, and
+// the routes carried it into the Groq prompt and into a KV row with a 180-day life. The real client
+// only ever put engine enums there, which is exactly why nobody noticed.
 //
 // The token below is not a message, on purpose. The point is not "is this prose?" but "did the
-// server accept a value it has no list for?". Each of the three routes is measured on its own,
-// and each one is paired with the legitimate value, so a gate that simply drops everything fails.
+// server accept a value it has no list for?". Each route is measured on its own and paired with the
+// legitimate value, so a gate that simply drops everything fails.
 
 const KACAK = 'zurnabalik_kanarya_7719';
 
-await blok('enum yuvasi 1/3: hukum_tur, tek token (spiker -> groq)', async () => {
-  const env = makeEnv();
-  const bilet = await biletAl(env);
-  const n = groqCagrilari().length;
-  await call('/api/spiker', env, {
-    token: bilet, body: { olgu: { hukum_tur: KACAK, toplam_mesaj: 6, senin_sorun: 2 } },
-  });
-  ok('groq yine de arandi (sadece o alan dustu)', groqCagrilari().length === n + 1);
-  const cagri = groqCagrilari().at(-1);
-  ok('kacak deger groq a ulasmadi', !cagri.govde.includes(KACAK), cagri.govde.slice(0, 400));
-  const yuk = groqYuku(cagri);
-  ok('hukum_tur alani yukten tamamen dustu', yuk && !('hukum_tur' in yuk), JSON.stringify(yuk));
-  ok('ayni istekteki sayilar hala gidiyor', yuk && yuk.toplam_mesaj === 6, JSON.stringify(yuk));
-});
-
-await blok('enum yuvasi 1/3 karsiti: gercek hukum degeri geciyor', async () => {
-  const env = makeEnv();
-  const bilet = await biletAl(env);
-  await call('/api/spiker', env, { token: bilet, body: { olgu: { hukum_tur: 'tense', toplam_mesaj: 6 } } });
-  const yuk = groqYuku(groqCagrilari().at(-1));
-  ok('listedeki deger gecti', yuk && yuk.hukum_tur === 'tense', JSON.stringify(yuk));
-});
-
-await blok('enum yuvasi 2/3: degisenler, virgullu liste (zaman -> groq)', async () => {
+await blok('enum yuvasi 1/2: degisenler, virgullu liste (zaman -> groq)', async () => {
   const env = makeEnv();
   const bilet = await biletAl(env);
   const n = groqCagrilari().length;
@@ -343,7 +214,7 @@ await blok('enum yuvasi 2/3: degisenler, virgullu liste (zaman -> groq)', async 
   ok('parcali kacak da gecmedi', !cagri.govde.includes('7719'), cagri.govde.slice(0, 400));
 });
 
-await blok('enum yuvasi 2/3 karsiti: gercek kavram listesi geciyor', async () => {
+await blok('enum yuvasi 1/2 karsiti: gercek kavram listesi geciyor', async () => {
   const env = makeEnv();
   const bilet = await biletAl(env);
   await call('/api/zaman', env, {
@@ -362,7 +233,7 @@ await blok('enum yuvasi 2/3 karsiti: gercek kavram listesi geciyor', async () =>
     !c2.govde.includes(KACAK) && !c2.govde.includes('degisenler'), c2.govde.slice(0, 400));
 });
 
-await blok('enum yuvasi 3/3: hukum, KV yolu (itiraz -> 180 gunluk satir)', async () => {
+await blok('enum yuvasi 2/2: hukum, KV yolu (itiraz -> 180 gunluk satir)', async () => {
   const env = makeEnv();
   const bilet = await biletAl(env);
   const res = await call('/api/itiraz', env, {
@@ -402,22 +273,23 @@ await blok('sunucu: itiraz bagisi KV ye ne yaziyor', async () => {
     && yazimlar[0].opts.expirationTtl <= 60 * 60 * 24 * 366, JSON.stringify(yazimlar[0].opts));
 });
 
-// ---- 3. the model may not put back what the wall took out -------------------------------------
-
-await blok('cikti duvari', async () => {
+// The spiker sends the chat now, and that is the point. What it must NOT do is leave a trace: a
+// route that forwards a conversation and also writes it somewhere is a route that stores it.
+await blok('sunucu: spiker sohbeti hicbir yere yazmiyor', async () => {
   const env = makeEnv();
   const bilet = await biletAl(env);
-  const res = await call('/api/spiker', env, { token: bilet, body: { olgu: spikerOlgu(FACTS) } });
-  const d = await res.json();
-  const cikti = JSON.stringify(d.spiker);
-  const degerler = Object.values(d.spiker).filter((v) => typeof v === 'string');
-  ok('ciktida rakam yok', !/[0-9]/.test(cikti), cikti);
-  ok('ciktida tirnakli alinti yok', degerler.every((v) => !/["“”«»]/.test(v)), cikti);
-  ok('modelin yolladigi okumalar ve alintili gozlemler dusuruldu',
-    !cikti.includes('bunu yazmamaliydi') && !cikti.includes('tek tarafli'), cikti);
-  ok('cikti alanlari sadece dort cumle',
-    Object.keys(d.spiker).sort().join(',') === 'denge_line,kapanis,sinyal_reason,ton_line',
-    Object.keys(d.spiker).join(','));
+  disCagrilar.push({ u: 'sinir', govde: '' });
+  const res = await call('/api/spiker', env, { token: bilet, body: { sohbet: DOC, onay: true } });
+  // The fake Groq above returns the time flow's plain-text answer, which is not valid JSON for this
+  // route, so a 502 is expected here. The output filter is measured in train/llm_yol_check.mjs; the
+  // question in THIS block is what was written while the request was being served.
+  ok('spiker istegi islendi (200 ya da 502, cokme degil)',
+    res.status === 200 || res.status === 502, `status ${res.status}`);
+  const yazilanlar = JSON.stringify(env.CORPUS.writes) + JSON.stringify(env.RATE_LIMIT.writes);
+  ok('spiker cagrisindan sonra KV de sohbetten tek kelime yok',
+    sohbetIzi(yazilanlar).length === 0, sohbetIzi(yazilanlar).join(', '));
+  ok('corpus namespace ine hicbir sey yazilmadi', env.CORPUS.writes.length === 0,
+    env.CORPUS.writes.map((w) => w.key).join(', '));
 });
 
 // ---- 4. the page and the code have to say the same thing --------------------------------------
@@ -457,7 +329,7 @@ await blok('gizlilik iddiasi kodla ayni seyi soyluyor', async () => {
   // The gate's own blind spot, measured rather than asserted: the same word in capitals has to be
   // found by the scanner this file actually uses, and has to be MISSED by the plain call it used
   // to use. If both find it, this normalisation is not doing anything and should not be trusted.
-  const ORNEK = 'Mesajların GENELLİKLE cihazından çıkmaz.';
+  const ORNEK = 'Sohbetin metni GENELLİKLE buluta gider.';
   ok('turkce buyuk harf: GENELLİKLE yakalaniyor', kacamakBul(ORNEK, KACAMAK).includes('genellikle'),
     JSON.stringify(kacamakBul(ORNEK, KACAMAK)));
   ok('duz toLowerCase() bunu KACIRIYOR (yani duzeltme gercekten gerekli)',
@@ -473,26 +345,38 @@ await blok('gizlilik iddiasi kodla ayni seyi soyluyor', async () => {
     ok(`${sayfa} icinde kacamak kelime yok`, bulunan.length === 0, bulunan.join(', '));
   }
 
-  ok('gizlilik metni iddiayi kosulsuz kuruyor', g.includes('Mesajlarının metni cihazından çıkmaz.'));
+  // The claim itself. It is the OPPOSITE of the one this file used to enforce, and it has to be
+  // made without a hedge and without a euphemism: the visitor is told the text is sent, told who
+  // reads it, and told how long it is kept.
+  ok('gizlilik metni artik "cihazindan cikmaz" demiyor',
+    !g.includes('Mesajlarının metni cihazından çıkmaz.'), 'eski iddia duruyor');
+  ok('gizlilik metni gonderimi kosulsuz kuruyor',
+    g.includes('o sohbetin metni buluta gönderilir'), 'acik cumle yok');
+  ok('gizlilik metni onay yoksa gitmedigini de soyluyor',
+    /Onay vermezsen tek karakter gitmez/.test(g), 'onay cumlesi yok');
+  ok('gizlilik metni saklama suresini sayiyla veriyor',
+    /sıfır gün/.test(g) && /180 gün/.test(g) && /400 gün/.test(g), 'sure yok');
+  ok('gizlilik metni saglayiciyi adiyla soyluyor', /Groq/.test(g) && /Llama/.test(g), 'saglayici yok');
   ok('gizlilik metni artik olmayan bir e-postaya atif yapmiyor',
     !/yukarıdaki e-posta|e-posta atman/i.test(g));
   ok('KVKK basvuru kanali sayfada var',
     g.includes('https://github.com/nosey-dewdrop/seviyorsevmiyor/issues'));
 
-  // The four lines this phase was opened on: each one is a claim, and each claim now has to be
-  // true of the code sitting next to it.
-  ok('worker doc u KV ye yazmiyor', !/doc,\s*$/m.test(w) && !/\bdoc:\s*doc\b/.test(w), 'worker.js');
-  ok('worker istek govdesinden doc okumuyor', !/body\.doc|b\.doc\b/.test(w.replace(/^\s*\/\/.*$/gm, '')),
+  // Each claim now has to be true of the code sitting next to it.
+  ok('worker sohbeti KV ye yazmiyor', !/put\([^)]*sohbet/.test(w), 'worker.js');
+  ok('worker itiraz govdesinden doc okumuyor', !/body\.doc|b\.doc\b/.test(w.replace(/^\s*\/\/.*$/gm, '')),
     'worker.js');
-  ok('wrangler artik icerik saklamadigini dogru gerekceyle soyluyor',
-    t.includes('No message text reaches this worker at all') && !t.includes('no content is ever stored here'),
+  ok('wrangler artik metnin geldigini ve saklanmadigini dogru gerekceyle soyluyor',
+    t.includes('Message text DOES reach this worker now')
+    && t.includes('It is never written here')
+    && !t.includes('No message text reaches this worker at all'),
     'wrangler.toml');
 });
 
 // The privacy claim is not only on the privacy page. The most-read copy of it is the consent
 // checkbox, and it is read at the exact moment the visitor agrees to something — so a stale
-// sentence there is worse than a stale sentence anywhere else. It used to say the chat is uploaded
-// while four other lines on the same page said the chat never leaves.
+// sentence there is worse than a stale sentence anywhere else. It used to say only counts are sent
+// while the code was about to start sending the whole conversation.
 await blok('onay aninda soylenen cumle de kodla ayni', async () => {
   const h = oku('web/index.html');
   const u = oku('web/js/ui.js');
@@ -500,19 +384,29 @@ await blok('onay aninda soylenen cumle de kodla ayni', async () => {
   const kutu = h.match(/id="cloudConsentBox"[^]*?<\/label>/);
   ok('bulut onay kutusu bulundu', !!kutu);
   const metin = kutu ? kutu[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
-  ok('onay kutusu sohbetin gonderildigini soylemiyor',
-    !/bu sohbet[,]? .*gönderilir/.test(metin) && !/sohbet.*buluta gönderilir/.test(metin), metin);
-  ok('onay kutusu ne gittigini soyluyor', /sayım/.test(metin) && /mesajların gitmez/.test(metin), metin);
+  ok('onay kutusu artik "yalnizca sayimlar gider" demiyor',
+    !/yalnızca sayımlar/.test(metin) && !/mesajların gitmez/.test(metin), metin);
+  ok('onay kutusu metnin gittigini ACIKCA soyluyor',
+    /sohbetin metni buluta gider/.test(metin), metin);
+  ok('onay kutusu isaretlenmezse gitmedigini de soyluyor',
+    /işaretlemezsen tek karakter gitmez/.test(metin), metin);
+  ok('onay kutusu saklanmadigini soyluyor', /saklanmaz/.test(metin), metin);
 
-  // the page's own four unconditional claims (description, og, twitter, schema) have to survive
-  // this edit: the checkbox was changed BECAUSE it disagreed with them, so removing them instead
-  // would satisfy "the page is consistent" the wrong way round.
-  const iddia = (h.match(/mesajların cihazından çıkmaz/g) || []).length;
-  ok('sayfa dort yerde hala mesajin cikmadigini soyluyor', iddia >= 4, String(iddia));
+  // the page's own unconditional claims (description, og, twitter, schema) had to be rewritten too:
+  // the checkbox was changed BECAUSE it disagreed with them, so leaving the four in place would
+  // satisfy "the page is consistent" the wrong way round.
+  ok('sayfada eski iddia hicbir yuzeyde kalmadi',
+    !/mesajların cihazından çıkmaz/.test(h), 'eski iddia duruyor');
+  const yeniIddia = (h.match(/sohbetin metni buluta gider/g) || []).length;
+  ok('sayfa en az dort yerde metnin gittigini soyluyor', yeniIddia >= 4, String(yeniIddia));
 
-  // the donation success line described deleting names from a chat that is no longer sent
+  // the donation success line describes the donation, which really is numbers only
   ok('bagis basari metni artik isim silmeyi onermiyor', !u.includes('isim geçiyorsa'), 'ui.js');
   ok('bagis basari metni ne gittigini soyluyor', u.includes('giden şey sohbetin değil'), 'ui.js');
+  // the card is what gets screenshotted, so its footer cannot say "mesajlar hiçbir yere gitmedi"
+  // on a reading the cloud wrote
+  ok('kart dipnotu bulutlu okumada dogru cumleyi yaziyor',
+    u.includes('yorumu onayınla bulut okudu'), 'ui.js kart dipnotu eski');
 
   // copy law: no em dash, questions end in "?"
   const yeni = [metin, ...u.split('\n').filter((l) => l.includes('giden şey sohbetin değil'))].join(' ');
@@ -590,11 +484,15 @@ await blok('kapali listeler motorun sozlugunden dogrulaniyor', async () => {
     'web/js/api.js': listeCikar(oku('web/js/api.js'), 'ENUM_DEGERLER'),
     'backend/worker.js': listeCikar(oku('backend/worker.js'), 'ENUM_DEGERLER'),
   };
-  const beklenen = { hukum: 'hukum', hukum_tur: 'hukum', karar: 'karar', flort_karar: 'karar' };
+  // hukum_tur / flort_karar are gone with the spiker payload that used them. A list nothing sends
+  // is a list nobody maintains, so the two remaining slots are the two /api/itiraz really posts.
+  const beklenen = { hukum: 'hukum', karar: 'karar' };
 
   for (const [dosya, liste] of Object.entries(listeler)) {
     ok(`${dosya} ENUM_DEGERLER okunabildi`, !!liste, String(liste));
     if (!liste) continue;
+    ok(`${dosya} artik olu enum yuvasi tasimiyor`,
+      !('hukum_tur' in liste) && !('flort_karar' in liste), Object.keys(liste).join(', '));
     for (const [alan, kaynak] of Object.entries(beklenen)) {
       const mevcut = liste[alan] || [];
       const eksik = sozluk[kaynak].filter((v) => !mevcut.includes(v));

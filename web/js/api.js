@@ -1,21 +1,32 @@
-// Spiker client. Sends the ENGINE's verdict and counts — numbers only. The chat text never
-// leaves this file's caller: it is turned into a flat table of counts here and the counts are
-// what travels. Any failure returns null; the on-device template lines are always the floor, so
-// the product never breaks offline.
+// API client.
 //
-// This is the file the privacy claim rests on. "mesajların cihazından çıkmaz" is a statement
-// about the request body, so every request body built below is built from numbers and short enum
-// keys, and train/bulut_check_eski.mjs measures the bodies rather than trusting this comment.
+// THE OLD FLOW SENDS THE CONVERSATION NOW. That is the product owner's call (30 Ağu): the
+// on-device counter was inventing verdicts out of word counts, and a model handed fifteen numbers
+// can only write templates. So /api/spiker receives the chat itself and reads it.
 //
-// Every call that costs money now carries a ticket: the page solves an invisible Turnstile
-// challenge, the worker verifies it server side and hands back a five-minute HMAC ticket. The
-// widget by itself protects nothing, so the ticket is what the worker checks.
+// What replaced the old wall is a CONSENT gate, and it is the only thing standing between the
+// conversation and the network: spikerRead() refuses to build a request body at all unless the
+// caller passes onay === true, which is the state of the checkbox the visitor ticked. No consent,
+// not one character. train/llm_yol_check.mjs measures that by mutating the check away and watching
+// the chat appear in the outgoing body.
+//
+// The time flow (zamanBulut.js) is unchanged: it still sends derived numbers only, and
+// train/bulut_check.mjs still measures it.
+//
+// Tickets: /api/zaman and /api/itiraz spend a Turnstile-backed ticket. /api/spiker asks for one
+// only when a site key is configured — with TURNSTILE_SITEKEY empty there is no challenge to
+// solve, so demanding a ticket would close the route instead of protecting it. The worker follows
+// the same rule from the other side (TURNSTILE_SECRET unset => no ticket demanded), and origin
+// allowlisting plus the per-IP and global quotas stay on either way.
 import { API_BASE } from './config.js?v=75';
 import { numericFeatures } from './features.js?v=75';
 
 // Public site key (NOT a secret — the secret half lives in wrangler as TURNSTILE_SECRET).
 // Cloudflare dash > Turnstile > add widget (Invisible) > copy the site key here.
 const TURNSTILE_SITEKEY = '';
+
+// Fill the key in and the ticket gate turns itself on, here and on the worker, with no other edit.
+export const BILET_GEREKLI = TURNSTILE_SITEKEY !== '';
 const TURNSTILE_JS = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 // Counter pings are cheap and content-free, so they do not spend a ticket.
@@ -135,15 +146,11 @@ export async function biletAl() {
 // Callers drop it so the next attempt solves a fresh challenge instead of replaying a bad ticket.
 export function biletDusur() { bilet = null; }
 
-// ---- the wall: chat text in, numbers out -----------------------------------------------------
+// ---- the donation payload: still numbers only -------------------------------------------------
 //
-// Both cloud routes of the old flow used to carry the conversation itself. They now carry a flat
-// object of counts built here. Two rules, both enforced by construction rather than by review:
-//
-//   1. an allowlist of field names. a new field cannot appear in the payload by accident, because
-//      only the names written below are ever read out of the report.
-//   2. every value is a number, a boolean, or a short enum key with no whitespace. a message is
-//      prose, and prose cannot survive that filter.
+// /api/itiraz is a different promise from /api/spiker and keeps its old shape. The spiker reads a
+// chat once and forgets it; a donated row is written into KV and lives for months, so what is
+// donated stays the twelve numbers the model actually trains on.
 
 // Rounded to two decimals so a float cannot smuggle a long tail of digits.
 function sayi(v) {
@@ -155,9 +162,7 @@ function sayi(v) {
 // worker.js holds the identical lists, because the server may not trust this file to have run.
 const ENUM_DEGERLER = {
   hukum: ['flirty', 'friendly', 'cold', 'tense', 'onesided'],
-  hukum_tur: ['flirty', 'friendly', 'cold', 'tense', 'onesided'],
   karar: ['var', 'yok', 'tek'],
-  flort_karar: ['var', 'yok', 'tek'],
 };
 function anahtar(alan, v) {
   if (typeof v !== 'string') return null;
@@ -165,47 +170,6 @@ function anahtar(alan, v) {
   if (!izin) return null;
   const t = v.trim();
   return izin.includes(t) ? t : null;
-}
-function say(v) { return Array.isArray(v) ? v.length : null; }
-
-// Drop every field the filters above rejected, so the payload has no null holes to inspect.
-function temizle(obj) {
-  const out = {};
-  for (const [k, v] of Object.entries(obj)) if (v !== null && v !== undefined) out[k] = v;
-  return out;
-}
-
-/**
- * The engine report (app.js spikerFacts) minus every string that came from the conversation.
- * `okumalar` carries the raw message text and `bayraklar`/`denge` carry generated sentences, so
- * those are reduced to counts: the spiker is told HOW MANY readings and flags there are, never
- * what anyone wrote.
- */
-export function spikerOlgu(facts) {
-  const f = facts && typeof facts === 'object' ? facts : {};
-  const h = f.hukum || {};
-  const fl = f.flort || {};
-  const s = f.sayim || {};
-  const bayraklar = Array.isArray(f.bayraklar) ? f.bayraklar : [];
-  // flag kinds are counted, not carried, so this compares rather than sanitises
-  const tur = (t) => bayraklar.filter((b) => b && b.tur === t).length;
-  return temizle({
-    hukum_tur: anahtar('hukum_tur', h.tur),
-    flort_karar: anahtar('flort_karar', fl.karar),
-    flort_yuzde: sayi(fl.yuzde),
-    sende_yuzde: sayi(fl.sende_yuzde),
-    onda_yuzde: sayi(fl.onda_yuzde),
-    toplam_mesaj: sayi(s.toplam_mesaj),
-    senin_mesajin: sayi(s.senin_mesajin),
-    onun_mesaji: sayi(s.onun_mesaji),
-    senin_sorun: sayi(s.senin_sorun),
-    onun_sorusu: sayi(s.onun_sorusu),
-    red_flag_turu: sayi(s.red_flag_turu),
-    green_flag: sayi(s.green_flag),
-    okuma_sayisi: say(f.okumalar),
-    red_bayrak: tur('red'),
-    green_bayrak: tur('green'),
-  });
 }
 
 /**
@@ -249,25 +213,49 @@ export async function itirazGonder(doc, hukum, karar) {
   } catch { return false; }
 }
 
-// The caller still hands over the conversation as a second argument; it is deliberately not read.
-// Removing the parameter would only move the question to app.js, which this phase may not touch —
-// so the fact that nothing here consumes it is the thing the gate measures.
-export async function spikerRead(facts) {
+// ---- /api/spiker: the conversation, and the consent gate in front of it ----------------------
+
+// A ceiling on what one reading may cost, in characters. The worker refuses anything larger, so
+// this is the polite half of the same limit rather than a second policy.
+export const SOHBET_MAKS = 12_000;
+
+/**
+ * Ask the cloud to read this conversation.
+ *
+ * @param {{sohbet: string, onay: boolean}} istek
+ *   sohbet — the chat, "SEN:" / "O:" per line.
+ *   onay   — the consent checkbox. MUST be exactly true.
+ *
+ * THE CONSENT GATE IS THE LINE BELOW. It is not a formality and it is not repeated anywhere else
+ * on the client: if it is removed, the conversation goes out. train/llm_yol_check.mjs removes it
+ * on purpose and fails if the chat does not then appear in the request body.
+ */
+export async function spikerRead(istek) {
+  const sohbet = istek && typeof istek.sohbet === 'string' ? istek.sohbet : '';
+  const onay = !!istek && istek.onay === true;
+  if (!onay) return null;                 // RIZA KAPISI — onay yoksa gövde hiç kurulmaz
+  if (!sohbet.trim()) return null;
+
   const ctl = new AbortController();
-  const t = setTimeout(() => ctl.abort(), 7000);
+  const t = setTimeout(() => ctl.abort(), 15000);
   try {
-    const token = await biletAl();
-    if (!token) return null;
+    const headers = { 'content-type': 'application/json' };
+    if (BILET_GEREKLI) {
+      const token = await biletAl();
+      if (!token) return null;
+      headers['x-app-token'] = token;
+    }
     const res = await fetch(`${API_BASE}/api/spiker`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-app-token': token },
-      body: JSON.stringify({ olgu: spikerOlgu(facts) }),
+      headers,
+      body: JSON.stringify({ sohbet: sohbet.slice(0, SOHBET_MAKS), onay: true }),
       signal: ctl.signal,
     });
     if (res.status === 403) bilet = null;
     if (!res.ok) return null;
     const data = await res.json().catch(() => null);
-    return data && data.spiker ? data.spiker : null;
+    const sp = data && data.spiker;
+    return sp && Array.isArray(sp.satirlar) && sp.satirlar.length ? sp : null;
   } catch {
     return null;
   } finally {

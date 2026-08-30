@@ -325,6 +325,13 @@ baslik('4. sizinti kapisi refs/ altinin tamamina bakiyor mu');
 
 const refOnce = git(['for-each-ref', '--format=%(refname) %(objectname)', 'refs/']).trim();
 
+// The working tree as it was BEFORE this gate ran. The old check compared against a hand-written
+// list of file names, which meant it went red every time the repo had unrelated work in progress
+// and it went green if a mutation leaked into a file that happened to be on the list. The question
+// is not "which files are dirty" but "did THIS gate leave anything behind", so it is asked as a
+// before/after difference.
+const agacOnce = git(['status', '--porcelain']);
+
 // A synthetic dirty commit, built with plumbing so no branch, no index and no working file is
 // touched. Its author is the noreply identity on purpose: the finding has to come from the
 // CONTENT, so the metadata rule cannot be what trips the gate.
@@ -439,8 +446,8 @@ await blok('enum turetme', async () => {
   // MUTATION A: the client list goes stale against the engine's tone vocabulary.
   const a = await mutasyon('web/js/api.js',
     (src) => src.replace(
-      "  hukum_tur: ['flirty', 'friendly', 'cold', 'tense', 'onesided'],",
-      "  hukum_tur: ['flirty', 'friendly', 'cold', 'tense'],"),
+      "  hukum: ['flirty', 'friendly', 'cold', 'tense', 'onesided'],",
+      "  hukum: ['flirty', 'friendly', 'cold', 'tense'],"),
     async () => kos('node', ['train/bulut_check_eski.mjs']));
   ok('MUTASYON A: api.js listesinden bir ton dusunce KIRMIZI', !a.ok, `exit ${a.kod}`);
   ok('kirmizi satir eksik degeri adiyla soyluyor',
@@ -469,20 +476,21 @@ baslik('calisma agaci');
 rmSync(tmp, { recursive: true, force: true });
 
 await blok('temizlik', async () => {
-  const kirli = git(['status', '--porcelain'])
-    .split('\n')
-    .map((s) => s.trim())
-    .filter(Boolean)
-    // .rabadon is machine-local session state, not this phase's work
-    .filter((s) => !s.includes('.rabadon/'));
-  console.log(kirli.length ? kirli.map((s) => `     ${s}`).join('\n') : '     (bu fazin dosyalari disinda degisiklik yok)');
-  const beklenen = [
-    'backend/worker.js', 'train/sizinti_check.mjs', 'train/bulut_check_eski.mjs',
-    'train/parity_negatif_check.mjs', 'train/tr_kucult.mjs', 'train/kapi_saglik_check.mjs',
-  ];
-  const beklenmeyen = kirli.filter((s) => !beklenen.some((b) => s.endsWith(b)));
+  // .rabadon is machine-local session state written by an outside tool while this runs, so it is
+  // dropped from BOTH snapshots rather than excused in one of them.
+  const suz = (metin) => metin.split('\n').map((x) => x.trim()).filter(Boolean)
+    .filter((x) => !x.includes('.rabadon/'));
+  const once = suz(agacOnce);
+  const simdi = suz(git(['status', '--porcelain']));
+  const yeni = simdi.filter((x) => !once.includes(x));
+  const kaybolan = once.filter((x) => !simdi.includes(x));
+  console.log(once.length
+    ? `     kapi baslarken zaten kirli olan ${once.length} dosya vardi, bunlar sayilmiyor`
+    : '     kapi temiz bir agacta kostu');
+  for (const x of [...yeni, ...kaybolan]) console.log(`     ${x}`);
   ok('kapi hicbir dosyayi kirli birakmadi (mutasyonlarin hepsi geri kondu)',
-    beklenmeyen.length === 0, beklenmeyen.join(', '));
+    yeni.length === 0 && kaybolan.length === 0,
+    [...yeni.map((x) => `yeni: ${x}`), ...kaybolan.map((x) => `kayboldu: ${x}`)].join(', '));
 });
 
 console.log('');

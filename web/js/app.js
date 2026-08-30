@@ -1,5 +1,5 @@
 // Flow: input → parse → who-is-me → on-device engine (verdict + counts = the law) →
-// optional Groq/Llama spiker (fresh wording + gözden kaçanlar, consent-gated) → reveal.
+// optional Groq/Llama spiker (reads the CONVERSATION, consent-gated) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
 import { loadModel, scoreConversation } from './model.js?v=75';
 import { parseChat, toDoc } from './parse.js?v=75';
@@ -100,36 +100,18 @@ function renderWhois() {
 }
 
 // ---- analyze ----
-// Facts sent to the spiker: EXPLICIT named numbers, never "5-3" strings — Llama once read
-// "mesaj 5-3" as "3 of 5 messages"; ambiguity is how numbers get bent. Fields are the law.
-function spikerFacts(r) {
-  const n = r.nasil || {};
-  return {
-    hukum: { tur: r.genel_ton.key, etiket: r.genel_ton.label, cumle: r.genel_ton.line, gerekce: r.genel_ton.why || null },
-    flort: { karar: r.flort_sinyali.karar, yuzde: r.flort_sinyali.score, sende_yuzde: r.flort_sinyali.me, onda_yuzde: r.flort_sinyali.other },
-    sayim: {
-      toplam_mesaj: n.msgs, senin_mesajin: n.mine, onun_mesaji: n.theirs,
-      senin_sorun: n.questionsMine, onun_sorusu: n.questionsTheirs,
-      red_flag_turu: n.redKinds, green_flag: n.greens,
-    },
-    denge: { cumle: r.ilgi_dengesi.line },
-    okumalar: r.mesaj_okumalari.map((m) => ({ mesaj: m.text, okuma: m.read })),
-    bayraklar: r.bayraklar.map((f) => ({ tur: f.type, baslik: f.title })),
-    kapanis: r.kapanis,
-  };
+// What the spiker is given: the conversation, labelled the way the reveal screen labels it, so the
+// model and the reader are looking at the same two names. Nothing is summarised on the way out;
+// summarising was the old design and it is what produced template sentences.
+function spikerDoc(messages, me) {
+  return messages.map((m) => `${m.speaker === me ? 'SEN' : 'O'}: ${m.text}`).join('\n');
 }
 
-// The spiker may only restyle wording and add evidence-quoted observations; every merged
-// field keeps its template floor if the cloud returns nothing.
+// The spiker ADDS a short reading; it does not overwrite the engine's lines. The old merge rewrote
+// ton_line, sinyal_reason, denge_line, every per-message reading and the closing sentence, which is
+// how one verdict ended up stated three times in different words on the same screen.
 function mergeSpiker(r, sp) {
-  if (sp.ton_line) r.genel_ton.line = sp.ton_line;
-  if (sp.sinyal_reason) r.flort_sinyali.reason = sp.sinyal_reason;
-  if (sp.denge_line) r.ilgi_dengesi.line = sp.denge_line;
-  if (Array.isArray(sp.okumalar)) {
-    r.mesaj_okumalari.forEach((m, i) => { if (sp.okumalar[i]) m.read = sp.okumalar[i]; });
-  }
-  if (sp.kapanis) r.kapanis = sp.kapanis;
-  r.gozden_kacanlar = sp.gozden_kacanlar || [];
+  r.spikerSatirlar = Array.isArray(sp.satirlar) ? sp.satirlar : [];
   r.spiker = true;
 }
 
@@ -144,11 +126,15 @@ goBtn.addEventListener('click', async () => {
     const r = buildReveal({ toneResult, messages: parsed.messages, me: parsed.me });
     ping('analiz');
     if (consentBox.checked && cloudConsentBox.checked) {
-      goBtn.textContent = 'spiker yazıyor…';
-      // `if (sp)` alone was a silent default: the box was ticked, the cloud never answered, and
-      // the reveal showed template lines with nothing on screen admitting it. spikerDene names
-      // the cause and playReveal prints it.
-      const { sp, sebep } = await spikerDene(spikerFacts(r));
+      goBtn.textContent = 'spiker okuyor…';
+      // The checkbox is read HERE and passed on as `onay`; api.js refuses to build a request body
+      // without it. `if (sp)` alone was a silent default: the box was ticked, the cloud never
+      // answered, and the reveal showed template lines with nothing on screen admitting it.
+      // spikerDene names the cause and playReveal prints it.
+      const { sp, sebep } = await spikerDene({
+        sohbet: spikerDoc(parsed.messages, parsed.me),
+        onay: cloudConsentBox.checked === true,
+      });
       if (sp) { mergeSpiker(r, sp); ping('spiker'); }
       else r.spikerKapali = sebep;
     }

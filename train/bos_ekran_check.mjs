@@ -263,14 +263,32 @@ await blok('bulutCagir sebebi gercekten ayirt ediyor', async () => {
 
 baslik('3. index.html: canli spiker isaretlendi, bulut kapali');
 
+const ISTEK = { sohbet: 'SEN: selam\nO: hmm', onay: true };
+
 await blok('spikerDene', async () => {
-  const a = await ui.spikerDene({}, { bilet: async () => null, oku: async () => { throw new Error('cagrilmamaliydi'); } });
-  ok('bilet yoksa sebep bilet_yok ve spikerRead cagrilmiyor', a.sp === null && a.sebep === 'bilet_yok',
-    JSON.stringify(a));
-  const b = await ui.spikerDene({}, { bilet: async () => 't', oku: async () => null });
+  // onay yok: the request is never built, and that is its own named cause rather than a silent
+  // fall back to the template lines.
+  const o = await ui.spikerDene({ sohbet: ISTEK.sohbet, onay: false },
+    { biletGerekli: false, oku: async () => { throw new Error('cagrilmamaliydi'); } });
+  ok('onay yoksa sebep onay_yok ve spikerRead cagrilmiyor', o.sp === null && o.sebep === 'onay_yok',
+    JSON.stringify(o));
+  const a = await ui.spikerDene(ISTEK,
+    { biletGerekli: true, bilet: async () => null, oku: async () => { throw new Error('cagrilmamaliydi'); } });
+  ok('bilet gerekliyken bilet yoksa sebep bilet_yok ve spikerRead cagrilmiyor',
+    a.sp === null && a.sebep === 'bilet_yok', JSON.stringify(a));
+  const b = await ui.spikerDene(ISTEK, { biletGerekli: true, bilet: async () => 't', oku: async () => null });
   ok('bilet varken cevap gelmezse sebep ag_hatasi', b.sp === null && b.sebep === 'ag_hatasi', JSON.stringify(b));
-  const c = await ui.spikerDene({}, { bilet: async () => 't', oku: async () => ({ ton_line: 'x' }) });
+  const c = await ui.spikerDene(ISTEK,
+    { biletGerekli: true, bilet: async () => 't', oku: async () => ({ satirlar: ['x'] }) });
   ok('bulut cevap verirse sebep yok', c.sebep === null && !!c.sp, JSON.stringify(c));
+  // sitekey bos: the ticket gate is not asked at all, so the request goes straight out
+  const d = await ui.spikerDene(ISTEK, {
+    biletGerekli: false,
+    bilet: async () => { throw new Error('bilet istenmemeliydi'); },
+    oku: async () => ({ satirlar: ['x'] }),
+  });
+  ok('sitekey bosken bilet hic istenmiyor, istek dogrudan gidiyor', d.sebep === null && !!d.sp,
+    JSON.stringify(d));
 
   const m = ui.SPIKER_SEBEPLER.map((s) => ui.spikerKapaliMetni(s));
   for (const [i, s] of ui.SPIKER_SEBEPLER.entries()) {
@@ -279,14 +297,16 @@ await blok('spikerDene', async () => {
     ok(`${s}: cihazda yazildigini ADIYLA soyluyor`, /cihaz/.test(m[i]) && /şablon/.test(m[i]), m[i]);
     ok(`${s}: genel "hata olustu" cumlesi yok`, yasakBul(m[i]).length === 0, yasakBul(m[i]).join(', '));
   }
-  ok('iki sebep iki ayri cumle', new Set(m).size === m.length);
+  ok('her sebep ayri bir cumle', new Set(m).size === m.length);
   ok('bilinmeyen sebep de sessiz kalmiyor', bosMu(`<p>${ui.spikerKapaliMetni('zzz')}</p>`) === null);
 });
 
 await blok('app.js gercekten bagli', async () => {
   const app = readFileSync(join(REPO, 'web/js/app.js'), 'utf8');
   const uiSrc = readFileSync(join(REPO, 'web/js/ui.js'), 'utf8');
-  ok('app.js spikerDene i kullaniyor', /spikerDene\(spikerFacts\(r\)\)/.test(app), 'cagri yok');
+  ok('app.js spikerDene i sohbet + onay ile cagiriyor',
+    /spikerDene\(\{[^]*?sohbet: spikerDoc\(parsed\.messages, parsed\.me\),[^]*?onay: cloudConsentBox\.checked === true,/.test(app),
+    'cagri yok');
   ok('app.js sessiz dusmuyor: sebebi rapora yaziyor', /r\.spikerKapali = sebep/.test(app), 'atama yok');
   ok('app.js artik ciplak spikerRead cagirmiyor', !/\bspikerRead\(/.test(app), 'hala cagiriyor');
   ok('ui.js sebebi ekrana basiyor', /spikerKapaliMetni\(r\.spikerKapali\)/.test(uiSrc), 'render yok');
