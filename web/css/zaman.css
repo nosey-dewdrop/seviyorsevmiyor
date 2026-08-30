@@ -37,6 +37,11 @@ body {
   letter-spacing: -0.02em;
 }
 .ust-not { color: var(--ink-3); font-size: 13px; }
+/* iki akış arasında sıkışmasın: üstte de altta da eski akışa açık bir dönüş yolu */
+.geri { margin-left: auto; color: var(--ink-2); font-size: 13px; text-decoration: none; }
+.geri::before { content: "[ "; }
+.geri::after { content: " ]"; }
+.geri:hover { color: var(--ink); }
 
 h1 {
   font-size: 30px;

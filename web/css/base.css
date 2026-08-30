@@ -53,6 +53,22 @@ button { font-family: inherit; cursor: pointer; }
 .dev-notu { margin-top: 10px; max-width: 480px; text-align: center; font-family: var(--mono); }
 .dev-notu p { font-size: 13.5px; line-height: 1.5; color: var(--ink-2); margin: 0 0 4px; }
 
+/* ikinci akışın kapısı: ana sayfadan zaman.html'e görünür giriş.
+   kaydırmadan görülsün diye başlığın hemen altında. pill/krem/renk yok:
+   düz metin, üstünde ve altında saç teli çizgi. */
+.akis-gecis {
+  display: block; max-width: 680px; margin: 0 auto 26px; padding: 12px 0;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  font-family: var(--mono); text-align: left; text-decoration: none; color: var(--ink-2);
+}
+.akis-gecis:hover { border-color: var(--line-2); text-decoration: none; }
+.akis-gecis .ag-ad { display: block; font-size: 14px; font-weight: 700; color: var(--ink); }
+.akis-gecis .ag-alt { display: block; margin-top: 4px; font-size: 12px; line-height: 1.55; color: var(--ink-3); }
+.akis-gecis .ag-git { display: block; margin-top: 6px; font-size: 12px; color: var(--ink-2); }
+.akis-gecis .ag-git::before { content: "[ "; }
+.akis-gecis .ag-git::after { content: " ]"; }
+.akis-gecis:hover .ag-git { color: #fff; }
+
 /* kocaman * papatyalar — kenarlarda, sönük, süs (Damla 15 Tem) */
 .papatyalar { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 .papatyalar span { position: absolute; font-family: var(--mono); font-size: 64px; line-height: 1;
