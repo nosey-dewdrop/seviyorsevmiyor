@@ -1500,6 +1500,52 @@ hakem notu: test taklit değil, 4 mutasyonla kırmızı yandığı kanıtlandı.
 bilet olmadan 200 aldı ve Groq'a bir çağrı harcattı. Kartın kullanıcı cümlesi
 o rotada yalan; `zaman.html` canlıdaki ana akış.
 
+## S3.5 · "KAPILAR YALAN SÖYLEMİYOR, KOTA SÖMÜRÜLMÜYOR"
+
+S0 sert durağında beklerken koşabilen tek faz. S4..S14'ün hiçbirine bağlı
+değil, hepsinin altını sağlamlaştırıyor. Beş faz boyunca hakemlerin bulduğu
+ama kendi kartlarının dışında kalan borçlar burada kapanıyor.
+
+**Neden şimdi.** Bu borçların üçü kapıların kendisinde. Kapı yanlış güven
+verirse sonraki her GEÇTİ şüpheli olur; §0.3 gereği hepsi her fazda koşuyor.
+
+```
+1. /api/stats  biletsiz, rate-limit'siz, istek başına 84 KV okuma.
+               Hakem ölçtü: tek IP'den 50 istek = 4200 okuma, sıfır ret.
+               ~1200 istek Cloudflare free-tier günlük 100k kotasını bitirir
+               ve TÜM SİTE ölür. Groq'a dokunmadığı için S2'nin eşiğini
+               kırmamıştı
+2. parity      negatif test sadece Python kolunu sabote ediyor. Python exit 1
+               verince JS kolu hiç koşmuyor; web/js/features.js sapmasında
+               parity_check.mjs'in kırmızı yandığı HİÇ test edilmemiş
+3. sizinti     kapı Türkçe büyük harf körü. GENELLİKLE (U+0130) geçiyor;
+               .toLowerCase() İ'yi i+birleşen nokta olarak açıyor.
+               Aynı körlük bulut_check_eski kaçamak taramasında da var
+4. sizinti     kapı refs/heads/ dışına bakmıyor. refs/backup/* ve
+               refs/original/* kirli geçmişi yerelde taşıyor. Taze klonda
+               sorun yok ama git push --all / --mirror sızdırır
+5. enum listesi motorun sözlüğünden türetilmiyor, elle kopyalanmış. reveal.js
+               TONE_TR'ye yeni ton eklenirse iki liste de bayatlar, kapı yeşil
+               kalır, alan sessizce düşer. Kapı listeyi sözlükten doğrulamalı
+```
+
+**DOKUNULMAZ.** `engine/`, `web/js/time/`, `web/js/app.js`, `web/index.html`,
+`web/gizlilik.html`. Bu faz kapıları ve worker kotasını düzeltir, ürün
+metnine dokunmaz.
+
+```
+KULLANICI CÜMLESİ : (bu faz Damla için) Yeşil yanan kapı yalan söylemiyor,
+                    ve bir yabancı sitemi kota bitirerek kapatamıyor.
+KABUL KOMUTU      : node train/kapi_saglik_check.mjs
+EŞİK              : /api/stats biletsiz veya kotasız çağrılamıyor · JS kolunda
+                    kasıtlı sapmada parity KIRMIZI · GENELLİKLE her iki kapıda
+                    da yakalanıyor · refs/heads dışındaki kirli ref sızıntı
+                    kapısında görünüyor · enum listesi sözlükten doğrulanıyor
+DOKUNULABİLİR     : backend/worker.js, backend/tests/, train/, web/js/api.js
+```
+
+---
+
 ## DEPLOY ÖNCESİ KONTROL LİSTESİ (30 Ağu, ölçülerek çıkarıldı)
 
 Canlı şu an `275afbb`, yerel main 5+ commit ileride. **S2 ve S3'ün tamamı
