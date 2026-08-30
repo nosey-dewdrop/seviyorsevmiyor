@@ -523,9 +523,14 @@ görecek.
 ```
 KULLANICI CÜMLESİ : Ağ sekmesini açtım, giden istekte tek bir mesajım yok.
 KABUL KOMUTU      : node train/bulut_check.mjs && node train/bulut_check_eski.mjs
-EŞİK              : ikisi de yeşil · giden gövdede metin alanı sayısı = 0
+EŞİK              : ikisi de yeşil · giden gövdede metin alanı sayısı = 0 ·
+                    ürünün HER yüzeyindeki gizlilik cümlesi kodla uyuşuyor
+                    (onay kutusu dahil, kullanıcının onay verdiği an dahil) ·
+                    enum yuvasının İÇERİĞİ sunucuda da doğrulanıyor, uzunluk
+                    değil değer kontrolü · KVKK başvuru kanalı çalışıyor
 DOKUNULABİLİR     : web/js/api.js, backend/worker.js, train/,
-                    web/gizlilik.html, backend/wrangler.toml
+                    web/gizlilik.html, backend/wrangler.toml,
+                    web/index.html, web/js/ui.js
 ```
 
 ```
@@ -1494,6 +1499,37 @@ hakem notu: test taklit değil, 4 mutasyonla kırmızı yandığı kanıtlandı.
 `/api/zaman` bilet kapısının DIŞINDA: hakem sadece Origin başlığı uydurarak
 bilet olmadan 200 aldı ve Groq'a bir çağrı harcattı. Kartın kullanıcı cümlesi
 o rotada yalan; `zaman.html` canlıdaki ana akış.
+
+## S3 — Ham metin kapat — KART YANLIŞ (eşik zorlaştırıldı, faz tekrar koşar)
+ölçülen: bulut_check 12 madde + bulut_check_eski 44 madde yeşil, ikisi exit 0 ·
+hakemin kendi probe'u: 9 kötü niyetli istemci varyantı (doc, facts+doc, text,
+sohbet, messages, olgu içinde uzun string, iç içe nesne) **hepsi sunucuda
+düştü, Groq'a tek kelime gitmedi** · KV'ye yazılan tek satır 12 sayı + hüküm +
+karar, TTL 180 gün · worker LOGS = 0 · 3 mutasyonun 3'ünde kapı kırmızı ·
+gizlilik metnindeki 13 iddianın 13'ü kodla eşleşiyor · kaçamak kelime 0 ·
+KVKK kanalı curl -L 200 · birikimli 10/10
+commit: 5813961
+hakem notu: duvar gerçek, istemciye güvenilmiyor, sunucu tarafı allowlist
+kendi elimle kırılamadı. Ama kart `web/index.html`'i DOKUNULABİLİR listesine
+koymamıştı ve ürünün en çok okunan gizlilik cümlesi tam orada:
+**`index.html:124` onay kutusu hâlâ "bu sohbet, yorum yazılması için buluta
+gönderilir" diyor.** Aynı sayfa satır 7/15/23/37'de tersini söylüyor. Faz,
+tasarımı gereği kendi kullanıcı cümlesini karşılayamıyordu → §0.2 KART YANLIŞ.
+
+### İkinci turda kapatılacak, hakemin bulduğu
+- `web/index.html:124` onay kutusu metni — kullanıcının onay verdiği an
+- `web/js/ui.js:243` bağış başarı metni "isim geçiyorsa bir dahakine silsen
+  iyi olur" — artık metin gitmiyor, cümle yanlış
+- **Enum yuvası kanalı.** `anahtarTemiz` 40 karaktere kadar boşluksuz token
+  kabul ediyor, `olguTemiz` 24 alan geçiriyor. Hakem
+  `{hukum_tur:"zurnabalik_kanarya_7719"}` ile Groq'a ulaştı,
+  `{hukum:"..."}` ile KV'ye 180 gün yazdırdı. Gerçek istemci o yuvalara enum
+  dışında bir şey koymuyor, bugün sızıntı yok — ama sunucu içeriğe bakmıyor,
+  istek başına ~960 bayt. Uzunluk değil DEĞER kontrolü gerekiyor
+- Ölü dal: `app.js:136` `gozden_kacanlar` artık hiç dolmuyor, `ui.js:142`
+  döngüsü her zaman 0 satır basıyor. Boş ekran değil, eksilen bölüm.
+  `app.js:152` hâlâ `spikerDoc(...)` hesaplayıp yolluyor, okunmuyor, ölü hesap
+  → app.js dokunulabilir değil, S4'e
 
 ## S2 — Worker sertleştirme — GEÇTİ (ikinci tur, sıkı eşikle)
 ölçülen: 76/76 kapı yeşil · hakemin kendi probe'u: biletsiz `/api/zaman`,
