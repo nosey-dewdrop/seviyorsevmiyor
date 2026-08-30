@@ -71,6 +71,59 @@ const metaIzinli = new RegExp(konf.metadata_izinli_email ?? '@users\\.noreply\\.
 const birlesikRe = new RegExp(desenler.map((d) => `(?:${d.desen})`).join('|'), 'i');
 // git grep POSIX ERE kullanir: (?: ...) desteklemez, duz grup gerekir. -i is passed as a flag.
 const birlesikEre = desenler.map((d) => `(${d.desen})`).join('|');
+
+// --- turkce buyuk harf, GECMISTE de -------------------------------------
+//
+// `-i` only folds I<->i. It never folds `İ` (U+0130) to `i`, and git grep cannot be taught Turkish
+// casing, so an address written `İLETİSİM@...` in an old commit walked through a green gate: the
+// working-tree scan caught it (desenVurdu normalises), the history scan did not. The pattern is
+// therefore re-emitted with every dotted/dotless variant spelled out.
+//
+// Alternation `(i|İ)`, not a bracket class `[iİ]`: measured, a bracket class holding a multibyte
+// character matches under a UTF-8 locale and silently matches NOTHING under LC_ALL=C, while the
+// alternation holds in C, en_US.UTF-8 and tr_TR.UTF-8 alike. The gate must not depend on the
+// locale it happens to be started with.
+// The dotted capital I is listed twice on purpose: once composed (U+0130) and once decomposed
+// (I + U+0307 COMBINING DOT ABOVE), which is what an NFD-normalised export or a JS toLowerCase()
+// round trip leaves behind. A pattern that only knows the composed form is still half blind.
+const TR_VARYANT = {
+  i: ['i', '\u0130', 'I\u0307'],
+  I: ['I', '\u0131'],
+  ['\u0130']: ['\u0130', 'i', 'I\u0307'],
+  ['\u0131']: ['\u0131', 'I'],
+};
+// Returns the widened pattern and the chars it could NOT widen (inside a bracket expression),
+// so blindness that remains is reported by name instead of being assumed away.
+function trEreGenislet(desen) {
+  let cikti = '';
+  let kacis = false;
+  let koseIcinde = false;
+  const korOlan = new Set();
+  for (const ch of desen) {
+    if (kacis) { cikti += ch; kacis = false; continue; }
+    if (ch === '\\') { cikti += ch; kacis = true; continue; }
+    if (koseIcinde) {
+      cikti += ch;
+      if (ch === ']') koseIcinde = false;
+      else if (TR_VARYANT[ch]) korOlan.add(ch);
+      continue;
+    }
+    if (ch === '[') { cikti += ch; koseIcinde = true; continue; }
+    const v = TR_VARYANT[ch];
+    cikti += v ? `(${v.join('|')})` : ch;
+  }
+  return { ere: cikti, korOlan: [...korOlan] };
+}
+
+const genisletmeler = desenler.map((d) => ({ ad: d.ad ?? d.desen, desen: d.desen, ...trEreGenislet(d.desen) }));
+const birlesikEreTr = genisletmeler.map((g) => `(${g.ere})`).join('|');
+const trGenisletildi = genisletmeler.filter((g) => g.ere !== g.desen).length;
+for (const g of genisletmeler) {
+  if (g.korOlan.length) {
+    hatalar.push(`desen "${g.ad}": kose parantez icindeki ${g.korOlan.join(', ')} turkce genisletilemedi `
+      + '— bu desen GECMISTE turkce buyuk harfe kor. deseni kose parantezsiz yaz.');
+  }
+}
 const vurdu = (metin) => desenVurdu(birlesikRe, metin);
 const adBul = (metin) => {
   const v = desenler
@@ -126,19 +179,33 @@ for (const dal of dallar) {
 not(`metadata: ${metaSayim} commit tarandi (author + committer)`);
 
 // --- 3. tum commit'lerin icerigi ----------------------------------------
-// `-i` so a leak in capitals is still a leak. git grep cannot be taught Turkish casing, so the
-// working-tree scan below (which can, via desenVurdu) is the layer that catches `İ`.
+// Two passes per commit: the plain ERE with `-i` (catches ASCII capitals), and the Turkish-widened
+// ERE (catches `İ` / `ı`, which `-i` never folds). A finding that only the second pass sees is
+// labelled, so "the history scan is Turkish-aware" is something you can read in the output rather
+// than something you have to take on faith.
 function icerikTara(commitler, topla) {
   let vurus = 0;
   for (const sha of commitler) {
-    const cikti = gitSessiz(['grep', '-I', '-i', '-l', '-E', birlesikEre, sha, '--']);
-    if (cikti === null) {
-      topla(`${sha.slice(0, 8)} icerik taranamadi`);
-      continue;
+    const bulunan = new Map(); // dosya yolu -> hangi taramalar buldu
+    let patladi = false;
+    for (const [etiket, ere] of [['ascii', birlesikEre], ['turkce', birlesikEreTr]]) {
+      const cikti = gitSessiz(['grep', '-I', '-i', '-l', '-E', ere, sha, '--']);
+      if (cikti === null) {
+        topla(`${sha.slice(0, 8)} icerik taranamadi (${etiket} taramasi kosmadi)`);
+        patladi = true;
+        continue;
+      }
+      for (const satir of cikti.split('\n').filter(Boolean)) {
+        if (!bulunan.has(satir)) bulunan.set(satir, []);
+        bulunan.get(satir).push(etiket);
+      }
     }
-    for (const satir of cikti.split('\n').filter(Boolean)) {
+    if (patladi) continue;
+    for (const [satir, etiketler] of bulunan) {
       vurus++;
-      topla(`gecmis ${satir}`);
+      // Named on purpose: a hit only the widened pass sees is a leak the old gate was blind to.
+      const not2 = etiketler.includes('ascii') ? '' : ' [yalnizca turkce buyuk harf taramasi buldu]';
+      topla(`gecmis ${satir}${not2}`);
     }
   }
   return vurus;
@@ -147,6 +214,7 @@ function icerikTara(commitler, topla) {
 const commitler = git(['rev-list', ...dallar]).split('\n').filter(Boolean);
 const icerikVurus = icerikTara(commitler, (h) => hatalar.push(h));
 not(`icerik: ${commitler.length} commit tarandi (refs/heads), ${icerikVurus} dosya vurusu`);
+not(`gecmis taramasi: ascii (-i) + turkce buyuk harf varyanti, ${trGenisletildi}/${desenler.length} desen genisletildi`);
 
 // --- 3b. refs/heads disindaki ref'ler: ayri, kirmizi yakmayan uyari -----
 if (digerRefler.length) {

@@ -15,7 +15,9 @@
 //      whole site goes with it.
 //   2. the parity negative test sabotaged the Python arm only, so the JS arm's red light was
 //      never once observed.
-//   3. both leak gates lowercased with JS rules, so Turkish `İ` walked through.
+//   3. both leak gates lowercased with JS rules, so Turkish `İ` walked through — and in the
+//      history pass `git grep -i` never folded `İ` at all, so a leak in Turkish capitals was
+//      visible in the working tree and invisible in every commit.
 //   4. the leak gate read refs/heads only, while refs/backup/* and refs/original/* carry the
 //      dirty history in this folder.
 //   5. the enum allowlists were hand-copied, so the engine could grow a value and both copies
@@ -28,7 +30,7 @@ import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OWN = 'https://nosey-dewdrop.github.io';
@@ -253,15 +255,36 @@ await blok('bulut_check_eski turkce mutasyonu', async () => {
 });
 
 // End to end through the leak gate: a real address written in Turkish capitals, sitting in a
-// tracked file, has to turn sizinti_check red. The pattern is synthetic and lives in a temp file
-// outside the repo, so nothing personal is written anywhere.
+// tracked file, has to turn sizinti_check red. The pattern is synthetic and the pattern FILE lives
+// in a temp dir outside the repo, so nothing personal is written anywhere.
+//
+// The local parts are MINTED AT RUNTIME from random bytes, and that is the whole point. The first
+// version of this gate spelled them out as literals, so once this file was committed the leak gate
+// found its own source and `sizinti_check` went red on a clean tree — the gate was the leak. A
+// working-tree-only fix would not have been enough either: the history pass greps every commit, and
+// the literal is already sitting in an old one. Only a string that exists in no commit, and in no
+// file, can be searched for without the searcher matching itself. Splitting a fixed literal across
+// concatenated fragments would still lose, because the widened history scan reads whole lines from
+// blobs, not from this source. Reading them from a pattern file would only move the literal into a
+// second file that has the same problem the day it is committed.
+//
+// The domain stays `ornek.test`: `.test` is reserved by RFC 6761 and can never resolve, and the
+// bare string `ornek.test` is not a pattern by itself, so it is safe to keep in plain sight.
+const rastgeleYerel = (onek) => onek + randomBytes(6).toString('hex'); // hex: hic `i` icermez
+const ASCII_YEREL = rastgeleYerel('zb');   // saf ASCII kol
+const TR_YEREL = rastgeleYerel('i');       // turkce kol: bas harf `i`, buyugu `İ`
+const ALAN = 'ornek.test';
+const ASCII_ADRES_BUYUK = `${ASCII_YEREL.toUpperCase()}@${ALAN.toUpperCase()}`;
+// Turkish uppercase, done by hand: `'i'.toUpperCase()` is `I` in JS, not `İ`. The rest is hex.
+const TR_ADRES_BUYUK = `İ${TR_YEREL.slice(1).toUpperCase()}@${ALAN.toUpperCase()}`;
+
 const tmp = mkdtempSync(join(tmpdir(), 'kapi-saglik-'));
 const DESEN_DOSYA = join(tmp, 'desenler.json');
 writeFileSync(DESEN_DOSYA, JSON.stringify({
   metadata_izinli_email: '@users\\.noreply\\.github\\.com$',
   desenler: [
-    { ad: 'sentetik adres', desen: 'zurnabalik@ornek\\.test' },
-    { ad: 'sentetik tr adres', desen: 'iletisim@ornek\\.test' },
+    { ad: 'sentetik adres', desen: `${ASCII_YEREL}@ornek\\.test` },
+    { ad: 'sentetik tr adres', desen: `${TR_YEREL}@ornek\\.test` },
   ],
 }, null, 2));
 const sizintiKos = () => kos('node', ['train/sizinti_check.mjs'], {
@@ -269,11 +292,23 @@ const sizintiKos = () => kos('node', ['train/sizinti_check.mjs'], {
 });
 
 await blok('sizinti_check turkce buyuk harf, uctan uca', async () => {
+  // The green below only means something if the minted patterns are genuinely absent. Asked of
+  // git directly, over the working tree AND over every commit reachable from any ref.
+  const SENTETIK_ERE = `(${ASCII_YEREL}@ornek\\.test)|(${TR_YEREL}@ornek\\.test)`;
+  const agactaVar = kos('git', ['grep', '-I', '-i', '-l', '-E', SENTETIK_ERE, '--']);
+  // `git grep --all` is not a thing (that is --all-match); the revisions are listed explicitly.
+  const tumCommitler = git(['rev-list', '--all']).split('\n').filter(Boolean);
+  const gecmisteVar = kos('git', ['grep', '-I', '-i', '-l', '-E', SENTETIK_ERE, ...tumCommitler, '--']);
+  ok('sentetik desenler calisma agacinda HIC gecmiyor (kapi kendi kaynagini yakalamiyor)',
+    agactaVar.kod === 1, agactaVar.out.trim());
+  ok('sentetik desenler hicbir commit te de gecmiyor (gecmis de temiz)',
+    gecmisteVar.kod === 1, gecmisteVar.out.trim());
+
   const temiz = sizintiKos();
   ok('sentetik desenlerle temiz agac YESIL', temiz.ok, `exit ${temiz.kod}`);
 
   const kirli = await mutasyon('train/synth.mjs',
-    (src) => `// gecici sizinti testi: İLETİSİM@ORNEK.TEST\n${src}`,
+    (src) => `// gecici sizinti testi: ${TR_ADRES_BUYUK}\n${src}`,
     async () => sizintiKos());
   ok('MUTASYON: turkce buyuk harfli adres calisma agacinda KIRMIZI yakiyor', !kirli.ok, `exit ${kirli.kod}`);
   ok('kirmizi satir dosyayi ve deseni adiyla soyluyor',
@@ -293,8 +328,8 @@ const refOnce = git(['for-each-ref', '--format=%(refname) %(objectname)', 'refs/
 // A synthetic dirty commit, built with plumbing so no branch, no index and no working file is
 // touched. Its author is the noreply identity on purpose: the finding has to come from the
 // CONTENT, so the metadata rule cannot be what trips the gate.
-function sentetikKirliCommit() {
-  const blob = git(['hash-object', '-w', '--stdin'], { input: 'iletisim: ZURNABALIK@ORNEK.TEST\n' }).trim();
+function sentetikKirliCommit(adres) {
+  const blob = git(['hash-object', '-w', '--stdin'], { input: `iletisim: ${adres}\n` }).trim();
   const tree = git(['mktree'], { input: `100644 blob ${blob}\tkirli.txt\n` }).trim();
   return git(['commit-tree', tree, '-m', 'sentetik kirli commit'], {
     env: {
@@ -310,7 +345,8 @@ const GECICI_DIGER = 'refs/kapisaglik/kirli';
 const GECICI_HEAD = 'refs/heads/kapisaglik-kirli';
 
 await blok('ref kapsami', async () => {
-  const commit = sentetikKirliCommit();
+  const commit = sentetikKirliCommit(ASCII_ADRES_BUYUK);
+  const commitTr = sentetikKirliCommit(TR_ADRES_BUYUK);
   try {
     // 4a. dirty ref OUTSIDE refs/heads: named in a warning, exit code stays green
     git(['update-ref', GECICI_DIGER, commit]);
@@ -330,7 +366,46 @@ await blok('ref kapsami', async () => {
       icerde.out.split('\n').filter((l) => /kirli\.txt/.test(l)).slice(0, 2).join(' | '));
     git(['update-ref', '-d', GECICI_HEAD]);
 
-    // 4c. the real backup refs are seen, named, and NOT deleted
+    // 4c. THE SAME THING IN TURKISH CAPITALS. 4b above is pure ASCII, so `git grep -i` folds it and
+    // the gate would have looked fine while being completely blind to `İ` in history — the
+    // working-tree scan normalises, the history scan did not. This is the measurement that was
+    // never taken.
+    git(['update-ref', GECICI_HEAD, commitTr]);
+    const trIcerde = sizintiKos();
+    ok('turkce buyuk harfli adres GECMISTE de KIRMIZI yakiyor (git grep -i tek basina bulamaz)',
+      !trIcerde.ok, `exit ${trIcerde.kod} — gecmis taramasi hala turkce koru`);
+    ok('kirmizi satir commit i ve dosyayi adiyla soyluyor',
+      /gecmis [0-9a-f]{40}:kirli\.txt/.test(trIcerde.out),
+      trIcerde.out.split('\n').filter((l) => /kirli\.txt/.test(l)).slice(0, 2).join(' | '));
+    ok('bulgu, yalnizca turkce taramanin buldugu diye ISARETLENIYOR',
+      /yalnizca turkce buyuk harf taramasi buldu/.test(trIcerde.out),
+      trIcerde.out.split('\n').filter((l) => /kirli\.txt/.test(l)).slice(0, 2).join(' | '));
+    ok('kapi turkce varyant taramasini kostugunu ADIYLA yaziyor',
+      /gecmis taramasi: ascii \(-i\) \+ turkce buyuk harf varyanti/.test(trIcerde.out),
+      'gecmis tarama satiri yok');
+
+    // MUTATION: take the widened pass back out, leaving only `git grep -i`. The same commit,
+    // still sitting under refs/heads, has to go UNNOTICED — that is the proof that the widening
+    // is what catches it and not something else in the gate.
+    const kor = await mutasyon('train/sizinti_check.mjs',
+      (src) => src.replace(
+        "for (const [etiket, ere] of [['ascii', birlesikEre], ['turkce', birlesikEreTr]]) {",
+        "for (const [etiket, ere] of [['ascii', birlesikEre]]) {"),
+      async () => sizintiKos());
+    ok('MUTASYON: turkce kol sokulunce ayni commit gecmiste GORULMUYOR (kapi yeniden kor)',
+      kor.ok, `exit ${kor.kod} — mutasyon tutmadi, bu olcum bir sey ispatlamiyor`);
+    git(['update-ref', '-d', GECICI_HEAD]);
+
+    // 4d. and outside refs/heads the Turkish one is a named warning, not a red light
+    git(['update-ref', GECICI_DIGER, commitTr]);
+    const trDisari = sizintiKos();
+    ok('turkce kirli ref refs/heads DISINDA kapiyi kirmizi yakmiyor', trDisari.ok, `exit ${trDisari.kod}`);
+    ok('ama uyarida commit iyle birlikte gorunuyor',
+      new RegExp(GECICI_DIGER).test(trDisari.out) && /kirli\.txt/.test(trDisari.out),
+      trDisari.out.split('\n').filter((l) => /kapisaglik|kirli\.txt/.test(l)).join(' | '));
+    git(['update-ref', '-d', GECICI_DIGER]);
+
+    // 4e. the real backup refs are seen, named, and NOT deleted
     const gercek = sizintiKos();
     ok('gecici refler temizlenince kapi yeniden YESIL', gercek.ok, `exit ${gercek.kod}`);
     ok('gercek yedek refleri uyarida adiyla geciyor',
