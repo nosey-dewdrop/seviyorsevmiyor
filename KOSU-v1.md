@@ -1579,6 +1579,38 @@ Canlı altbilgi "v71 · 16 Ağu" diyor ama JS `?v=72` — etiket güncellenmemi�
 
 ---
 
+## S3.5 — Kapılar ve kota — GEÇTİ (ikinci tur)
+ölçülen: `/api/stats` istek başına 84 → 1.36 KV okuma, tek IP 50 istekten 40'ı
+reddediliyor, kotayı bitirmek 1.200 → ~100.000 istek (83x), panel hâlâ gerçek
+sayılarla 200 dönüyor · JS kolu sabotajında python YEŞİL kalıp mjs KIRMIZI
+yanıyor · `GENELLİKLE` iki kapıda da yakalanıyor · refs/backup uyarı + exit 0,
+aynı commit refs/heads'te KIRMIZI + exit 1 · enum sözlüğü reveal.js'ten
+gerçekten okunuyor · kapı 3 kez koşuldu, üçünde de bit-aynı çıktı · birikimli
+13/13 serial yeşil
+commit: eee1ddf → d9e4332
+hakem notu: birinci turda kapı kendi kaynağındaki sentetik desenleri sızıntı
+sanıp temiz ağaçta exit 1 veriyordu. Şimdi desenler `randomBytes` ile çalışma
+anında basılıyor, ne ağaçta ne geçmişte literal kalıyor. Türkçe geçmiş
+taraması eklendi ve hakem kendi dalında dört varyantla sınadı: `İLETİSİM@...`
+yakalandı ve "yalnızca türkçe tarama buldu" diye işaretlendi, Türkçe kol
+söküldüğünde aynı commit görünmez oldu — kol süs değil.
+
+### S3.5'ten devredilen
+- **KV YAZMA kotası açık, okuma tarafından kötü.** `/api/ping` istek başına 2
+  KV yazma (`limited()` + `bump()`), tavan 30/dk → tek IP günde **86.400
+  yazma**. Free tier günlük sınırı **1.000**. Eşik "okuma" dediği için bu turu
+  düşürmedi → S13, ayrı kapı
+- Reddedilen istek de bedava değil: her 429 hâlâ 1 KV okuma. Delik 1.200'den
+  100.000'e çıktı ama sıfırlanmadı → S13
+- Gerçek `.sizinti_patterns.json` desenlerinin hiçbirinde `i/I/İ/ı` yok, yani
+  Türkçe kol pratikte sadece sentetik testte çalışıyor. Kapı bunu dürüstçe
+  yazıyor (`0/3 desen genişletildi`), sessiz default değil
+- Eski sentetik literaller `eee1ddf` commit'inde duruyor. Zararsız, bugünkü
+  kapı rastgele desen bastığı için kendini yakalamıyor
+- **`refs/backup/*` gerçek kişisel gmail taşıyor** (563+12+9+9+6 bulgu). Kapı
+  adıyla uyarıyor ama `git push --all` / `--mirror` ya da klasörün
+  kopyalanması bunları dışarı taşır. Yedek oldukları için silinmedi
+
 ## S3 — Ham metin kapat — GEÇTİ (üçüncü tur)
 **Ürünün ana iddiası artık doğru. "Cihazından çıkmaz" cümlesi yazılabilir.**
 ölçülen: bulut_check 12/12 · bulut_check_eski 60/60 · giden gövde spiker 255
