@@ -22,6 +22,7 @@ const TTL = {
   corpus: 60 * 60 * 24 * 180,   // 180 days: long enough to retrain on, short enough to defend
   stat: 60 * 60 * 24 * 400,
   zamanGun: 60 * 60 * 30,
+  statsOnbellek: 60 * 10,       // backstop only; freshness is decided by the timestamp inside
 };
 
 export default {
@@ -77,9 +78,25 @@ export default {
         return json({ ok: true }, 200, origin);
       }
 
-      // public read-only counts (the panel)
+      // public read-only counts (the panel).
+      //
+      // This route used to be the cheapest way to kill the whole site. It took no ticket, no
+      // counter and no cache, and every call fanned out into 14 days x 6 events = 84 KV reads.
+      // Measured: 50 calls from one IP = 4200 reads and not one refusal, so ~1200 calls exhaust the
+      // free tier's 100k daily reads — and because the rate limiter lives in the SAME namespace,
+      // the site does not lose its panel, it loses its doors.
+      //
+      // Chosen door: QUOTA + CACHE, not a ticket. A ticket costs a Turnstile solve, and the only
+      // caller is web/panel.html, a plain page that posts here with no ticket and which this phase
+      // is not allowed to edit — a ticket gate would close the panel instead of protecting it. The
+      // panel is also read-only and content-free, so what it needs is a ceiling, not an identity.
+      // Quota bounds how many times a stranger may ask; the cache bounds what one ask costs.
       if (url.pathname === '/api/stats') {
-        return json(await readStats(env), 200, origin);
+        if (await limited(env, `st:${ip}`, STATS_IP_DAKIKA, 120)
+          || await limited(env, `stgun:${ip}`, STATS_IP_GUNLUK, 90000)) {
+          return json({ error: 'Rate limit exceeded' }, 429, origin);
+        }
+        return json(await statsOku(env), 200, origin);
       }
 
       // how many cloud-written readings are left today. reading this does NOT spend one, so the
@@ -241,6 +258,33 @@ async function bump(env, olay) {
   const key = `stat:${olay}:${day}`;
   const cur = parseInt((await env.RATE_LIMIT?.get(key)) || '0');
   await env.RATE_LIMIT?.put(key, String(cur + 1), { expirationTtl: TTL.stat });
+}
+
+// The panel's ceiling. A human reading a counter page refreshes a handful of times; ten a minute
+// and a hundred and twenty a day is far above that and far below anything that costs money.
+const STATS_IP_DAKIKA = 10;
+const STATS_IP_GUNLUK = 120;
+// How stale a daily counter is allowed to be. Five minutes on a table of DAILY totals is invisible
+// to the reader and turns 84 reads per view into 84 reads per five minutes for the whole planet.
+const STATS_ONBELLEK_SN = 300;
+const STATS_ONBELLEK_ANAHTAR = 'stats:onbellek';
+
+// One served request now costs three reads (two counters + the cache) instead of eighty-four.
+// The 84-read fan-out still happens, but at most once per STATS_ONBELLEK_SN across all callers.
+async function statsOku(env) {
+  const ham = await env.RATE_LIMIT?.get(STATS_ONBELLEK_ANAHTAR);
+  if (ham) {
+    try {
+      const p = JSON.parse(ham);
+      if (p && p.veri && Number.isFinite(p.ts) && Date.now() - p.ts < STATS_ONBELLEK_SN * 1000) {
+        return p.veri;
+      }
+    } catch { /* a corrupt cache is a cache miss, never an error the visitor sees */ }
+  }
+  const veri = await readStats(env);
+  await env.RATE_LIMIT?.put(STATS_ONBELLEK_ANAHTAR, JSON.stringify({ ts: Date.now(), veri }),
+    { expirationTtl: TTL.statsOnbellek });
+  return veri;
 }
 
 async function readStats(env) {

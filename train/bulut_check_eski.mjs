@@ -20,6 +20,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import worker from '../backend/worker.js';
 import { spikerOlgu, itirazOlgu } from '../web/js/api.js';
+import { kacamakBul } from './tr_kucult.mjs';
 
 let fails = 0;
 const ok = (n, c, d = '') => {
@@ -446,14 +447,24 @@ await blok('gizlilik iddiasi kodla ayni seyi soyluyor', async () => {
     .replace(/<[^>]+>/g, (etiket) => {
       const alan = etiket.match(/(?:content|alt|title|placeholder|aria-label)="[^"]*"/gi) || [];
       return ` ${alan.join(' ')} `;
-    })
-    .toLowerCase();
+    });
+  // NOT .toLowerCase(): "GENELLİKLE".toLowerCase() is "genelli̇kle" (i + U+0307), so a hedge word
+  // set in capitals — a heading, a button, a schema.org label — walked through this scan while the
+  // gate stayed green. kacamakBul() folds İ->i and I->ı first. See train/tr_kucult.mjs.
 
   const sayfalar = readdirSync(new URL('web/', KOK)).filter((f) => f.endsWith('.html')).sort();
   ok('kapi web altindaki tum sayfalari tariyor', sayfalar.length >= 5, sayfalar.join(', '));
+  // The gate's own blind spot, measured rather than asserted: the same word in capitals has to be
+  // found by the scanner this file actually uses, and has to be MISSED by the plain call it used
+  // to use. If both find it, this normalisation is not doing anything and should not be trusted.
+  const ORNEK = 'Mesajların GENELLİKLE cihazından çıkmaz.';
+  ok('turkce buyuk harf: GENELLİKLE yakalaniyor', kacamakBul(ORNEK, KACAMAK).includes('genellikle'),
+    JSON.stringify(kacamakBul(ORNEK, KACAMAK)));
+  ok('duz toLowerCase() bunu KACIRIYOR (yani duzeltme gercekten gerekli)',
+    !ORNEK.toLowerCase().includes('genellikle'), JSON.stringify(ORNEK.toLowerCase()));
   for (const sayfa of sayfalar) {
     const metin = okunacakMetin(oku(`web/${sayfa}`));
-    const bulunan = KACAMAK.filter((k) => metin.includes(k));
+    const bulunan = kacamakBul(metin, KACAMAK);
     if (DEVREDILEN.has(sayfa)) {
       if (bulunan.length) console.log(`??  ${sayfa} kacamak kelime tasiyor (devredilen, kapi kirmizi yanmaz)\n    ${bulunan.join(', ')}`);
       else console.log(`ok  ${sayfa} kacamak kelime yok (devredilen dosya, yine de temiz)`);
@@ -512,16 +523,98 @@ await blok('onay aninda soylenen cumle de kodla ayni', async () => {
 // forget, so they are compared instead of trusted: an engine that grows a sixth verdict has to
 // grow it in both files or this fails.
 await blok('istemci ve sunucu ayni kapali listeyi kullaniyor', async () => {
-  const cikar = (src, ad) => {
-    const m = src.match(new RegExp(`const ${ad} = \\{[^]*?\\n\\};`));
-    return m ? m[0].replace(/\s+/g, ' ') : null;
-  };
-  const a = cikar(oku('web/js/api.js'), 'ENUM_DEGERLER');
-  const w = cikar(oku('backend/worker.js'), 'ENUM_DEGERLER');
+  const a = listeCikar(oku('web/js/api.js'), 'ENUM_DEGERLER');
+  const w = listeCikar(oku('backend/worker.js'), 'ENUM_DEGERLER');
   ok('iki dosyada da ENUM_DEGERLER var', !!a && !!w, `api=${!!a} worker=${!!w}`);
-  ok('iki liste birebir ayni', a === w, `\n    api:    ${a}\n    worker: ${w}`);
-  ok('liste motorun sozlugunu tasiyor',
-    !!a && a.includes('onesided') && a.includes('tense') && a.includes('tek'), String(a));
+  ok('iki liste birebir ayni', JSON.stringify(a) === JSON.stringify(w),
+    `\n    api:    ${JSON.stringify(a)}\n    worker: ${JSON.stringify(w)}`);
+});
+
+// ---- 5. the lists have to be the ENGINE's vocabulary, not a hand-copied snapshot ---------------
+//
+// Comparing api.js against worker.js only proves the two copies agree. Both were typed by hand
+// from web/js/reveal.js, so if reveal.js grows a sixth tone tomorrow, both copies go stale
+// TOGETHER, the comparison above stays green, and the new tone is silently dropped on the wire —
+// the reading loses a field and nothing anywhere says so.
+//
+// So the reference is the engine itself. reveal.js is read (never written) and its real
+// vocabulary is derived from it: the TONE_TR keys, and the flört verdict literals. The signal
+// concepts come the same way, from the series keys in web/js/time/signals.js. A value that exists
+// in the engine and is missing from a shipped list is RED.
+function listeCikar(src, ad) {
+  const m = src.match(new RegExp(`const ${ad} = \\{[^]*?\\n\\};`));
+  if (!m) return null;
+  const out = {};
+  for (const g of m[0].matchAll(/([a-z_]+):\s*\[([^\]]*)\]/g)) {
+    out[g[1]] = [...g[2].matchAll(/'([^']*)'/g)].map((x) => x[1]);
+  }
+  return out;
+}
+
+function motorSozlugu() {
+  const reveal = oku('web/js/reveal.js');
+
+  // tone vocabulary = the keys of TONE_TR, the table the reveal screen labels a verdict with
+  const tone = reveal.match(/const TONE_TR = \{([^]*?)\n\};/);
+  const hukum = tone ? [...tone[1].matchAll(/^\s*([a-z_]+):/gm)].map((x) => x[1]) : [];
+
+  // flört verdict = the string literals buildReveal() can ASSIGN to `karar`. The same expression
+  // also compares against tone keys ('onesided', 'flirty'), so those are subtracted rather than
+  // pattern-matched around: a verdict value is a literal in that statement that is not a tone key.
+  const kararIfade = reveal.match(/const karar = [^;]+;/);
+  const karar = kararIfade
+    ? [...new Set([...kararIfade[0].matchAll(/'([a-z_]+)'/g)].map((x) => x[1]))].filter((v) => !hukum.includes(v))
+    : [];
+
+  // signal concepts = the series keys, with the _${side} suffix stripped
+  const signals = oku('web/js/time/signals.js');
+  const kavram = [...new Set([...signals.matchAll(/key:\s*[`']([a-z]+)(?:_\$\{side\})?[`']/g)].map((x) => x[1]))];
+
+  return { hukum, karar, kavram };
+}
+
+await blok('kapali listeler motorun sozlugunden dogrulaniyor', async () => {
+  const sozluk = motorSozlugu();
+  console.log(`\nmotorun sozlugu (reveal.js + signals.js'ten okundu):`);
+  console.log(`  hukum : ${sozluk.hukum.join(', ')}`);
+  console.log(`  karar : ${sozluk.karar.join(', ')}`);
+  console.log(`  kavram: ${sozluk.kavram.join(', ')}\n`);
+
+  // A gate that derives an EMPTY vocabulary would pass everything, so the derivation is checked
+  // before it is used as a reference.
+  ok('sozluk gercekten cikarildi (bos degil)',
+    sozluk.hukum.length >= 5 && sozluk.karar.length >= 3 && sozluk.kavram.length >= 6,
+    JSON.stringify(sozluk));
+
+  const listeler = {
+    'web/js/api.js': listeCikar(oku('web/js/api.js'), 'ENUM_DEGERLER'),
+    'backend/worker.js': listeCikar(oku('backend/worker.js'), 'ENUM_DEGERLER'),
+  };
+  const beklenen = { hukum: 'hukum', hukum_tur: 'hukum', karar: 'karar', flort_karar: 'karar' };
+
+  for (const [dosya, liste] of Object.entries(listeler)) {
+    ok(`${dosya} ENUM_DEGERLER okunabildi`, !!liste, String(liste));
+    if (!liste) continue;
+    for (const [alan, kaynak] of Object.entries(beklenen)) {
+      const mevcut = liste[alan] || [];
+      const eksik = sozluk[kaynak].filter((v) => !mevcut.includes(v));
+      const fazla = mevcut.filter((v) => !sozluk[kaynak].includes(v));
+      ok(`${dosya} ${alan} motorun ${kaynak} sozlugunu tam tasiyor`, eksik.length === 0,
+        `sozlukte var listede YOK: ${eksik.join(', ')}`);
+      ok(`${dosya} ${alan} sozlukte olmayan deger tasimiyor`, fazla.length === 0,
+        `listede var sozlukte yok: ${fazla.join(', ')}`);
+    }
+  }
+
+  // KAVRAMLAR lives on the server only: the time flow's `degisenler` list is filtered there.
+  const kav = oku('backend/worker.js').match(/const KAVRAMLAR = \[([^\]]*)\]/);
+  const kavListe = kav ? [...kav[1].matchAll(/'([^']*)'/g)].map((x) => x[1]) : [];
+  const kavEksik = sozluk.kavram.filter((v) => !kavListe.includes(v));
+  ok('worker KAVRAMLAR signals.js seri anahtarlarini tam tasiyor', kav && kavEksik.length === 0,
+    `sozlukte var listede YOK: ${kavEksik.join(', ')}`);
+  ok('worker KAVRAMLAR sozlukte olmayan kavram tasimiyor',
+    kavListe.every((v) => sozluk.kavram.includes(v)),
+    kavListe.filter((v) => !sozluk.kavram.includes(v)).join(', '));
 });
 
 console.log('');

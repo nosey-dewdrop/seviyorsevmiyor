@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { desenVurdu, trKucult } from './tr_kucult.mjs';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PATTERN_FILE = process.env.SIZINTI_PATTERNS
@@ -65,25 +66,43 @@ for (const d of desenler) {
   }
 }
 const metaIzinli = new RegExp(konf.metadata_izinli_email ?? '@users\\.noreply\\.github\\.com$');
-const birlesikRe = new RegExp(desenler.map((d) => `(?:${d.desen})`).join('|'));
-// git grep POSIX ERE kullanir: (?: ...) desteklemez, duz grup gerekir
+// Case-insensitive on purpose. A leak written in capitals is the same leak, and JS lowercasing is
+// not Turkish, so desenVurdu() also offers the İ->i / I->ı normalised text to the regex.
+const birlesikRe = new RegExp(desenler.map((d) => `(?:${d.desen})`).join('|'), 'i');
+// git grep POSIX ERE kullanir: (?: ...) desteklemez, duz grup gerekir. -i is passed as a flag.
 const birlesikEre = desenler.map((d) => `(${d.desen})`).join('|');
+const vurdu = (metin) => desenVurdu(birlesikRe, metin);
 const adBul = (metin) => {
-  const v = desenler.filter((d) => new RegExp(d.desen).test(metin)).map((d) => d.ad ?? d.desen);
+  const v = desenler
+    .filter((d) => desenVurdu(new RegExp(d.desen, 'i'), metin))
+    .map((d) => d.ad ?? d.desen);
   return v.length ? v.join(', ') : 'desen';
 };
 not(`desen dosyasi: ${PATTERN_FILE} (${desenler.length} desen)`);
 
-// --- 1. hangi dallar ----------------------------------------------------
-const dallar = git(['for-each-ref', '--format=%(refname)', 'refs/heads/'])
+// --- 1. hangi ref'ler ---------------------------------------------------
+//
+// The gate used to read refs/heads/ only. That is what a fresh clone carries, which is why it
+// looked clean — but it is not what this folder carries. refs/backup/* and
+// refs/original/refs/heads/* still hold the pre-rewrite history, and `git push --mirror`, a stray
+// `git push refs/*`, or simply copying the directory takes them along.
+//
+// Two severities, on purpose. A dirty ref under refs/heads is a live branch: RED. A dirty ref
+// outside it is a deliberately kept backup: it gets its own named warning line and does NOT turn
+// the gate red, because deleting the backups to make a gate green would be the gate lying.
+const tumRefler = git(['for-each-ref', '--format=%(refname)', 'refs/'])
   .split('\n')
   .map((s) => s.trim())
   .filter(Boolean);
+const dallar = tumRefler.filter((r) => r.startsWith('refs/heads/'));
+const digerRefler = tumRefler.filter((r) => !r.startsWith('refs/heads/'));
 if (dallar.length === 0) {
   console.error('KIRMIZI: taranacak dal yok.');
   process.exit(1);
 }
-not(`dallar: ${dallar.map((d) => d.replace('refs/heads/', '')).join(', ')}`);
+const uyarilar = [];
+not(`dallar (KIRMIZI kapsami): ${dallar.map((d) => d.replace('refs/heads/', '')).join(', ')}`);
+not(`refs/heads disi ref (uyari kapsami): ${digerRefler.length ? digerRefler.join(', ') : 'yok'}`);
 
 // --- 2. metadata (author + committer, isim ve e-posta) ------------------
 let metaSayim = 0;
@@ -99,7 +118,7 @@ for (const dal of dallar) {
         hatalar.push(`${dal} ${sha.slice(0, 8)} ${alan} noreply degil: ${deger}`);
       }
     }
-    if (birlesikRe.test(satir)) {
+    if (vurdu(satir)) {
       hatalar.push(`${dal} ${sha.slice(0, 8)} metadata desen tuttu: ${adBul(satir)} [${an}/${cn}]`);
     }
   }
@@ -107,20 +126,64 @@ for (const dal of dallar) {
 not(`metadata: ${metaSayim} commit tarandi (author + committer)`);
 
 // --- 3. tum commit'lerin icerigi ----------------------------------------
-const commitler = git(['rev-list', ...dallar]).split('\n').filter(Boolean);
-let icerikVurus = 0;
-for (const sha of commitler) {
-  const cikti = gitSessiz(['grep', '-I', '-l', '-E', birlesikEre, sha, '--']);
-  if (cikti === null) {
-    hatalar.push(`${sha.slice(0, 8)} icerik taranamadi`);
-    continue;
+// `-i` so a leak in capitals is still a leak. git grep cannot be taught Turkish casing, so the
+// working-tree scan below (which can, via desenVurdu) is the layer that catches `İ`.
+function icerikTara(commitler, topla) {
+  let vurus = 0;
+  for (const sha of commitler) {
+    const cikti = gitSessiz(['grep', '-I', '-i', '-l', '-E', birlesikEre, sha, '--']);
+    if (cikti === null) {
+      topla(`${sha.slice(0, 8)} icerik taranamadi`);
+      continue;
+    }
+    for (const satir of cikti.split('\n').filter(Boolean)) {
+      vurus++;
+      topla(`gecmis ${satir}`);
+    }
   }
-  for (const satir of cikti.split('\n').filter(Boolean)) {
-    icerikVurus++;
-    hatalar.push(`gecmis ${satir}`);
+  return vurus;
+}
+
+const commitler = git(['rev-list', ...dallar]).split('\n').filter(Boolean);
+const icerikVurus = icerikTara(commitler, (h) => hatalar.push(h));
+not(`icerik: ${commitler.length} commit tarandi (refs/heads), ${icerikVurus} dosya vurusu`);
+
+// --- 3b. refs/heads disindaki ref'ler: ayri, kirmizi yakmayan uyari -----
+if (digerRefler.length) {
+  // Scanned ref by ref, so every finding is reported with the NAME of the ref that carries it.
+  // Commits already covered by refs/heads (or by an earlier ref in this loop) are skipped, so the
+  // 125 above are not walked again.
+  const gorulen = new Set(commitler);
+  let ekToplam = 0;
+  const kirliRefler = [];
+  for (const ref of digerRefler) {
+    const bulgular = [];
+    for (const satir of git(['log', ref, '--format=%H%x09%ae%x09%ce%x09%an%x09%cn']).split('\n').filter(Boolean)) {
+      const [sha, ae, ce, an, cn] = satir.split('\t');
+      if (!metaIzinli.test(ae)) bulgular.push(`${sha.slice(0, 8)} author-email noreply degil: ${ae}`);
+      if (!metaIzinli.test(ce)) bulgular.push(`${sha.slice(0, 8)} committer-email noreply degil: ${ce}`);
+      if (vurdu(satir)) bulgular.push(`${sha.slice(0, 8)} metadata desen tuttu: ${adBul(satir)} [${an}/${cn}]`);
+    }
+    const yeni = git(['rev-list', ref, '--not', ...dallar]).split('\n')
+      .filter((s) => s && !gorulen.has(s));
+    for (const s of yeni) gorulen.add(s);
+    ekToplam += yeni.length;
+    ekToplam += 0;
+    icerikTara(yeni, (h) => bulgular.push(h));
+    if (bulgular.length) kirliRefler.push({ ref, bulgular });
+  }
+  not(`refs/heads disi: ${ekToplam} ek commit tarandi, ${kirliRefler.length} kirli ref`);
+  if (kirliRefler.length) {
+    uyarilar.push('refs/heads DISINDA kirli ref var. bunlar yedek amacli tutuluyor, o yuzden kapi');
+    uyarilar.push('bu yuzden KIRMIZI yanmaz. ama "git push --all/--mirror" ya da klasoru kopyalamak');
+    uyarilar.push('bunlari da tasir:');
+    for (const { ref, bulgular } of kirliRefler) {
+      uyarilar.push(`  ${ref}  (${bulgular.length} bulgu)`);
+      for (const b of bulgular.slice(0, 3)) uyarilar.push(`      ${b}`);
+      if (bulgular.length > 3) uyarilar.push(`      ... +${bulgular.length - 3} bulgu daha`);
+    }
   }
 }
-not(`icerik: ${commitler.length} commit tarandi, ${icerikVurus} dosya vurusu`);
 
 // --- 4. calisma agaci (izlenen dosyalar) --------------------------------
 const izlenen = git(['ls-files', '-z']).split('\0').filter(Boolean);
@@ -136,7 +199,7 @@ for (const yol of izlenen) {
   }
   if (metin.includes('\0')) continue; // binary
   metin.split('\n').forEach((satir, i) => {
-    if (birlesikRe.test(satir)) {
+    if (vurdu(satir)) {
       agacVurus++;
       hatalar.push(`calisma agaci ${yol}:${i + 1} ${adBul(satir)}`);
     }
@@ -152,7 +215,8 @@ for (const yol of ADRESSIZ_SAYFALAR) {
     continue;
   }
   readFileSync(tam, 'utf8').split('\n').forEach((satir, i) => {
-    if (EPOSTA.test(satir) || /mailto:/i.test(satir)) {
+    // trKucult too: "AHMET@ORNEK.COM" folds fine, "İLETISIM@ORNEK.COM" does not without it.
+    if (EPOSTA.test(satir) || EPOSTA.test(trKucult(satir)) || /mailto:/i.test(satir)) {
       hatalar.push(`${yol}:${i + 1} e-posta adresi var: ${satir.trim().slice(0, 80)}`);
     }
   });
@@ -160,10 +224,16 @@ for (const yol of ADRESSIZ_SAYFALAR) {
 not(`yayin sayfalari: ${ADRESSIZ_SAYFALAR.join(', ')} adres taramasi bitti`);
 
 // --- sonuc --------------------------------------------------------------
+// Warnings are printed whether the gate is red or green: a finding that only shows up on failure
+// is a finding nobody reads.
+if (uyarilar.length) {
+  console.log('\nUYARI (kapi kirmizi degil):');
+  for (const u of uyarilar) console.log(`  ${u}`);
+}
 if (hatalar.length) {
-  console.error(`\nKIRMIZI: ${hatalar.length} sizinti`);
+  console.error(`\nKIRMIZI: ${hatalar.length} sizinti (refs/heads + calisma agaci)`);
   for (const h of hatalar) console.error(`  - ${h}`);
   process.exit(1);
 }
-console.log('\nYESIL: hicbir dalda, hicbir commit metadata/icerikte ve calisma agacinda sizinti yok.');
+console.log('\nYESIL: refs/heads altinda, commit metadata/icerikte ve calisma agacinda sizinti yok.');
 process.exit(0);
