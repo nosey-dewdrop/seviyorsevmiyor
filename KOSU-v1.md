@@ -1579,6 +1579,43 @@ Canlı altbilgi "v71 · 16 Ağu" diyor ama JS `?v=72` — etiket güncellenmemi�
 
 ---
 
+## S3.6 — Tıkladım ve bir şey oldu — GEÇTİ
+ölçülen: hakem 15 ayrı başarısızlık senaryosu denedi (bilet yok, fetch reject,
+403, 429, 500, bozuk JSON, boş gövde, bilinmeyen sebep, doğrulamadan elenme,
+iki kota türü, sayaç ölü) — **hiçbirinde boş string, yalnız boşluk, yalnız
+spinner, undefined/null/[object Object] kalmadı** · altı sebep altı farklı
+cümle · genel "hata oluştu" cümlesi bulut yolunda yok · retry butonu gerçekten
+çalışıyor, sonsuz döngü yok · `?v=72` sıfır satır, `?v=73` 38 satır, altbilgi
+v71 → v73 · kapı iki mutasyonda kırmızı · birikimli 14/14 serial yeşil
+commit: de56b47
+hakem notu: canlıdaki kusur (`zaman.js` `yer.innerHTML = ''`) gitti. Kullanıcı
+"canlı spiker" işaretleyip bulut kapalıyken artık sessizce şablona düşmüyor,
+yorum sütununda sebebi adıyla okuyor.
+
+### S3.6'dan devredilen — hepsi ölçüldü, ikisi ağır
+- **`/api/bilet` fetch'inde timeout YOK** (`web/js/api.js`). Asılı istek =
+  sonsuz "bulut yazıyor", yani ayrı bir boş-ekran sınıfı. Diğer üç çağrının
+  timeout'u var (15sn/6sn/12sn), bu yok. **En ağır kalan borç**
+- **Turnstile callback closure yeniden kullanılıyor** (`web/js/api.js`).
+  403 sonrası ya da bilet 5 dk'da sona erdikten sonraki her yenileme 12.4 sn
+  asılıp kalıcı `bilet_yok` veriyor. Her uzun oturumda tetiklenir
+- 403/429/500/bozuk-JSON tek `null`'a çöküyor → kullanıcı 429'da "istek gitti,
+  dönüş gelmedi" okuyor, bu YANLIŞ; bulut kesinlikle cevap verdi
+- `index.html` spiker akışında `gunluk_doldu` ayırt edilemiyor, iki sebep var
+- **`web/js/time/` ve `analyze.js` → `../parse.js` query'siz.** Bump bu
+  modülleri kapsamıyor; `parse.js` iki ayrı cache girdisi olarak yaşıyor
+  (`app.js` ?v=73, `analyze.js` query'siz). Zaman motorunda düzeltme yapılırsa
+  dönen ziyaretçi ESKİ motoru çalıştırır. v61 bug'ının kapatılmamış kolu
+- **`app.js` goBtn catch: "bir şey ters gitti. sayfayı yenileyip tekrar dener
+  misin?"** — kartın kendi kapısının YASAK listesindeki genel özür cümlesi,
+  hem de kullanıcı cümlesindeki tam o butonda. `8b6ee0b`'den beri var
+- `playReveal` await edilmiyor (`app.js:163`) ve içeride `root.innerHTML = ''`
+  var; orada istisna olursa dıştaki try/catch yakalayamaz, geriye boş sonuç
+  alanı kalır. Tetiklenemedi — **DOĞRULANMADI**
+- İki sebep cümlesi geliştiriciye konuşuyor ("doğrulama anahtarı tanımlı
+  değil"). Boş ekran değil ama kopya borcu
+- `CLAUDE.md` başlığı hâlâ `## Status (v72, ...)`
+
 ## S3.5 — Kapılar ve kota — GEÇTİ (ikinci tur)
 ölçülen: `/api/stats` istek başına 84 → 1.36 KV okuma, tek IP 50 istekten 40'ı
 reddediliyor, kotayı bitirmek 1.200 → ~100.000 istek (83x), panel hâlâ gerçek
