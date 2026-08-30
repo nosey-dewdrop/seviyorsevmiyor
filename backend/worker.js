@@ -88,7 +88,12 @@ export default {
       }
 
       // the time engine's optional voice. facts only, never messages.
+      // This spends the Groq key, so it is a ticket route like the other two. Origin alone is not a
+      // gate: a header is one line to forge outside a browser, and this is the live main flow, so
+      // the whole ZAMAN_GUNLUK budget was a stranger's to burn. Turnstile must be solved first.
       if (url.pathname === '/api/zaman') {
+        const red = await biletKapisi(env, request, origin);
+        if (red) return red;
         return handleZaman(request, env, ip, origin);
       }
 
@@ -99,6 +104,9 @@ export default {
         if (env.ITIRAZ_OPEN !== 'on') return json({ error: 'Itiraz is not open' }, 403, origin);
         const red = await biletKapisi(env, request, origin);
         if (red) return red;
+        if (!korpusKV(env)) {
+          return json({ error: 'Sunucu yapilandirilmadi', eksik: ['CORPUS'] }, 503, origin);
+        }
         if (await limited(env, `i:${ip}`, 5, 120) || await limited(env, `iday:${ip}`, 20, 90000)) {
           return json({ error: 'Rate limit exceeded' }, 429, origin);
         }
@@ -111,9 +119,9 @@ export default {
           karar: typeof b.karar === 'string' ? b.karar.slice(0, 10) : '',
           ts: Date.now(),
         };
-        // Donated content does not belong in the rate-limit namespace. CORPUS is its own binding;
-        // until it exists the write still lands with a retention window rather than forever.
-        await korpusKV(env)?.put(`corpus:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
+        // Donated content does not belong in the rate-limit namespace; the check above already
+        // refused the request if CORPUS is absent. Every write carries the retention window.
+        await korpusKV(env).put(`corpus:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
           JSON.stringify(kayit), { expirationTtl: TTL.corpus });
         await bump(env, 'itiraz_bagis');
         return json({ ok: true }, 200, origin);
@@ -149,9 +157,12 @@ function izinliOriginler(env) {
   return String(env.ALLOWED_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
 }
 
-// Corpus lives in its own namespace once the binding exists. RATE_LIMIT is the fallback so a
-// donation is never silently dropped, but the key prefix and the TTL are the same either way.
-function korpusKV(env) { return env.CORPUS || env.RATE_LIMIT; }
+// Corpus lives in its own namespace, full stop. The old fallback to RATE_LIMIT meant that in
+// production — where the binding is still commented out in wrangler.toml — donated conversations
+// were quietly landing in the rate-counter namespace and nobody could tell from the outside. A
+// missing binding is a misconfiguration, so it is named like every other one instead of papered
+// over: no CORPUS, no donation, and the response says which binding is absent.
+function korpusKV(env) { return env.CORPUS || null; }
 
 // Named, not boolean: a 503 that says which secret is missing is a bug report. A worker that
 // quietly stays open because a secret was never set is the failure this phase exists to remove.

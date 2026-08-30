@@ -87,7 +87,10 @@ function turnstileCevap(timeoutMs = 12000) {
 let bilet = null;          // { deger, sonKullanma }
 let biletIstek = null;     // in-flight, so two clicks do not burn two challenges
 
-async function biletAl() {
+// Exported because every route that spends the key needs a ticket now, /api/zaman included.
+// zamanBulut.js imports this one rather than growing a second copy: two ticket caches would mean
+// two Turnstile challenges per visitor and two places for the refresh rule to drift.
+export async function biletAl() {
   if (!TURNSTILE_SITEKEY) {
     // Same rule as the server: a missing key is said out loud, not worked around.
     console.error('[seviyorsevmiyor] TURNSTILE_SITEKEY bos — bulut yolu kapali.');
@@ -121,6 +124,10 @@ async function biletAl() {
   })();
   return biletIstek;
 }
+
+// A 403 from any ticket route means the cached ticket is dead (expired, or the secret rotated).
+// Callers drop it so the next attempt solves a fresh challenge instead of replaying a bad ticket.
+export function biletDusur() { bilet = null; }
 
 // Consented hard-case donation ("yanlış okudun" + bağış onayı) — the flywheel that grows OUR
 // engine so the LLM share shrinks over time.

@@ -9,6 +9,7 @@
 // nearly true. It costs the cloud lines some colour and it is worth it.
 
 import { API_BASE } from './config.js?v=72';
+import { biletAl, biletDusur } from './api.js?v=72';
 
 const ZAMAN_URL = `${API_BASE}/api/zaman`;
 const KALAN_URL = `${API_BASE}/api/zaman-kalan`;
@@ -58,18 +59,25 @@ export function olgular(res) {
 }
 
 /**
+ * This route spends the Groq key, so it carries a ticket exactly like the spiker does. The ticket
+ * comes from api.js — one Turnstile challenge per visitor, shared across both flows. No ticket
+ * means no call: the page falls back to the shipped phrasebook, which is the floor anyway.
+ *
  * @returns { ok:true, satirlar:[...], kalan } | { ok:false, sebep, kalan } | null when unreachable
  */
 export async function bulutYaz(res, timeoutMs = 15000) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), timeoutMs);
   try {
+    const token = await biletAl();
+    if (!token) return null;
     const r = await fetch(ZAMAN_URL, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', 'x-app-token': token },
       body: JSON.stringify({ olgu: olgular(res) }),
       signal: ctl.signal,
     });
+    if (r.status === 403) biletDusur();
     if (!r.ok) return null;
     const d = await r.json();
     if (!d.ok) return d;

@@ -14,8 +14,11 @@ id = "facdf8b5b45d493b808c18fe9fa3e7a1"
 # [[kv_namespaces]]
 # binding = "CORPUS"
 # id = "<paste the id wrangler prints>"
-# Until the binding exists the worker falls back to RATE_LIMIT, but the 180-day expirationTtl is
-# applied either way.
+#
+# THIS BINDING IS MISSING RIGHT NOW, so /api/itiraz is closed in production: it answers
+# 503 {"eksik":["CORPUS"]} instead of writing donated chats into the rate-counter namespace.
+# The worker used to fall back to RATE_LIMIT silently, which is how content ended up in the wrong
+# place with nobody able to see it. Uncomment the block above to reopen donations.
 
 [vars]
 # Only these origins may talk to the worker. Empty or missing => the worker returns 503 naming
