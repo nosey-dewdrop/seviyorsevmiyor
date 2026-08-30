@@ -3,10 +3,47 @@
 // oturur. Her yorum satırı tıklanabilir: altında "NEDEN BÖYLE OKUDUM?" + "BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?"
 // + rızalı bağış açılır. Karttaki her sayı gerçek sohbetten hesaplanır, elle sayı yazılmaz.
 
-import { ping, itirazGonder } from './api.js?v=72';
-import { deflectedPlans } from './balance.js?v=72';
+import { ping, itirazGonder, biletAl, spikerRead } from './api.js?v=73';
+import { deflectedPlans } from './balance.js?v=73';
 
-const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Guarded so train/bos_ekran_check.mjs can import the real spikerDene / spikerKapaliMetni below
+// in Node instead of retyping them.
+const REDUCED = typeof window !== 'undefined' && window.matchMedia
+  && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---- canlı spiker: bulut yolu kapalıysa bunu ADIYLA söyle ----
+//
+// The visitor ticks "canlı spiker" and spikerRead returns null; app.js used to skip the merge with
+// `if (sp)` and show the shipped template lines with nothing on screen saying so. The box they
+// ticked did nothing and no one told them. Same rule as the time flow: the cause is named.
+export const SPIKER_SEBEPLER = ['bilet_yok', 'ag_hatasi'];
+
+const SPIKER_KAPALI = {
+  bilet_yok: 'canlı spikeri işaretledin ama bulut yolu şu an kapalı: bu sürümde doğrulama anahtarı '
+    + 'tanımlı değil, o yüzden istek hiç gönderilmedi. yukarıdaki yorum cümlelerini cihazındaki '
+    + 'şablon yazdı. hüküm ve sayılar zaten cihazda hesaplanıyordu, onlar değişmedi.',
+  ag_hatasi: 'canlı spikeri işaretledin, istek gitti ama bulut cevap dönmedi. yorum cümlelerini bu '
+    + 'yüzden cihazın kendi şablonu yazdı. sohbeti tekrar okutursan spiker yeniden denenir. hüküm '
+    + 've sayılar buluttan gelmiyordu, onlar aynı.',
+};
+
+export function spikerKapaliMetni(sebep) {
+  return SPIKER_KAPALI[sebep] || SPIKER_KAPALI.ag_hatasi;
+}
+
+/**
+ * Ask for the ticket first, so "no ticket" and "no answer" stop being the same null.
+ * deps exists for the gate; the defaults are the real client.
+ */
+export async function spikerDene(facts, deps = {}) {
+  const bilet = deps.bilet || biletAl;
+  const oku = deps.oku || spikerRead;
+  const token = await bilet();
+  if (!token) return { sp: null, sebep: 'bilet_yok' };
+  const sp = await oku(facts);
+  if (!sp) return { sp: null, sebep: 'ag_hatasi' };
+  return { sp, sebep: null };
+}
 
 function el(tag, cls, html) {
   const n = document.createElement(tag);
@@ -301,6 +338,11 @@ export async function playReveal(root, r, messages, me) {
     par.addEventListener('click', () => box.classList.toggle('on'));
   });
 
+  // bulut yolu kapalıysa bunu satır olarak yaz, sessizce şablona düşme
+  if (r.spikerKapali) {
+    yorum.appendChild(el('p', 'satir', esc(spikerKapaliMetni(r.spikerKapali))));
+  }
+
   // genel itiraz satırı
   const hint = el('p', 'itiraz',
     'katılmıyor musun? bir satıra dokun, neden öyle okuduğumu göstereyim.');
@@ -331,7 +373,7 @@ export async function playReveal(root, r, messages, me) {
     btn.textContent = 'hazırlanıyor...';
     ping('paylasim');
     try {
-      const { shareReveal } = await import('./share.js?v=72');
+      const { shareReveal } = await import('./share.js?v=73');
       const how = await shareReveal(r, st, okumaNo, senAgir);
       btn.textContent = how === 'downloaded' ? 'indirildi' : how === 'shared' ? 'paylaşıldı' : 'kartı indir';
     } catch { btn.textContent = 'olmadı, tekrar dene'; }

@@ -7,7 +7,7 @@
 import {
   sec, ACILIS_KIRILMA, ACILIS_YOK, ACILIS_KESINTI, CUMLE, arketip,
   KAPANIS_KIRILMA, KAPANIS_YOK,
-} from './soz.js?v=72';
+} from './soz.js?v=73';
 
 const AY = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran',
   'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık'];

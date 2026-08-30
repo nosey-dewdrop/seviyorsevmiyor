@@ -1,13 +1,13 @@
 // Flow: input → parse → who-is-me → on-device engine (verdict + counts = the law) →
 // optional Groq/Llama spiker (fresh wording + gözden kaçanlar, consent-gated) → reveal.
 // Free and unlimited (Damla, 13 Tem: money is not a goal here — idea tool, audience first).
-import { loadModel, scoreConversation } from './model.js?v=72';
-import { parseChat, toDoc } from './parse.js?v=72';
-import { buildReveal } from './reveal.js?v=72';
-import { playReveal } from './ui.js?v=72';
-import { spikerRead, ping } from './api.js?v=72';
-import { ocrToText } from './ocr.js?v=72';
-import { readWhatsApp } from './wa.js?v=72';
+import { loadModel, scoreConversation } from './model.js?v=73';
+import { parseChat, toDoc } from './parse.js?v=73';
+import { buildReveal } from './reveal.js?v=73';
+import { playReveal, spikerDene } from './ui.js?v=73';
+import { ping } from './api.js?v=73';
+import { ocrToText } from './ocr.js?v=73';
+import { readWhatsApp } from './wa.js?v=73';
 
 const $ = (id) => document.getElementById(id);
 const pasteBox = $('pasteBox');
@@ -119,10 +119,6 @@ function spikerFacts(r) {
   };
 }
 
-function spikerDoc(messages, me) {
-  return messages.map((m) => `${m.speaker === me ? 'SEN' : 'O'}: ${m.text}`).join('\n');
-}
-
 // The spiker may only restyle wording and add evidence-quoted observations; every merged
 // field keeps its template floor if the cloud returns nothing.
 function mergeSpiker(r, sp) {
@@ -149,8 +145,12 @@ goBtn.addEventListener('click', async () => {
     ping('analiz');
     if (consentBox.checked && cloudConsentBox.checked) {
       goBtn.textContent = 'spiker yazıyor…';
-      const sp = await spikerRead(spikerFacts(r), spikerDoc(parsed.messages, parsed.me));
+      // `if (sp)` alone was a silent default: the box was ticked, the cloud never answered, and
+      // the reveal showed template lines with nothing on screen admitting it. spikerDene names
+      // the cause and playReveal prints it.
+      const { sp, sebep } = await spikerDene(spikerFacts(r));
       if (sp) { mergeSpiker(r, sp); ping('spiker'); }
+      else r.spikerKapali = sebep;
     }
     attachHistory(r, parsed);
     lastReveal = r;
