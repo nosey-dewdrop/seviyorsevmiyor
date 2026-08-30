@@ -7,10 +7,10 @@
 // with no message text and no names. Declining, being over quota, or the endpoint being down all
 // leave the reading exactly as it was.
 
-import { readWhatsApp } from './wa.js?v=73';
-import { yaz, bulutBlok } from './zamanYazi.js?v=73';
-import { kalanSor, bulutYaz } from './zamanBulut.js?v=73';
-import { biletAl } from './api.js?v=73';
+import { readWhatsApp } from './wa.js?v=74';
+import { yaz, bulutBlok } from './zamanYazi.js?v=74';
+import { kalanSor, bulutYaz } from './zamanBulut.js?v=74';
+import { biletAl } from './api.js?v=74';
 
 // The page wiring below is guarded so this module can also be imported in Node, where there is no
 // document. train/bos_ekran_check.mjs drives the real bulutuBagla / bulutCagir / bulutSonucBlok

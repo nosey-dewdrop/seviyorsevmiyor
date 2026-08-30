@@ -37,12 +37,26 @@ function want(name, html, needles, forbidden = []) {
     ['bir kırılma yok', 'bulamadım'], ['undefined', 'NaN']);
 }
 
-// 3. too short
+// 3. too short for a DATE. Not too short for a reading.
+//
+// This used to assert the refusal card ("yetmiyor", "daha uzun bir sohbet dene"), which is what the
+// old gateOverall early return produced. That behaviour was the defect: one threshold silenced the
+// counts and every per signal test along with the date. The assertion is inverted, not weakened.
+// The date claim must still be absent, and now the reading and the counts must be present.
 {
   const { text } = makeExport({ seed: 3, days: 20, sessionsPerWeek: 4 });
-  const html = yaz(analyzeTime(text, { B: 199, Bboot: 60 }), 'x.txt');
-  want('kisa sohbet, eksigi sayiyla soyluyor', html,
-    ['yetmiyor', 'gerekiyor'], ['undefined', 'NaN']);
+  const res = analyzeTime(text, { B: 199, Bboot: 60 });
+  const html = yaz(res, 'x.txt');
+  want('kisa sohbette motor okuyor, sadece tarih susuyor', html,
+    ['gün yazmıyorum', 'gerekiyor', 'mesaj', 'konuşma', 'sıra', 'kelime'],
+    ['undefined', 'NaN', 'daha uzun bir sohbet dene', 'bir şey söylemeye yetmiyor']);
+  if (res.ok !== true) { fails++; console.log(`*** kisa sohbette motor hala reddediyor: ${res.reason}`); }
+  else if (res.points.length || /class="tarih"/.test(html)) {
+    fails++; console.log('*** kisa sohbette tarih iddiasi uretildi');
+  } else console.log('ok  kisa sohbette tarih iddiasi yok');
+  const okumaSayisi = (html.match(/<ul class="okuma">([^]*?)<\/ul>/) || ['', ''])[1].split('<li').length - 1;
+  if (okumaSayisi < 1) { fails++; console.log('*** kisa sohbette hic okuma satiri yok'); }
+  else console.log(`ok  kisa sohbette ${okumaSayisi} okuma satiri var`);
 }
 
 // 4. group

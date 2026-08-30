@@ -4,9 +4,10 @@
 import { parseChat } from '../parse.js';
 import { buildTimeline } from './timeline.js';
 import { buildSignals, summary, sessionGap } from './signals.js';
-import { detectChangePoints, holmAdjust, jointClaim } from './cpd.js';
+import { detectChangePoints, holmAdjust, jointClaim, MIN_EVENTS } from './cpd.js';
 import {
-  gateOverall, gateSignal, lastWordLift, classifyPoint, dateShowable, asymmetry, medianCi, NEED,
+  gateChangePoint, gateSignal, lastWordLift, classifyPoint, dateShowable, asymmetry, medianCi,
+  shareTest, NEED,
 } from './honesty.js';
 
 // A stable seed derived from the file itself: same export, same date, every time.
@@ -32,10 +33,16 @@ export function analyzeTime(raw, opts = {}) {
   if (!tl.ok) return { ok: false, reason: tl.reason, stamped: tl.stampedCount };
 
   const sum = summary(tl);
-  const overall = gateOverall(sum);
-  if (!overall.ok) {
-    return { ok: false, reason: 'veri_yetersiz', gate: overall, summary: sum, speakers: parsed.speakers };
-  }
+
+  // The date layer has a gate. The engine does not.
+  //
+  // This used to be `if (!gateOverall(sum).ok) return { ok: false, reason: 'veri_yetersiz' }`, and
+  // everything below it — buildSignals, the latency medians, the asymmetry, who ends, the archetype,
+  // and the plain counts that need no inference at all — died on that line. A 68 message chat got a
+  // screen that said "500 needed" and nothing else, while the same 68 messages carried a measurable
+  // 6x reply gap. The gate now closes only the thing it actually describes: the change point search
+  // and the day it would print.
+  const zamanKapisi = gateChangePoint(sum);
 
   step(30, 'sinyaller');
   const signals = buildSignals(tl);
@@ -45,8 +52,9 @@ export function analyzeTime(raw, opts = {}) {
   const refused = [];
   for (const s of signals) {
     const g = gateSignal(s.key, sum);
-    if (g.ok && s.x.length >= 60) eligible.push(s);
-    else refused.push({ key: s.key, ...g, events: s.x.length });
+    const yeter = g.ok && s.x.length >= MIN_EVENTS;
+    if (!yeter) refused.push({ key: s.key, ...g, events: s.x.length });
+    else if (zamanKapisi.ok) eligible.push(s);
   }
 
   step(45, 'degisim noktalari');
@@ -77,9 +85,16 @@ export function analyzeTime(raw, opts = {}) {
   const latA = signals.find((s) => s.key === 'gecikme_A');
   const latB = signals.find((s) => s.key === 'gecikme_B');
 
+  // Two more readings that need no change point and no long chat: who opens, and who is awake at
+  // night. Both are one Bernoulli draw per session / per message, both are tested against the null
+  // that fits them, and both stay silent unless the 99% interval clears that null.
+  const aPayi = sum.messages ? sum.A.messages / sum.messages : null;
+  const geceToplam = sum.A.nightMessages + sum.B.nightMessages;
+
   return {
     ok: true,
     seed,
+    zamanKapisi,
     speakers: parsed.speakers,
     summary: sum,
     tau: tl.tau,
@@ -98,6 +113,8 @@ export function analyzeTime(raw, opts = {}) {
       asymmetry: latA && latB ? asymmetry(latA.raw, latB.raw) : null,
     },
     lastWord: { A: lastWordLift(sum, 'A'), B: lastWordLift(sum, 'B') },
+    baslatma: shareTest(sum.A.starts, sum.sessions, 0.5),
+    gece: shareTest(sum.A.nightMessages, geceToplam, aPayi),
     need: NEED,
   };
 }

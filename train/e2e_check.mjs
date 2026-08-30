@@ -48,13 +48,28 @@ const say = (s) => console.log(s);
   if (n !== 0) { say('   *** uydurma tarih'); fails++; }
 }
 
-// ---------- 3. short chat: must refuse with numbers ----------
+// ---------- 3. short chat: no DATE, but the rest of the engine still runs ----------
+//
+// The old assertion here was `if (res.ok) fail` — a short chat had to be refused outright. That
+// locked the defect in place: gateOverall was an early return, so 68 real messages produced two
+// missing-data numbers and nothing else. The test is not relaxed, it is aimed at the right thing.
+// A date claim on a chat shorter than 2 * 21 days is still a failure. Silence is now also a failure.
 {
   const { text } = makeExport({ seed: 3, days: 20, sessionsPerWeek: 4 });
   const res = analyzeTime(text, { B: 199, Bboot: 60 });
-  say(`\n3) KISA SOHBET (20 gun)    → ok=${res.ok} sebep=${res.reason}`);
-  if (res.ok) { say('   *** kisa sohbette konustu'); fails++; }
-  else if (res.gate) say(`   eksik: ${res.gate.reasons.map((r) => `${r.what} ${r.have}/${r.need}`).join(', ')}`);
+  say(`\n3) KISA SOHBET (20 gun)    → ok=${res.ok} tarih_kapisi=${res.zamanKapisi ? res.zamanKapisi.ok : '?'}`);
+  if (!res.ok) { say(`   *** kisa sohbeti tumden reddetti: ${res.reason}`); fails++; }
+  else {
+    say(`   ${res.summary.messages} mesaj, ${Math.round(res.summary.spanDays)} gun, ${res.summary.sessions} oturum`);
+    say(`   eksik olan katman: ${res.zamanKapisi.reasons.map((r) => `${r.what} ${r.have}/${r.need}`).join(', ')}`);
+    if (res.points.length) { say('   *** kisa sohbette TARIH IDDIASI uretti'); fails++; }
+    const sayimVar = res.summary.messages > 0 && res.summary.sessions > 0
+      && res.summary.A.turns > 0 && res.summary.B.turns > 0;
+    if (!sayimVar) { say('   *** sayimlar hesaplanmadi'); fails++; }
+    const okumaVar = res.latency.A || res.latency.B || res.lastWord.A || res.baslatma;
+    if (!okumaVar) { say('   *** hicbir okuma katmani hesaplanmadi'); fails++; }
+    say(`   sayimlar var, okuma katmanlari hesaplandi (gecikme/bitiren/baslatma/gece)`);
+  }
 }
 
 // ---------- 4. group chat: must refuse ----------

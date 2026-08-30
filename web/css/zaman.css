@@ -151,8 +151,15 @@ h3 { font-size: 14px; font-weight: 700; margin: 0 0 8px; color: var(--ink-2); }
 .say b { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
 .say span { color: var(--ink-3); font-size: 11px; line-height: 1.35; }
 
-.eksikler { margin: 0 0 12px; padding-left: 18px; color: var(--ink-2); }
-.eksikler b { color: var(--ink); }
+/* The reading that needs no date. A line that found a difference is the page's own ink; a line that
+   found none is set back, because "no difference here" is information but it is not the headline. */
+.okuma { margin: 0 0 18px; padding-left: 18px; }
+.okuma li { margin-bottom: 6px; }
+.okuma li.yok { color: var(--ink-3); }
+
+/* Why the day is missing. A footnote under a reading, deliberately not a card of its own: the
+   screen it replaced was a full-page refusal and that is the thing being removed. */
+.tarih-notu { margin: 0 0 18px; }
 
 .nasil-okudum { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 14px; }
 .nasil-okudum summary { cursor: pointer; color: var(--ink-2); font-size: 13px; }

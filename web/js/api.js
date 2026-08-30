@@ -10,8 +10,8 @@
 // Every call that costs money now carries a ticket: the page solves an invisible Turnstile
 // challenge, the worker verifies it server side and hands back a five-minute HMAC ticket. The
 // widget by itself protects nothing, so the ticket is what the worker checks.
-import { API_BASE } from './config.js?v=73';
-import { numericFeatures } from './features.js?v=73';
+import { API_BASE } from './config.js?v=74';
+import { numericFeatures } from './features.js?v=74';
 
 // Public site key (NOT a secret — the secret half lives in wrangler as TURNSTILE_SECRET).
 // Cloudflare dash > Turnstile > add widget (Invisible) > copy the site key here.

@@ -1,16 +1,43 @@
 // Thresholds and intervals. "Not enough data" is a first class result here, printed with its own
 // numbers ("41 replies, 100 needed"), because a silent engine and a confident engine look identical
 // to the person reading the screen.
+//
+// What "not enough data" is NOT allowed to mean: the whole screen. A threshold here closes ONE
+// layer. Every other layer keeps its own gate and keeps running.
+
+import { MIN_EVENTS } from './cpd.js';
 
 export const NEED = {
-  anyTimeClaim: { messages: 500, days: 60 },
-  replyLatency: 100,      // within-session replies per side
+  // The dated change point is the only claim in this engine that needs a long chat, and both of its
+  // limits are read off the code and the measurement rather than chosen by feel.
+  //
+  //   days 42     cpd.js:249 refuses any split unless BOTH sides of it span at least 21 calendar
+  //               days, so 2 * 21 = 42 is the shortest chat in which a dated break can exist at
+  //               all. This is arithmetic on the segmenter, not taste: 5000 messages inside 11 days
+  //               still produce no date, because no candidate survives that guard.
+  //   messages 250 train/az_veri_check.mjs, 200 null chats per size. The date claim comes back at
+  //               0.0% false positives at 250 / 42 days and again at 500 / 84 days, where the layer
+  //               is open on all 200 runs. And the number is a description, not an extra rule: at
+  //               120 messages over 120 days, where the calendar gate is NOT what binds, only 1
+  //               chat in 50 had any signal series long enough for the search to run on at all
+  //               (MIN_EVENTS = 60). Under 250 there is nothing there to gate.
+  //
+  // It replaces { messages: 500, days: 60 }. That pair arrived in one commit (d47cb1c), written by
+  // hand, with no calibration and no test anywhere under train/, and it was roughly twice anything
+  // that had been measured. Its cost was not conservatism: gateOverall was wired as an early return
+  // in analyze.js, so those two numbers silenced the counts, the latency medians, the asymmetry and
+  // the archetype as well, none of which they describe.
+  changePoint: { messages: 250, days: 42 },
+
+  replyLatency: 100,      // within-session replies per side, for the change point layer
   segmentReplies: 40,     // per side of a change point
   initiation: 50,         // sessions
   lastWord: 50,           // sessions
   night: 30,              // night messages
+  events: MIN_EVENTS,     // cpd.js MIN_EVENTS, measured in train/cpd_check.mjs:110
   lastWordLift: 0.15,
   ciDaysMax: 60,          // wider than this and the date is not shown at all
+  medianMin: 8,           // medianCi returns null below this
 };
 
 const Z = 2.575829303548901;   // 99%
@@ -38,14 +65,16 @@ export function medianCi(values, z = Z) {
   return { median: s[n >> 1], lo: s[lo], hi: s[hi], n };
 }
 
-// Whether the whole time layer is allowed to say anything at all.
-export function gateOverall(sum) {
+// Whether the DATE layer is allowed to speak: the change point search and the day it prints.
+// Nothing else. Counts are description, not inference, and the per signal tests below carry their
+// own gates, so both keep running under this line.
+export function gateChangePoint(sum) {
   const reasons = [];
-  if (sum.messages < NEED.anyTimeClaim.messages) {
-    reasons.push({ what: 'mesaj', have: sum.messages, need: NEED.anyTimeClaim.messages });
+  if (sum.messages < NEED.changePoint.messages) {
+    reasons.push({ what: 'mesaj', have: sum.messages, need: NEED.changePoint.messages });
   }
-  if (sum.spanDays < NEED.anyTimeClaim.days) {
-    reasons.push({ what: 'gun', have: Math.round(sum.spanDays), need: NEED.anyTimeClaim.days });
+  if (sum.spanDays < NEED.changePoint.days) {
+    reasons.push({ what: 'gun', have: Math.round(sum.spanDays), need: NEED.changePoint.days });
   }
   return { ok: reasons.length === 0, reasons };
 }
@@ -65,7 +94,29 @@ export function gateSignal(key, sum) {
   if (key.startsWith('gece')) {
     return { ok: s.nightMessages >= NEED.night, have: s.nightMessages, need: NEED.night, what: 'gece mesaji' };
   }
+  // uzunluk_* and sessizlik used to fall through to a bare { ok: true, have: null, need: null }.
+  // They were not ungated: analyze.js filtered them with an inline `s.x.length >= 60` right after
+  // asking this function. So the gate said yes, a literal somewhere else said no, and the refusal
+  // line on screen read "mesaj uzunluğu (null/null)". Same number, stated where the others state
+  // theirs. MIN_EVENTS is cpd.js's own floor and it is the one measured in train/cpd_check.mjs:110.
+  if (key.startsWith('uzunluk')) {
+    return { ok: s.turns >= NEED.events, have: s.turns, need: NEED.events, what: 'sira' };
+  }
+  if (key === 'sessizlik') {
+    const gaps = Math.max(0, sum.sessions - 1);
+    return { ok: gaps >= NEED.events, have: gaps, need: NEED.events, what: 'sessizlik' };
+  }
   return { ok: true, have: null, need: null, what: null };
+}
+
+// A share against the null it should be compared with, at 99%. Used for "who opens" (null: half the
+// sessions) and "who writes at night" (null: that side's share of all messages, because whoever
+// writes more writes more at night too). Reported only when the whole interval clears the null, so
+// a coin flip prints as a coin flip instead of a lean.
+export function shareTest(k, n, nullP) {
+  if (!n || nullP == null) return null;
+  const ci = wilson(k, n);
+  return { k, n, p: k / n, nullP, ci, significant: ci.lo > nullP || ci.hi < nullP };
 }
 
 // "Who ends conversations" as lift over that side's message share, with a binomial test against

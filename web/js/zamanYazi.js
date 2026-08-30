@@ -7,10 +7,18 @@
 import {
   sec, ACILIS_KIRILMA, ACILIS_YOK, ACILIS_KESINTI, CUMLE, arketip,
   KAPANIS_KIRILMA, KAPANIS_YOK,
-} from './soz.js?v=73';
+} from './soz.js?v=74';
 
 const AY = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran',
   'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık'];
+
+// soz.js is the phrasebook and it is not part of this change, so the one opening this screen newly
+// needs sits here. ACILIS_YOK ("aradım, bir gün bulamadım") would be a lie on a short chat: the date
+// layer never ran, so nothing was searched and there is nothing to have failed to find.
+const ACILIS_TARIHSIZ = [
+  'bu sohbet kısa. okunacak şey yine de var.',
+  'tarih çıkmıyor. onun dışındaki her şey duruyor.',
+];
 
 function tarih(min) {
   const d = new Date(min * 60000);
@@ -139,20 +147,95 @@ function redKarti(res) {
       <b>sohbeti dışa aktar</b> ile alınan dosya gerekiyor.</p>
       <button class="btn" id="yeniBtn" type="button">başka dosya</button></div>`;
   }
-  if (res.reason === 'veri_yetersiz') {
-    const eksik = res.gate.reasons
-      .map((r) => `<li>${r.what === 'mesaj' ? 'mesaj' : 'gün'}: <b>${r.have}</b> var, <b>${r.need}</b> gerekiyor.</li>`)
-      .join('');
-    return `<div class="kart">
-      <h2>bu sohbet bir şey söylemeye yetmiyor.</h2>
-      <p>uydurmaktansa susuyor. eksik olan şu.</p>
-      <ul class="eksikler">${eksik}</ul>
-      <p class="ince">daha uzun bir sohbet dene.</p>
-      <button class="btn" id="yeniBtn" type="button">başka dosya</button></div>`;
-  }
+  // There is deliberately no 'veri_yetersiz' card here any more. A short chat is not a refusal, it
+  // is a reading with one layer missing, and it is rendered by yaz() like any other.
   return `<div class="kart"><h2>okunamadı.</h2>
     <p>${esc(res.reason || 'bilinmeyen sebep')}</p>
     <button class="btn" id="yeniBtn" type="button">başka dosya</button></div>`;
+}
+
+// The reading that does not need a date.
+//
+// Each of these is one test with one gate, and each gate is per line: a line that does not clear its
+// own interval prints the fact that it did not, and every other line is unaffected. That is the
+// whole difference from the old screen, where one failed gate silenced the other five.
+//
+// Every entry returns { metin, var: bool }. `var` is true when the test found a difference, and it
+// is used only for ordering: findings first, "no difference here" after them.
+function okumaSatirlari(res, ad) {
+  const out = [];
+  const lat = res.latency;
+  const asim = lat && lat.asymmetry;
+
+  if (asim) {
+    // The factor is 2^|ratio|. Using 2^ratio directly printed "0,1 kat slower", which is the
+    // reciprocal of the true 11,2 and reads as the opposite of what the data says.
+    if (asim.different) {
+      const kat = Math.pow(2, Math.abs(asim.ratio)).toFixed(1).replace('.', ',');
+      out.push({ var: true, metin: `${esc(asim.ratio > 0 ? ad.A : ad.B)} ${kat} kat daha geç dönüyor.` });
+    } else {
+      out.push({ var: false, metin: 'cevap sürelerinde iki taraf arasında anlamlı bir fark yok.' });
+    }
+  } else if (lat && (lat.A || lat.B)) {
+    out.push({
+      var: false,
+      metin: `cevap süreleri iki tarafta karşılaştırılamadı, bir tarafta ${res.need.medianMin} cevaptan az var.`,
+    });
+  }
+
+  const bw = res.lastWord && res.lastWord.A;
+  if (bw) {
+    if (bw.significant) {
+      out.push({
+        var: true,
+        metin: `konuşmaları çoğunlukla ${esc(bw.lift > 0 ? ad.A : ad.B)} bitiriyor, mesaj payından ${yuzde(Math.abs(bw.lift))} fazla.`,
+      });
+    } else {
+      out.push({ var: false, metin: 'konuşmayı kimin bitirdiği, kimin daha çok yazdığıyla açıklanıyor.' });
+    }
+  }
+
+  const bs = res.baslatma;
+  if (bs) {
+    if (bs.significant) {
+      const acan = bs.p >= 0.5 ? ad.A : ad.B;
+      const pay = bs.p >= 0.5 ? bs.p : 1 - bs.p;
+      out.push({ var: true, metin: `konuşmaların ${yuzde(pay)} kadarını ${esc(acan)} açıyor.` });
+    } else {
+      out.push({ var: false, metin: 'konuşmayı kimin başlattığı iki taraf arasında dengeli.' });
+    }
+  }
+
+  const gc = res.gece;
+  if (gc) {
+    if (gc.significant) {
+      out.push({
+        var: true,
+        metin: `gece yazılan mesajların ${yuzde(gc.p)} kadarı ${esc(ad.A)}, oysa bütün mesajlardaki payı ${yuzde(gc.nullP)}.`,
+      });
+    } else {
+      out.push({ var: false, metin: 'gece yazma, iki tarafın gündüzdeki payından ayrılmıyor.' });
+    }
+  }
+
+  return out.sort((a, b) => Number(b.var) - Number(a.var));
+}
+
+// Why the date is missing, with the number that decides it and where that number comes from. Not a
+// refusal screen: it is a footnote under a reading that is already on the page.
+function tarihNotu(res) {
+  const k = res.zamanKapisi;
+  if (!k || k.ok) return '';
+  const s = res.summary;
+  const n = res.need.changePoint;
+  const parca = [];
+  if (s.spanDays < n.days) {
+    parca.push(`bu sohbet ${Math.round(s.spanDays)} gün sürmüş, ne zaman değiştiğini söylemek için en az ${n.days} gün gerekiyor: bir kırılmanın iki yanının da ayrı ayrı 21 günü kapatması şart.`);
+  }
+  if (s.messages < n.messages) {
+    parca.push(`${s.messages} mesaj var, tarih katmanının yanlış tarih uydurmadığı ölçülmüş nokta ${n.messages} mesaj.`);
+  }
+  return `<p class="ince tarih-notu">${parca.join(' ')} o yüzden gün yazmıyorum. yukarıdaki okuma bundan etkilenmiyor, o katman ayrı ölçülüyor.</p>`;
 }
 
 export function yaz(res, dosyaAdi) {
@@ -164,8 +247,14 @@ export function yaz(res, dosyaAdi) {
   const kesintiler = res.points.filter((p) => p.kind === 'kesinti');
 
   const seed = res.seed >>> 0;
+  const okuma = okumaSatirlari(res, ad);
+  const kapali = !!(res.zamanKapisi && !res.zamanKapisi.ok);
   let mansel;
-  if (gosterilebilir.length) {
+  if (kapali) {
+    // The date layer never ran, so there is nothing to report about it up here. The headline is the
+    // strongest thing the engine did measure, and the reason the day is missing goes below.
+    mansel = `<p class="acilis">${sec(ACILIS_TARIHSIZ, seed, 1)}</p>`;
+  } else if (gosterilebilir.length) {
     const j = res.joint;
     const ana = j
       ? gosterilebilir.reduce((a, p) => (Math.abs(p.ts - j.ts) < Math.abs(a.ts - j.ts) ? p : a))
@@ -206,28 +295,31 @@ export function yaz(res, dosyaAdi) {
     : '';
 
   const lat = res.latency;
-  const asim = lat.asymmetry;
-  // The factor is 2^|ratio|. Using 2^ratio directly printed "0,1 kat slower", which is the
-  // reciprocal of the true 11,2 and reads as the opposite of what the data says.
-  const asimSatir = asim
-    ? (asim.different
-      ? `<li>${esc(asim.ratio > 0 ? ad.A : ad.B)} ${Math.pow(2, Math.abs(asim.ratio)).toFixed(1).replace('.', ',')} kat daha geç dönüyor.</li>`
-      : '<li>cevap sürelerinde iki taraf arasında anlamlı bir fark yok.</li>')
+
+  // The reading itself, one line per test, always rendered. On a chat too short for a date this is
+  // the whole headline; on a long one it sits under the date and says the same things in the same
+  // words, so the two screens are one product rather than two.
+  const okumaBlok = okuma.length
+    ? `<ul class="okuma">${okuma.map((o) => `<li${o.var ? '' : ' class="yok"'}>${o.metin}</li>`).join('')}</ul>`
     : '';
 
-  const bitirenA = res.lastWord.A;
-  const bitirenSatir = bitirenA && bitirenA.significant
-    ? `<li>konuşmaları çoğunlukla ${esc(bitirenA.lift > 0 ? ad.A : ad.B)} bitiriyor, mesaj payından ${yuzde(Math.abs(bitirenA.lift))} fazla.</li>`
-    : '<li>konuşmayı kimin bitirdiği, kimin daha çok yazdığıyla açıklanıyor.</li>';
-
+  // Counts. No inference in this block at all, so it is printed at every size, including the sizes
+  // where every test above comes back undecided. It is the most defensible thing on the page.
   const sayilar = `
     <div class="sayilar">
       <div class="say"><b>${s.messages}</b><span>mesaj</span></div>
       <div class="say"><b>${Math.round(s.spanDays)}</b><span>gün</span></div>
       <div class="say"><b>${s.sessions}</b><span>konuşma</span></div>
+      <div class="say"><b>${s.A.turns + s.B.turns}</b><span>sıra</span></div>
+      <div class="say"><b>${s.A.words + s.B.words}</b><span>kelime</span></div>
+      <div class="say"><b>${s.A.questions + s.B.questions}</b><span>soru</span></div>
+      <div class="say"><b>${s.A.media + s.B.media}</b><span>medya</span></div>
+      <div class="say"><b>${s.A.nightMessages + s.B.nightMessages}</b><span>gece mesajı</span></div>
       <div class="say"><b>${sure(lat.A ? lat.A.median : null)}</b><span>${esc(ad.A)} cevap</span></div>
       <div class="say"><b>${sure(lat.B ? lat.B.median : null)}</b><span>${esc(ad.B)} cevap</span></div>
       <div class="say"><b>${s.A.starts}/${s.B.starts}</b><span>${esc(ad.A)} / ${esc(ad.B)} başlatma</span></div>
+      <div class="say"><b>${s.A.ends}/${s.B.ends}</b><span>${esc(ad.A)} / ${esc(ad.B)} bitirme</span></div>
+      <div class="say"><b>${sure(s.longestSilenceMin)}</b><span>en uzun sessizlik${s.longestSilenceTs != null ? `, ${kisaTarih(s.longestSilenceTs)}` : ''}</span></div>
     </div>`;
 
   const uyarilar = [];
@@ -244,10 +336,11 @@ export function yaz(res, dosyaAdi) {
         <li>${s.messages} mesaj, ${s.A.turns + s.B.turns} sıra, ${s.sessions} ayrı konuşma.</li>
         <li>konuşma sınırı ${res.tau} dakika. bu, sohbetin kendi boşluk dağılımından çıkarıldı.</li>
         <li>cevap süresi hesaplanırken karşı tarafın uyku saatleri düşüldü.</li>
-        <li>tarih, sıralama tabanlı bir kırılma testiyle bulundu. anlamlılık ${1000} karıştırma denemesiyle ölçüldü.</li>
-        <li>yavaş bir eğim kırılma sayılmaz. aday, düz bir çizgiden daha iyi açıklamak zorunda.</li>
-        ${asimSatir}
-        ${bitirenSatir}
+        ${kapali
+    ? `<li>tarih katmanı bu sohbette hiç çalıştırılmadı, o yüzden aşağıda bir gün yok. üstteki satırların her biri kendi testinden geçti, biri düşünce diğerleri düşmüyor.</li>`
+    : `<li>tarih, sıralama tabanlı bir kırılma testiyle bulundu. anlamlılık ${1000} karıştırma denemesiyle ölçüldü.</li>
+        <li>yavaş bir eğim kırılma sayılmaz. aday, düz bir çizgiden daha iyi açıklamak zorunda.</li>`}
+        <li>üstteki okuma satırlarının her biri %99 güven aralığıyla ölçüldü. aralık sıfırı kesiyorsa satır fark yok diyor, tahmin etmiyor.</li>
         ${s.longestSilenceMin ? `<li>en uzun sessizlik ${sure(s.longestSilenceMin)}, ${tarih(s.longestSilenceTs)} öncesi.</li>` : ''}
         ${res.refused.length ? `<li>yetersiz veri yüzünden bakılmayanlar: ${res.refused.map((r) => `${ETIKET[kavram(r.key)] || r.key} (${r.have}/${r.need})`).join(', ')}.</li>` : ''}
         ${uyarilar.map((u) => `<li>${u}</li>`).join('')}
@@ -258,8 +351,10 @@ export function yaz(res, dosyaAdi) {
   return `<div class="kart">
     <p class="ust-etiket">${esc(ad.A)} ve ${esc(ad.B)}</p>
     ${mansel}
+    ${okumaBlok}
     ${arketipBlok}
     ${kesintiBlok}
+    ${tarihNotu(res)}
     <div id="bulutYer"></div>
     ${sayilar}
     ${nasil}

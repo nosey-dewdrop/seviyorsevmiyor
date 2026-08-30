@@ -8,8 +8,8 @@
 // are left out deliberately, so "only numbers leave this device" stays literally true rather than
 // nearly true. It costs the cloud lines some colour and it is worth it.
 
-import { API_BASE } from './config.js?v=73';
-import { biletAl, biletDusur } from './api.js?v=73';
+import { API_BASE } from './config.js?v=74';
+import { biletAl, biletDusur } from './api.js?v=74';
 
 const ZAMAN_URL = `${API_BASE}/api/zaman`;
 const KALAN_URL = `${API_BASE}/api/zaman-kalan`;

@@ -3,8 +3,8 @@
 // oturur. Her yorum satırı tıklanabilir: altında "NEDEN BÖYLE OKUDUM?" + "BAŞKA TÜRLÜSÜ MÜMKÜN MÜ?"
 // + rızalı bağış açılır. Karttaki her sayı gerçek sohbetten hesaplanır, elle sayı yazılmaz.
 
-import { ping, itirazGonder, biletAl, spikerRead } from './api.js?v=73';
-import { deflectedPlans } from './balance.js?v=73';
+import { ping, itirazGonder, biletAl, spikerRead } from './api.js?v=74';
+import { deflectedPlans } from './balance.js?v=74';
 
 // Guarded so train/bos_ekran_check.mjs can import the real spikerDene / spikerKapaliMetni below
 // in Node instead of retyping them.
@@ -373,7 +373,7 @@ export async function playReveal(root, r, messages, me) {
     btn.textContent = 'hazırlanıyor...';
     ping('paylasim');
     try {
-      const { shareReveal } = await import('./share.js?v=73');
+      const { shareReveal } = await import('./share.js?v=74');
       const how = await shareReveal(r, st, okumaNo, senAgir);
       btn.textContent = how === 'downloaded' ? 'indirildi' : how === 'shared' ? 'paylaşıldı' : 'kartı indir';
     } catch { btn.textContent = 'olmadı, tekrar dene'; }

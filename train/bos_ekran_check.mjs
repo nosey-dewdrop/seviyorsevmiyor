@@ -21,7 +21,7 @@
 //   4. a banned-phrase list kills the generic apology ("bir hata olustu" and its family).
 //   5. the index.html side: the real ui.js spikerDene / spikerKapaliMetni, plus a static check
 //      that app.js actually wires them.
-//   6. the version bump: no `?v=72` may survive anywhere under web/.
+//   6. the version bump: no `?v=73` may survive anywhere under web/.
 //   7. MUTATION: the fix is taken back out of zaman.js in a temp copy of the tree, this gate is
 //      re-run against it, and it has to go RED. A gate that never sees the bug it was written for
 //      cannot tell a fix from a coincidence.
@@ -113,9 +113,9 @@ const RES = { ok: true, summary: {}, latency: {}, points: [], joint: null };
 
 // ---- load the real modules ---------------------------------------------------------------------
 
-const zaman = await import('../web/js/zaman.js?v=73');
-const ui = await import('../web/js/ui.js?v=73');
-const api = await import('../web/js/api.js?v=73');
+const zaman = await import('../web/js/zaman.js?v=74');
+const ui = await import('../web/js/ui.js?v=74');
+const api = await import('../web/js/api.js?v=74');
 
 baslik('0. gercek modul yuklendi mi');
 ok('web/js/zaman.js Node da import edilebiliyor (kapi kopya degil, kaynagin kendisi)',
@@ -318,25 +318,25 @@ await blok('bump olcumu', async () => {
   let cikti = '';
   let kod = 0;
   try {
-    cikti = execFileSync('git', ['grep', '-n', '-F', '?v=72', '--', 'web/'],
+    cikti = execFileSync('git', ['grep', '-n', '-F', '?v=73', '--', 'web/'],
       { cwd: REPO, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   } catch (e) { kod = e.status; cikti = String(e.stdout || ''); }
-  ok('web/ altinda hicbir ?v=72 kalmadi', kod === 1 && !cikti.trim(), cikti.trim());
+  ok('web/ altinda hicbir ?v=73 kalmadi', kod === 1 && !cikti.trim(), cikti.trim());
 
-  let v73 = '';
+  let v74 = '';
   try {
-    v73 = execFileSync('git', ['grep', '-c', '-F', '?v=73', '--', 'web/'],
+    v74 = execFileSync('git', ['grep', '-c', '-F', '?v=74', '--', 'web/'],
       { cwd: REPO, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-  } catch (e) { v73 = String(e.stdout || ''); }
-  const toplam = v73.split('\n').filter(Boolean)
+  } catch (e) { v74 = String(e.stdout || ''); }
+  const toplam = v74.split('\n').filter(Boolean)
     .reduce((a, l) => a + Number(l.split(':').pop() || 0), 0);
-  console.log(`     ?v=73 gecen satir sayisi: ${toplam}`);
-  ok('yerine ?v=73 kondu', toplam >= 30, String(toplam));
+  console.log(`     ?v=74 gecen satir sayisi: ${toplam}`);
+  ok('yerine ?v=74 kondu', toplam >= 30, String(toplam));
 
   const idx = readFileSync(join(REPO, 'web/index.html'), 'utf8');
   const imza = (idx.match(/class="imza"[^]*?<\/span>\s*$/m) || [])[0] || idx.match(/· v\d+ ·/)?.[0] || '';
-  ok('index.html altbilgi surum etiketi v73', /· v73 ·/.test(idx), imza);
-  ok('altbilgide eski v71/v72 etiketi kalmadi', !/· v7[12] ·/.test(idx));
+  ok('index.html altbilgi surum etiketi v74', /· v74 ·/.test(idx), imza);
+  ok('altbilgide eski v72/v73 etiketi kalmadi', !/· v7[123] ·/.test(idx));
 });
 
 // ---- 6. MUTASYON: duzeltmeyi sok, kapinin kirmizi yandigini gor ----------------------------------
